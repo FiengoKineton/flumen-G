@@ -8,7 +8,7 @@ from inspect import cleandoc
 from shlex import quote
 from copy import deepcopy
 
-from .model import CausalFlowModel
+from .model___old import CausalFlowModel
 
 
 def timestamp_str(timestamp):
