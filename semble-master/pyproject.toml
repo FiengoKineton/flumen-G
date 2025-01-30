@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools >= 64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "semble"
+dynamic = ["version"]
+authors = [{name = "Miguel Aguiar", email = "aguiar@kth.se"}]
+description = "A simple package for simulating control systems."
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = ["numpy>=1.18", "scipy>=1.5"]
+requires-python = ">= 3.6"
+
+[project.urls]
+Repository = "https://github.com/mcpca/semble.git"

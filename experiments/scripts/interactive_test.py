@@ -3,8 +3,8 @@ import os, sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 import torch
-from flow_model import Experiment, pack_model_inputs
-from trajectory_sampler import TrajectorySampler
+from flumen import Experiment, pack_model_inputs    # before: from flow_model
+from semble import TrajectorySampler                # before: from trajectory_sampler
 import matplotlib.pyplot as plt
 import numpy as np
 
