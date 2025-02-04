@@ -3,6 +3,13 @@ import time
 from .experiment import Experiment
 
 
+# ------------------------------------------------- #
+#   Prepara gli input per il modello.               #
+#   Riordina i dati per lunghezza decrescente,      #
+#   impacchetta le sequenze per l'RNN e le invia    #
+#   al dispositivo corretto.                        #
+# ------------------------------------------------- #
+
 def prep_inputs(x0, y, u, lengths, device):
     sort_idxs = torch.argsort(lengths, descending=True)
 
@@ -11,7 +18,7 @@ def prep_inputs(x0, y, u, lengths, device):
     u = u[sort_idxs]
     lengths = lengths[sort_idxs]
 
-    deltas = u[:, :lengths[0], -1].unsqueeze(-1)
+    deltas = u[:, :lengths[0], -1].unsqueeze(-1)  # Estrae l'ultimo elemento di ogni sequenza
 
     u = torch.nn.utils.rnn.pack_padded_sequence(u,
                                                 lengths,
@@ -26,6 +33,12 @@ def prep_inputs(x0, y, u, lengths, device):
     return x0, y, u, deltas
 
 
+# ------------------------------------------------- #
+#   Valida il modello sul dataset di validazione.   #
+#   Calcola la loss media sui dati di validazione   #
+#   senza aggiornare i pesi del modello.            #
+# ------------------------------------------------- #
+
 def validate(data, loss_fn, model, device):
     vl = 0.
 
@@ -39,6 +52,12 @@ def validate(data, loss_fn, model, device):
     return model.state_dim * vl / len(data)
 
 
+# ------------------------------------------------- #
+#   Esegue un singolo passo di addestramento.       #
+#   Calcola la predizione, la loss, esegue il       #
+#   backpropagation e aggiorna i pesi del modello.  #
+# ------------------------------------------------- #
+
 def train_step(example, loss_fn, model, optimizer, device):
     x0, y, u, deltas = prep_inputs(*example, device)
 
@@ -47,11 +66,17 @@ def train_step(example, loss_fn, model, optimizer, device):
     y_pred = model(x0, u, deltas)
     loss = model.state_dim * loss_fn(y, y_pred)
 
-    loss.backward()
-    optimizer.step()
+    loss.backward()  # Calcola i gradienti
+    optimizer.step()  # Aggiorna i pesi
 
     return loss.item()
 
+
+# ------------------------------------------------- #
+#   Implementa l'early stopping.                     #
+#   Ferma l'addestramento se la loss di validazione #
+#   non migliora per un numero definito di epoche.  #
+# ------------------------------------------------- #
 
 class EarlyStopping:
 
@@ -78,6 +103,12 @@ class EarlyStopping:
             self.early_stop = True
 
 
+# ------------------------------------------------- #
+#   Esegue l'addestramento del modello.             #
+#   Registra le metriche, aggiorna la learning rate #
+#   e applica l'early stopping.                     #
+# ------------------------------------------------- #
+
 def train(experiment: Experiment, model, loss_fn, optimizer, sched,
           early_stop: EarlyStopping, train_dl, val_dl, test_dl, device,
           max_epochs):
@@ -87,7 +118,7 @@ def train(experiment: Experiment, model, loss_fn, optimizer, sched,
     print(header_msg)
     print('=' * len(header_msg))
 
-    # Evaluate initial loss
+    # Evaluate initial loss - Calcola la loss iniziale sui dataset
     model.eval()
     train_loss = validate(train_dl, loss_fn, model, device)
     val_loss = validate(val_dl, loss_fn, model, device)
@@ -113,7 +144,7 @@ def train(experiment: Experiment, model, loss_fn, optimizer, sched,
         val_loss = validate(val_dl, loss_fn, model, device)
         test_loss = validate(test_dl, loss_fn, model, device)
 
-        sched.step(val_loss)
+        sched.step(val_loss)  # Aggiorna il learning rate
         early_stop.step(val_loss)
 
         print(

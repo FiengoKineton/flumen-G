@@ -3,6 +3,12 @@ import torch
 from torch.utils.data import Dataset
 
 
+# ------------------------------------------------- #
+#   Dataset per memorizzare traiettorie raw.        #
+#   Contiene stati iniziali, sequenze di controllo  #
+#   e variabili temporali associate.                #
+# ------------------------------------------------- #
+
 class RawTrajectoryDataset(Dataset):
 
     def __init__(self,
@@ -54,6 +60,13 @@ class RawTrajectoryDataset(Dataset):
                 torch.from_numpy(sample["control"]).type(
                     torch.get_default_dtype()).reshape((-1, self.control_dim)))
 
+    
+    # ------------------------------------------------- #
+    #   Genera un dataset a partire da un generatore.  #
+    #   Crea traiettorie casuali basate sui parametri  #
+    #   specificati.                                   #
+    # ------------------------------------------------- #
+
     @classmethod
     def generate(cls, generator, time_horizon, n_trajectories, n_samples,
                  noise_std):
@@ -84,6 +97,12 @@ class RawTrajectoryDataset(Dataset):
                 self.time[index], self.state[index], self.state_noise[index],
                 self.control_seq[index])
 
+
+# ------------------------------------------------- #
+#   Dataset per la preparazione delle sequenze RNN. #
+#   Converte le traiettorie raw in input strutturati #
+#   per modelli basati su RNN.                      #
+# ------------------------------------------------- #
 
 class TrajectoryDataset(Dataset):
 
@@ -155,6 +174,12 @@ class TrajectoryDataset(Dataset):
         self.seq_lens = torch.tensor(seq_len_data, dtype=torch.long)
 
         self.len = len(init_state)
+
+
+    # ------------------------------------------------- #
+    #   Prepara un esempio per l'input RNN.             #
+    #   Determina gli indici e costruisce la sequenza.  #
+    # ------------------------------------------------- #
 
     @staticmethod
     def process_example(start_idx, end_idx, t, u, delta):
