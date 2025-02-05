@@ -10,6 +10,12 @@ import numpy as np
 from scipy.linalg import sqrtm, inv
 
 
+# ------------------------------------------------- #
+#   Normalizza i target dei dati d'input.           #
+#   Calcola la media e la deviazione standard,      #
+#   quindi applica la trasformazione di whitening.  #
+# ------------------------------------------------- #
+
 def whiten_targets(data):
     mean = data[0].state.mean(axis=0)
     std = sqrtm(np.cov(data[0].state.T))
@@ -22,6 +28,13 @@ def whiten_targets(data):
 
     return mean, std, istd
 
+
+# ------------------------------------------------- #
+#   Prepara un esperimento per l'addestramento.     #
+#   Divide i dati in train, validation e test,      #
+#   applica il whitening se richiesto e            #
+#   inizializza il modello e gli ottimizzatori.     #
+# ------------------------------------------------- #
 
 def prepare_experiment(data, args):
     train_data, val_data, test_data = data.get_datasets(
@@ -44,7 +57,7 @@ def prepare_experiment(data, args):
                                                train_data.output_dim)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
+    model.to(device)  # Sposta il modello sulla GPU se disponibile
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     sched = torch.optim.lr_scheduler.ReduceLROnPlateau(

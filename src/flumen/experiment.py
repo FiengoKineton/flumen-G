@@ -11,10 +11,20 @@ from copy import deepcopy
 from .model import CausalFlowModel
 
 
+# ------------------------------------------------- #
+#   Converte un timestamp in stringa formattata.    #
+#   Se il timestamp è None, restituisce "N/A".      #
+# ------------------------------------------------- #
+
 def timestamp_str(timestamp):
     return datetime.fromtimestamp(timestamp).strftime(
         '%Y%m%d_%H%M%S') if timestamp else "N/A"
 
+
+# ------------------------------------------------- #
+#   Genera il percorso di salvataggio per il file.  #
+#   Combina il root, la directory e il timestamp.   #
+# ------------------------------------------------- #
 
 def save_path(root, dir, timestamp, train_id):
     file_name = dir + '_' + timestamp_str(timestamp) + '_' + str(train_id.hex)
@@ -22,6 +32,11 @@ def save_path(root, dir, timestamp, train_id):
 
     return path, file_name
 
+
+# ------------------------------------------------- #
+#   Inizializza un modello CausalFlowModel.         #
+#   Imposta i parametri di dimensione e RNN.        #
+# ------------------------------------------------- #
 
 def instantiate_model(args, state_dim, control_dim, output_dim):
     return CausalFlowModel(state_dim=state_dim,
@@ -35,6 +50,12 @@ def instantiate_model(args, state_dim, control_dim, output_dim):
                            decoder_depth=args.decoder_depth,
                            use_batch_norm=args.use_batch_norm)
 
+
+# ------------------------------------------------- #
+#   Classe per gestire un esperimento di training.  #
+#   Tiene traccia della configurazione, progressi,  #
+#   modelli e metriche di valutazione.              #
+# ------------------------------------------------- #
 
 class Experiment:
 
@@ -84,6 +105,12 @@ class Experiment:
 
         self.model_state = None
 
+
+    # ------------------------------------------------- #
+    #   Registra i progressi dell'addestramento.        #
+    #   Tiene traccia delle perdite di training e val.  #
+    # ------------------------------------------------- #
+
     def register_progress(self, train, val, test, best):
         self.n_epochs += 1
         self.train_loss.append(train)
@@ -95,14 +122,30 @@ class Experiment:
             self.val_loss_best = val
             self.test_loss_best = test
 
+    
+    # ------------------------------------------------- #
+    #   Salva lo stato attuale del modello.             #
+    #   Crea una copia dello stato per il ripristino.   #
+    # ------------------------------------------------- #
+
     def save_model(self, model):
         self.model_state = deepcopy(model.state_dict())
+
+
+    # ------------------------------------------------- #
+    #   Carica il modello dallo stato salvato.          #
+    # ------------------------------------------------- #
 
     def load_model(self, device='cpu'):
         model = instantiate_model(self.args, *self.dims)
         model.load_state_dict(self.model_state)
 
         return model
+
+
+    # ------------------------------------------------- #
+    #   Salva l'esperimento su file.                    #
+    # ------------------------------------------------- #
 
     def save(self, train_time):
         self.train_time = train_time
@@ -112,6 +155,12 @@ class Experiment:
             torch.save(self,
                        os.path.join(self.save_path, self.file_name + '.pth'))
 
+
+    # ------------------------------------------------- #
+    #   Esegue la predizione con il modello.            #
+    #   Normalizza gli input prima della predizione.    #
+    # ------------------------------------------------- #
+
     def predict(self, model, x0, u, deltas):
         x0[:] = (x0 - self.td_mean) @ self.td_std_inv
         with torch.no_grad():
@@ -120,6 +169,11 @@ class Experiment:
 
         return y_pred
 
+
+    # ------------------------------------------------- #
+    #   Restituisce una stringa con gli argomenti.      #
+    # ------------------------------------------------- #
+
     def args_str(self):
         out_str = ""
 
@@ -127,6 +181,12 @@ class Experiment:
             out_str += f"{k}: {v}\n"
 
         return out_str
+
+
+    # ------------------------------------------------- #
+    #   Restituisce una stringa con i dettagli          #
+    #   dell'esperimento e il modello addestrato.       #
+    # ------------------------------------------------- #
 
     def __str__(self):
         return cleandoc(f'''\

@@ -28,7 +28,6 @@ class CausalFlowModel(nn.Module):
         self.check = True
 
         if self.check:
-            print("\nRIGTH model.py\n")
             print("control_dim:", control_dim)
             print("control_rnn_size:", control_rnn_size)
             print("control_rnn_depth:", control_rnn_depth)
