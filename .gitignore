@@ -161,7 +161,7 @@ cython_debug/
 
 *.pth
 *.out
-outputs/
+# outputs/
 *.png
 *.eps
 *.pdf
