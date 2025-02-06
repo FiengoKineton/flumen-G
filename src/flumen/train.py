@@ -58,7 +58,7 @@ def validate(data, loss_fn, model, device):
 #   backpropagation e aggiorna i pesi del modello.  #
 # ------------------------------------------------- #
 
-def train_step(example, loss_fn, model, optimizer, device):
+def train_step(example, loss_fn, model, optimizer, device):         # --- GRADIENT PROPAGATION!
     x0, y, u, deltas = prep_inputs(*example, device)
 
     optimizer.zero_grad()
@@ -73,7 +73,7 @@ def train_step(example, loss_fn, model, optimizer, device):
 
 
 # ------------------------------------------------- #
-#   Implementa l'early stopping.                     #
+#   Implementa l'early stopping.                    #
 #   Ferma l'addestramento se la loss di validazione #
 #   non migliora per un numero definito di epoche.  #
 # ------------------------------------------------- #
@@ -98,6 +98,7 @@ class EarlyStopping:
             self.counter = 0
         else:
             self.counter += 1
+            print("\nEarlyStopping counter: ", self.counter, " - must be <", self.patience, "\n")   # --- ADDED!
 
         if self.counter >= self.patience:
             self.early_stop = True

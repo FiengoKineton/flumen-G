@@ -100,8 +100,8 @@ class RawTrajectoryDataset(Dataset):
 
 # ------------------------------------------------- #
 #   Dataset per la preparazione delle sequenze RNN. #
-#   Converte le traiettorie raw in input strutturati #
-#   per modelli basati su RNN.                      #
+#   Converte le traiettorie raw in input            #
+#   strutturati per modelli basati su RNN.          #
 # ------------------------------------------------- #
 
 class TrajectoryDataset(Dataset):
@@ -125,7 +125,7 @@ class TrajectoryDataset(Dataset):
 
         rng = np.random.default_rng()
 
-        k_tr = 0
+        k_tr = 0        # --- what does it do?
 
         for (x0, x0_n, t, y, y_n, u) in raw_data:
             y += y_n
@@ -182,19 +182,36 @@ class TrajectoryDataset(Dataset):
     # ------------------------------------------------- #
 
     @staticmethod
-    def process_example(start_idx, end_idx, t, u, delta):
-        init_time = 0.
+    def process_example(start_idx, end_idx, t, u, delta):           # --- DISCRETIZZAZIONE!
+        """
+        Processes a seq with adaptive time step instead of a fixed delta.
+        """
 
-        u_start_idx = int(np.floor((t[start_idx] - init_time) / delta))
-        u_end_idx = int(np.floor((t[end_idx] - init_time) / delta))
+        init_time = 0.
+        epsilon = 1e-6
+
+
+    ### Step 1: Compute dynamic time steps (δ_i = ε / max(|u_i - u_(i-1)|, ε))
+        delta_seq  = torch.zeros_like(u)
+        delta_seq[0] = epsilon
+        delta_seq[1:] = epsilon / torch.maximum(torch.abs(u[1:] - u[:-1]), torch.tensor(epsilon))
+
+    ### Step 2: Compute cumulative time steps from dynamic deltas (keeps track of time progression with varying δ_i values)
+        cumulative_time = torch.cumsum(delta_seq, dim=0)
+
+    ### Step 3: Find the start and end idx in cumulative time (cannot use simple division)
+        u_start_idx = torch.searchsorted(cumulative_time, t[start_idx] - init_time)         # before | = int(np.floor((t[start_idx] - init_time) / delta))
+        u_end_idx = torch.searchsorted(cumulative_time, t[end_idx] - init_time)             # before | = int(np.floor((t[end_idx] - init_time) / delta))
         u_sz = 1 + u_end_idx - u_start_idx
 
         u_seq = torch.zeros_like(u)
         u_seq[0:u_sz] = u[u_start_idx:(u_end_idx + 1)]
 
+    ### Step 4: Comupute time step adjustments
         deltas = torch.ones((u_seq.shape[0], 1))
-        t_u_end = init_time + delta * u_end_idx
-        t_u_start = init_time + delta * u_start_idx
+        t_u_start = cumulative_time[u_start_idx] if u_start_idx > 0 else init_time          # before | = init_time + delta * u_end_idx
+        t_u_end = cumulative_time[u_end_idx] if u_end_idx > 0 else init_time                # before | = init_time + delta * u_start_idx
+
 
         if u_sz > 1:
             deltas[0] = (1. - (t[start_idx] - t_u_start) / delta).item()
