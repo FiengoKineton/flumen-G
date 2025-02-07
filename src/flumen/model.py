@@ -71,7 +71,7 @@ class CausalFlowModel(nn.Module):
 
         ### LSTM with depth=1, as suggested
             self.u_rnn = torch.nn.LSTM(
-                input_size=state_dim + control_dim + 1,         # before | =1 + control_dim,
+                input_size=control_dim + 1,                     # wrong, before | + state_dim
                 hidden_size=control_rnn_size + state_dim,       # before | no +state_dim
                 batch_first=True,
                 num_layers=self.control_rnn_depth,    
@@ -79,7 +79,7 @@ class CausalFlowModel(nn.Module):
             )
 
         ### ENCODER
-            x_dnn_osz = control_rnn_size * self.control_rnn_depth + state_dim   # before | no +state_dim    
+            x_dnn_osz = control_rnn_size * self.control_rnn_depth       # wrong, before | + state_dim   
             self.x_dnn = FFNet(in_size=state_dim,
                             out_size=x_dnn_osz,
                             hidden_size=encoder_depth *
@@ -124,26 +124,22 @@ class CausalFlowModel(nn.Module):
 
     # ----------------------------------------------------------------------------------------------------------------------- #
         if self.mode == "new":
-            if self.check: print("x shape:", x.shape)
-
             h0 = self.x_dnn(x)  
-            if self.check: print("h0 shape:", h0.shape)
+            h0_stack = torch.cat((x, h0), dim=1)  # [x, h0]
+            # h0 = torch.stack(h0_stack.split(self.control_rnn_size+self.state_dim, dim=1))
+            h0_stack = h0_stack.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
 
-            # h0_stack = torch.cat((x, h0), dim=1)  # [x, h0]
+            """
             h0_stack = h0[:, :self.control_rnn_size + self.state_dim]  
-            if self.check: print("h0_stack shape:", h0_stack.shape)
-
-
             h0_stack = h0_stack.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)  
+            # if self.check: print("h0_stack-2 shape:", h0_stack.shape)
+            """
 
-
-            if self.check: print("h0_stack-2 shape:", h0_stack.shape)
-            
             c0 = torch.zeros_like(h0_stack)  
-            if self.check: print("c0 shape:", c0.shape)
 
+
+            """
             rnn_input_unpacked, _ = torch.nn.utils.rnn.pad_packed_sequence(rnn_input, batch_first=True)
-            if self.check: print("rnn_input shape before:", rnn_input_unpacked.shape)
 
             # Ensure rnn_input contains the correct feature dimensions
             x_expanded = x.unsqueeze(1).expand(-1, rnn_input_unpacked.shape[1], -1)
@@ -152,15 +148,14 @@ class CausalFlowModel(nn.Module):
             assert rnn_input.shape[-1] == self.state_dim + self.control_dim + 1, \
                 f"rnn_input shape mismatch: expected {self.state_dim + self.control_dim + 1}, got {rnn_input.shape[-1]}"
 
-            if self.check: print("rnn_input shape after fix:", rnn_input.shape)
 
 
             lengths = (rnn_input.abs().sum(dim=2) != 0).sum(dim=1)  
             lengths = lengths.cpu()
             rnn_input_packed = torch.nn.utils.rnn.pack_padded_sequence(rnn_input, lengths, batch_first=True, enforce_sorted=False)
+            #"""
 
-
-            rnn_out_seq_packed, _ = self.u_rnn(rnn_input_packed, (h0_stack, c0))
+            rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0))
             h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
             h_shift = torch.roll(h, shifts=1, dims=1)
@@ -175,11 +170,15 @@ class CausalFlowModel(nn.Module):
 
             if self.check:
                 self.check = False
-                # print("x shape:", x.shape)
-                # print("h0 shape (after encoder):", h0.shape)
-                # print("h0_stack shape (LSTM input):", h0_stack.shape)
-                print("\nrnn_input shape:", rnn_input.shape)
-                print("decoder_input shape:", decoder_input.shape)
+
+                print("\nx shape:", x.shape)                                    # output | torch.Size([512, 2])
+                print("\nh0 shape:", h0.shape)                                  # output | torch.Size([512, 16])
+                print("\nh0_stack shape:", h0_stack.shape)                      # output | torch.Size([1, 512, 18])
+                print("\nc0 shape:", c0.shape)                                  # output | torch.Size([1, 512, 18])
+
+                # print("\nrnn_input_unpacked shape:", rnn_input_unpacked.shape)  # output | torch.Size([512, 75, 2])
+                # print("\nrnn_input shape:", rnn_input.shape)                    # output | bho!  
+                print("\ndecoder_input shape:", decoder_input.shape)            # output | torch.Size([512, 75, 18])
                 print("\n\n")
 
             return output

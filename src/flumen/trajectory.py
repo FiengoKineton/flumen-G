@@ -189,9 +189,9 @@ class TrajectoryDataset(Dataset):
 
         init_time = 0.
 
-        # mode = "fixed"
+        mode = "fixed"
         # mode = "adaptive"
-        mode = "naive"
+        # mode = "naive"
 
         # print("\nDiscretisation mode = ", mode, "\n")
 
