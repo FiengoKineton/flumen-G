@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from LSTM_my import LSTM_my
 
 
 class CausalFlowModel(nn.Module):
@@ -40,7 +41,7 @@ class CausalFlowModel(nn.Module):
 
 
     ### LSTM with depth=1, as suggested
-        self.u_rnn = torch.nn.LSTM(
+        self.u_rnn = LSTM_my(
             input_size=control_dim + 1,                     # wrong, before | + state_dim
             hidden_size=control_rnn_size + state_dim,       # before | no +state_dim
             batch_first=True,
