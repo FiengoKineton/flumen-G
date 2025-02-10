@@ -22,166 +22,92 @@ class CausalFlowModel(nn.Module):
         self.output_dim = output_dim
 
         self.control_rnn_size = control_rnn_size
-
-
-        # self.mode = "new"
-        self.mode = "new"
-
-
-    # ----------------------------------------------------------------------------------------------------------------------- #
-        if self.mode == "old": 
-
-            self.u_rnn = torch.nn.LSTM(
-                input_size=1 + control_dim,
-                hidden_size=control_rnn_size,
-                batch_first=True,
-                num_layers=control_rnn_depth,
-                dropout=0,
-            )
-
-            x_dnn_osz = control_rnn_depth * control_rnn_size
-            self.x_dnn = FFNet(in_size=state_dim,
-                            out_size=x_dnn_osz,
-                            hidden_size=encoder_depth *
-                            (encoder_size * x_dnn_osz, ),
-                            use_batch_norm=use_batch_norm)
-
-            u_dnn_isz = control_rnn_size
-            self.u_dnn = FFNet(in_size=u_dnn_isz,
-                            out_size=output_dim,
-                            hidden_size=decoder_depth *
-                            (decoder_size * u_dnn_isz, ),
-                            use_batch_norm=use_batch_norm)
-   
-    # ----------------------------------------------------------------------------------------------------------------------- #
-        if self.mode == "new": 
-            self.control_rnn_depth = control_rnn_depth                      # before | = control_rnn_depth (bc now num_layers=1))
-
-            self.check = True
-
-            if self.check:
-                print("control_dim:", control_dim)
-                print("control_rnn_size:", control_rnn_size)
-                print("control_rnn_depth:", control_rnn_depth)
-                print("state_dim:", state_dim)
-                print("output_dim:", output_dim)
-                print("\n")
-
-
-
-        ### LSTM with depth=1, as suggested
-            self.u_rnn = torch.nn.LSTM(
-                input_size=control_dim + 1,                     # wrong, before | + state_dim
-                hidden_size=control_rnn_size + state_dim,       # before | no +state_dim
-                batch_first=True,
-                num_layers=self.control_rnn_depth,    
-                dropout=0,
-            )
-
-        ### ENCODER
-            x_dnn_osz = control_rnn_size * self.control_rnn_depth       # wrong, before | + state_dim   
-            self.x_dnn = FFNet(in_size=state_dim,
-                            out_size=x_dnn_osz,
-                            hidden_size=encoder_depth *
-                            (encoder_size * x_dnn_osz, ),
-                            use_batch_norm=use_batch_norm)
-
-        ### Updated DECODER that takes [x_tilde, h_tilde]
-            u_dnn_isz = control_rnn_size + state_dim        # before | no +state_dim (added to concatenate the state x_tilde)
-            self.u_dnn = FFNet(in_size=u_dnn_isz,
-                            out_size=output_dim,
-                            hidden_size=decoder_depth *
-                            (decoder_size * u_dnn_isz, ),
-                            use_batch_norm=use_batch_norm)
-            
+        self.control_rnn_depth = control_rnn_depth                   
 
         
+        """
+        self.check = True
 
+        if self.check:
+            print("control_dim:", control_dim)
+            print("control_rnn_size:", control_rnn_size)
+            print("control_rnn_depth:", control_rnn_depth)
+            print("state_dim:", state_dim)
+            print("output_dim:", output_dim)
+            print("\n")
+        """
+
+
+
+    ### LSTM with depth=1, as suggested
+        self.u_rnn = torch.nn.LSTM(
+            input_size=control_dim + 1,                     # wrong, before | + state_dim
+            hidden_size=control_rnn_size + state_dim,       # before | no +state_dim
+            batch_first=True,
+            num_layers=self.control_rnn_depth,    
+            dropout=0,
+        )
+
+    ### ENCODER
+        x_dnn_osz = control_rnn_size * self.control_rnn_depth       # wrong, before | + state_dim   
+        self.x_dnn = FFNet(in_size=state_dim,
+                        out_size=x_dnn_osz,
+                        hidden_size=encoder_depth *
+                        (encoder_size * x_dnn_osz, ),
+                        use_batch_norm=use_batch_norm)
+
+    ### Updated DECODER that takes [x_tilde, h_tilde]
+        u_dnn_isz = control_rnn_size + state_dim        # before | no +state_dim (added to concatenate the state x_tilde)
+        self.u_dnn = FFNet(in_size=u_dnn_isz,
+                        out_size=output_dim,
+                        hidden_size=decoder_depth *
+                        (decoder_size * u_dnn_isz, ),
+                        use_batch_norm=use_batch_norm)
+            
 
 
 
     def forward(self, x, rnn_input, deltas):
     
-    # ----------------------------------------------------------------------------------------------------------------------- #
-        if self.mode == "old": 
-            h0 = self.x_dnn(x)              
-            h0 = torch.stack(h0.split(self.control_rnn_size, dim=1))
-            c0 = torch.zeros_like(h0)
 
-            rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0))
-            h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed,
-                                                            batch_first=True)
+        h0 = self.x_dnn(x)  
+        h0_stack = torch.cat((x, h0), dim=1)  # [x, h0]
+        # h0 = torch.stack(h0_stack.split(self.control_rnn_size+self.state_dim, dim=1))
+        h0_stack = h0_stack.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
 
-            h_shift = torch.roll(h, shifts=1, dims=1)
-            h_shift[:, 0, :] = h0[-1]
-
-            encoded_controls = (1 - deltas) * h_shift + deltas * h
-            output = self.u_dnn(encoded_controls[range(encoded_controls.shape[0]),
-                                                h_lens - 1, :])
-
-            return output
+        c0 = torch.zeros_like(h0_stack)  
+        # torch.nn.init.xavier_uniform_(c0)
 
 
-    # ----------------------------------------------------------------------------------------------------------------------- #
-        if self.mode == "new":
-            h0 = self.x_dnn(x)  
-            h0_stack = torch.cat((x, h0), dim=1)  # [x, h0]
-            # h0 = torch.stack(h0_stack.split(self.control_rnn_size+self.state_dim, dim=1))
-            h0_stack = h0_stack.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0))
+        h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
-            """
-            h0_stack = h0[:, :self.control_rnn_size + self.state_dim]  
-            h0_stack = h0_stack.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)  
-            # if self.check: print("h0_stack-2 shape:", h0_stack.shape)
-            """
+        h_shift = torch.roll(h, shifts=1, dims=1)
+        h_shift[:, 0, :] = h0_stack[-1]
 
-            c0 = torch.zeros_like(h0_stack)  
+        encoded_controls = (1 - deltas) * h_shift + deltas * h  
+
+        decoder_input = encoded_controls  
+        output = self.u_dnn(decoder_input[range(encoded_controls.shape[0]), h_lens - 1, :])
+        output = output[:, :self.state_dim]  # Ensure only x_tilde is output
 
 
-            """
-            rnn_input_unpacked, _ = torch.nn.utils.rnn.pad_packed_sequence(rnn_input, batch_first=True)
+        """
+        if self.check:
+            self.check = False
 
-            # Ensure rnn_input contains the correct feature dimensions
-            x_expanded = x.unsqueeze(1).expand(-1, rnn_input_unpacked.shape[1], -1)
-            rnn_input = torch.cat((x_expanded, rnn_input_unpacked), dim=2)
+            print("\nx shape:", x.shape)                                    # output | torch.Size([512, 2])
+            print("\nh0 shape:", h0.shape)                                  # output | torch.Size([512, 16])
+            print("\nh0_stack shape:", h0_stack.shape)                      # output | torch.Size([1, 512, 18])
+            print("\nc0 shape:", c0.shape)                                  # output | torch.Size([1, 512, 18])
 
-            assert rnn_input.shape[-1] == self.state_dim + self.control_dim + 1, \
-                f"rnn_input shape mismatch: expected {self.state_dim + self.control_dim + 1}, got {rnn_input.shape[-1]}"
+            # print("\nrnn_input_unpacked shape:", rnn_input_unpacked.shape)  # output | torch.Size([512, 75, 2])
+            # print("\nrnn_input shape:", rnn_input.shape)                    # output | bho!  
+            print("\ndecoder_input shape:", decoder_input.shape)            # output | torch.Size([512, 75, 18])
+            print("\n\n")
+        """
 
-
-
-            lengths = (rnn_input.abs().sum(dim=2) != 0).sum(dim=1)  
-            lengths = lengths.cpu()
-            rnn_input_packed = torch.nn.utils.rnn.pack_padded_sequence(rnn_input, lengths, batch_first=True, enforce_sorted=False)
-            #"""
-
-            rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0))
-            h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
-
-            h_shift = torch.roll(h, shifts=1, dims=1)
-            h_shift[:, 0, :] = h0_stack[-1]
-
-            encoded_controls = (1 - deltas) * h_shift + deltas * h  
-
-            decoder_input = encoded_controls  
-            output = self.u_dnn(decoder_input[range(encoded_controls.shape[0]), h_lens - 1, :])
-            output = output[:, :self.state_dim]  # Ensure only x_tilde is output
-
-
-            if self.check:
-                self.check = False
-
-                print("\nx shape:", x.shape)                                    # output | torch.Size([512, 2])
-                print("\nh0 shape:", h0.shape)                                  # output | torch.Size([512, 16])
-                print("\nh0_stack shape:", h0_stack.shape)                      # output | torch.Size([1, 512, 18])
-                print("\nc0 shape:", c0.shape)                                  # output | torch.Size([1, 512, 18])
-
-                # print("\nrnn_input_unpacked shape:", rnn_input_unpacked.shape)  # output | torch.Size([512, 75, 2])
-                # print("\nrnn_input shape:", rnn_input.shape)                    # output | bho!  
-                print("\ndecoder_input shape:", decoder_input.shape)            # output | torch.Size([512, 75, 18])
-                print("\n\n")
-
-            return output
+        return output
 
 
 

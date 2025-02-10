@@ -62,9 +62,9 @@ class RawTrajectoryDataset(Dataset):
 
     
     # ------------------------------------------------- #
-    #   Genera un dataset a partire da un generatore.  #
-    #   Crea traiettorie casuali basate sui parametri  #
-    #   specificati.                                   #
+    #   Genera un dataset a partire da un generatore.   #
+    #   Crea traiettorie casuali basate sui parametri   #
+    #   specificati.                                    #
     # ------------------------------------------------- #
 
     @classmethod
@@ -188,133 +188,32 @@ class TrajectoryDataset(Dataset):
         """
 
         init_time = 0.
-
-        mode = "fixed"
-        # mode = "adaptive"
-        # mode = "naive"
-
-        # print("\nDiscretisation mode = ", mode, "\n")
-
-    # ----------------------------------------------------------------------------------------------------------------------- #
-        if mode == "fixed": 
             
-            u_start_idx = int(np.floor((t[start_idx] - init_time) / delta))
-            u_end_idx = int(np.floor((t[end_idx] - init_time) / delta))
-            u_sz = 1 + u_end_idx - u_start_idx
-            # print("\nu_sz: ", u_sz)         # output | 75
+        u_start_idx = int(np.floor((t[start_idx] - init_time) / delta))
+        u_end_idx = int(np.floor((t[end_idx] - init_time) / delta))
+        u_sz = 1 + u_end_idx - u_start_idx
+        # print("\nu_sz: ", u_sz)         # output | 75
 
-            u_seq = torch.zeros_like(u)
-            u_seq[0:u_sz] = u[u_start_idx:(u_end_idx + 1)]
+        u_seq = torch.zeros_like(u)
+        u_seq[0:u_sz] = u[u_start_idx:(u_end_idx + 1)]
 
-            deltas = torch.ones((u_seq.shape[0], 1))
-            t_u_end = init_time + delta * u_end_idx
-            t_u_start = init_time + delta * u_start_idx
+        deltas = torch.ones((u_seq.shape[0], 1))
+        t_u_end = init_time + delta * u_end_idx
+        t_u_start = init_time + delta * u_start_idx
 
-            if u_sz > 1:
-                deltas[0] = (1. - (t[start_idx] - t_u_start) / delta).item()
-                deltas[u_sz - 1] = ((t[end_idx] - t_u_end) / delta).item()
-            else:
-                deltas[0] = ((t[end_idx] - t[start_idx]) / delta).item()
+        if u_sz > 1:
+            deltas[0] = (1. - (t[start_idx] - t_u_start) / delta).item()
+            deltas[u_sz - 1] = ((t[end_idx] - t_u_end) / delta).item()
+        else:
+            deltas[0] = ((t[end_idx] - t[start_idx]) / delta).item()
 
-            deltas[u_sz:] = 0.
+        deltas[u_sz:] = 0.
 
-            # print("\nu_seq shape: ", u_seq.shape)         # , output | torch.Size([76, 1])
-            # print("\ndeltas shape: ", deltas.shape)       # , output | torch.Size([76, 1])
-            rnn_input = torch.hstack((u_seq, deltas))
+        # print("\nu_seq shape: ", u_seq.shape)         # , output | torch.Size([76, 1])
+        # print("\ndeltas shape: ", deltas.shape)       # , output | torch.Size([76, 1])
+        rnn_input = torch.hstack((u_seq, deltas))
 
-            return rnn_input, u_sz
-
-
-
-    # ----------------------------------------------------------------------------------------------------------------------- #
-        if mode == "adaptive": 
-
-            epsilon = 1e-6          # --- ADDED!
-
-
-        ### Step 1: Compute dynamic time steps (δ_i = ε / max(|u_i - u_(i-1)|, ε)) --- ADDED!
-            delta_seq  = torch.zeros_like(u)
-            delta_seq[0] = epsilon
-            delta_seq[1:] = epsilon / torch.maximum(torch.abs(u[1:] - u[:-1]), torch.tensor(epsilon))
-
-        ### Step 2: Compute cumulative time steps from dynamic deltas (keeps track of time progression with varying δ_i values) --- ADDED!
-            cumulative_time = torch.cumsum(delta_seq, dim=0)
-
-        ### Step 3: Find the start and end idx in cumulative time (cannot use simple division)
-            u_start_idx = torch.searchsorted(cumulative_time.squeeze(), t[start_idx] - init_time)         # before | = int(np.floor((t[start_idx] - init_time) / delta))
-            u_end_idx = torch.searchsorted(cumulative_time.squeeze(), t[end_idx] - init_time)             # before | = int(np.floor((t[end_idx] - init_time) / delta))
-            u_sz = 1 + u_end_idx - u_start_idx
-
-            u_seq = torch.zeros_like(u)
-            u_seq[0:u_sz] = u[u_start_idx:(u_end_idx + 1)]
-
-        ### Step 4: Comupute time step adjustments
-            deltas = torch.ones((u_seq.shape[0], 1))
-            t_u_start = cumulative_time[u_start_idx] if u_start_idx > 0 else init_time          # before | = init_time + delta * u_end_idx
-            t_u_end = cumulative_time[u_end_idx] if u_end_idx > 0 else init_time                # before | = init_time + delta * u_start_idx
-
-
-            if u_sz > 1:
-                deltas[0] = (1. - (t[start_idx] - t_u_start) / delta).item()
-                deltas[u_sz - 1] = ((t[end_idx] - t_u_end) / delta).item()
-            else:
-                deltas[0] = ((t[end_idx] - t[start_idx]) / delta).item()
-
-            deltas[u_sz:] = 0.
-
-            rnn_input = torch.hstack((u_seq, deltas))
-
-            return rnn_input, u_sz
-        
-
-    # ----------------------------------------------------------------------------------------------------------------------- #
-        if mode == "naive": 
-
-            u_start_idx = int(np.floor((t[start_idx] - init_time) / delta))
-            u_end_idx = int(np.floor((t[end_idx] - init_time) / delta))
-            u_sz = 1 + u_end_idx - u_start_idx
-            # print("\nu_sz: ", u_sz)                 # output | 75
-
-            # print("\nshape u: ", u.shape)           # output | torch.Size([76, 1])
-
-
-        ### Naive Discretization:   (instead of using directly the input values, we pass it through the n.d. first)
-            u_raw_seq = torch.zeros_like(u)
-            u_raw_seq[0:u_sz] = u[u_start_idx:(u_end_idx + 1)]
-
-            # print(u_raw_seq)
-            # print("\nu_raw_seq shape: ", u_raw_seq.shape)       # output | torch.Size([76, 1])
-
-
-            u_seq = torch.zeros_like(u_raw_seq)                   # before | = torch.zeros((u_sz, 1), dtype=u_raw_seq.dtype)
-
-            u_seq[0] = u_raw_seq[0]
-
-            # Compute the rest
-            for k in range(1, u_sz):
-                u_seq[k] = u_seq[k-1] + delta * (u_raw_seq[k] - u_raw_seq[k-1])
-        ### 
-
-
-            deltas = torch.ones((u_seq.shape[0], 1))
-            t_u_end = init_time + delta * u_end_idx
-            t_u_start = init_time + delta * u_start_idx
-
-            if u_sz > 1:
-                deltas[0] = (1. - (t[start_idx] - t_u_start) / delta).item()
-                deltas[u_sz - 1] = ((t[end_idx] - t_u_end) / delta).item()
-            else:
-                deltas[0] = ((t[end_idx] - t[start_idx]) / delta).item()
-
-            deltas[u_sz:] = 0.
-
-
-
-            # print("\nu_seq shape: ", u_seq.shape)         # , output | torch.Size([75, 1])
-            # print("\ndeltas shape: ", deltas.shape)       # , output | torch.Size([75, 1])
-            rnn_input = torch.hstack((u_seq, deltas))
-
-            return rnn_input, u_sz        
+        return rnn_input, u_sz      
 
 
 

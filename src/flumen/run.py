@@ -64,7 +64,7 @@ def prepare_experiment(data, args):
         optimizer,
         patience=args.sched_patience,
         cooldown=args.sched_cooldown,
-        factor=1. / args.sched_factor,
+        factor=1. / args.sched_factor,      # ---ADDED!
         threshold=args.es_delta,
         verbose=True)
 
