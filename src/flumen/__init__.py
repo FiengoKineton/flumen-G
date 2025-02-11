@@ -6,4 +6,4 @@ from .experiment import Experiment
 from .utils import get_arg_parser, pack_model_inputs, print_gpu_info
 
 
-from .LSTM_my import LSTM_my
+from flumen.LSTM_my import LSTM

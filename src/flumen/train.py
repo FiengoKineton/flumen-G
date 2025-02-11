@@ -58,6 +58,11 @@ def validate(data, loss_fn, model, device):
 #   backpropagation e aggiorna i pesi del modello.  #
 # ------------------------------------------------- #
 
+# Enable-anomaly-detection --------------------------------------- #
+torch.autograd.set_detect_anomaly(True)     # --- ADDED for LSTM_my!
+# ---------------------------------------------------------------- #
+
+
 def train_step(example, loss_fn, model, optimizer, device):         # --- GRADIENT PROPAGATION!
     x0, y, u, deltas = prep_inputs(*example, device)
 
@@ -98,7 +103,7 @@ class EarlyStopping:
             self.counter = 0
         else:
             self.counter += 1
-            print("\nEarlyStopping counter: ", self.counter, " - must be <", self.patience, "\n")   # --- ADDED!
+            print("\tEarlyStopping counter: ", self.counter, " - must be <", self.patience, "\n")   # --- ADDED!
 
         if self.counter >= self.patience:
             self.early_stop = True
