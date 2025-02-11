@@ -159,10 +159,10 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-*.pth
+# *.pth
 *.out
 # outputs/
-*.png
+# *.png
 *.eps
 *.pdf
 *.csv
