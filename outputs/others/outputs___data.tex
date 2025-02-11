@@ -297,21 +297,86 @@ Loss:           tr=2.590e-02 // vl=3.957e-02 // ts=9.337e-02
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 
-Experiment 013 - new Parameter & old LSTM.
+Experiment 013 - new Parameter & old LSTM (good good). 
 
 
 ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
 >> python experiments/load_data.py --lr=0.00025 --n_epochs=250 --batch_size=512 --es_delta=1e-4 --es_patience=20 --sched_patience=7 --sched_factor=4 --control_rnn_size=24 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
 
-_
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250211_221544_b5f818320adc423c87a8b501b124d702
+Timestamp:      20250211_235937
+Git hash:       52e65a29cc5b993f05c3112d9489b14fcd755b19 (dirty)
+Command line:   experiments/load_data.py --lr=0.00025 --n_epochs=250 --batch_size=512 --es_delta=1e-4 --es_patience=20 --sched_patience=7 --sched_factor=4 --control_rnn_size=24 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     6229.21
+Loss:           tr=1.777e-02 // vl=9.745e-02 // ts=3.222e-02
+0.010090025414175762
+
 ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
 
+### **Analysis of Experiment 013 - New Parameter & Old LSTM**
+---
+#### **1. Observations on the Loss Curves**
+- **Train loss (blue line)**: Continues decreasing, indicating the model is learning properly.
+- **Validation loss (orange line)**: Decreases but stabilizes at a higher level than train loss. There is a noticeable gap, which may indicate **overfitting**.
+- **Test loss (green line)**: Also stabilizes at a higher value, suggesting that the model is not generalizing perfectly to unseen data.
 
+##### **Main Takeaways:**
+- The model **still shows overfitting**, even if it is reduced compared to previous runs.
+- The test loss **is not significantly decreasing anymore**, which means the model might have reached its learning limit with the current configuration.
+
+---
+#### **2. Observations on the Predictions**
+- The **predicted trajectory (orange)** aligns well with the **true trajectory (blue)**.
+- The model captures the overall dynamics well, but towards the end of the time sequence, some deviations appear.
+- This suggests that the model **might struggle to generalize over longer horizons**.
+
+##### **Main Takeaways:**
+- The **short-term predictions are accurate**, but long-term accuracy could be improved.
+- A possible reason could be **insufficient recurrent state size** or **not enough regularization**.
+
+---
+### **Updated Parameters for Experiment 014**
+Given the previous results, let's update the parameters to **reduce overfitting and improve long-term prediction accuracy**:
+
+1. **Lower Learning Rate**  
+   - The previous learning rate of **0.00025** might still be too high, leading to overfitting.  
+   - **New learning rate:** `0.0002`
+
+2. **Increase Regularization (Early Stopping Sensitivity)**
+   - The **es_delta (minimum improvement in validation loss)** should be reduced to **encourage earlier stopping when overfitting begins**.
+   - **New es_delta:** `5e-5` (instead of `1e-4`)
+
+3. **Increase Control RNN Size**
+   - Increasing the **RNN hidden state size** might improve the ability to capture long-term dependencies.
+   - **New control_rnn_size:** `32` (instead of `24`)
+
+4. **Slightly Decrease Batch Size**
+   - A smaller batch size **adds noise to training**, which can improve generalization.
+   - **New batch size:** `384` (instead of `512`)
+
+5. **Slightly Increase Encoder & Decoder Depth**
+   - Increasing depth might **help capture more complex relationships** in the data.
+   - **New encoder_depth:** `3` (instead of `2`)  
+   - **New decoder_depth:** `3` (instead of `2`)  
+
+---
+### **Final Updated Command for Experiment 014**
+```bash
+python experiments/load_data.py --lr=0.0002 --n_epochs=250 --batch_size=384 --es_delta=5e-5 --es_patience=20 --sched_patience=7 --sched_factor=4 --control_rnn_size=32 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+```
+---
+### **Expected Improvements**
+- **Better generalization** (less overfitting).  
+- **More stable long-term predictions**.  
+- **Possibly reduced test loss** while maintaining good train loss.  
+
+Try running this setup and let's analyze the next results! 
 
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 
-Experiment 0__ - _. 
+Experiment 014 - _. 
 
 
 ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
