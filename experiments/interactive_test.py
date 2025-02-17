@@ -4,11 +4,11 @@ import numpy as np
 
 from flumen import CausalFlowModel
 from flumen.utils import pack_model_inputs
-from data_generation.generate_data import make_trajectory_sampler
+from generate_data import make_trajectory_sampler
 
 from argparse import ArgumentParser
 
-import pickle
+import yaml
 from pathlib import Path
 import sys
 from pprint import pprint
@@ -39,13 +39,16 @@ def main():
         api = wandb.Api()
         model_artifact = api.artifact(args.path)
         model_path = Path(model_artifact.download())
+
+        model_run = model_artifact.logged_by()
+        print(model_run.summary)
     else:
         model_path = Path(args.path)
 
     with open(model_path / "state_dict.pth", 'rb') as f:
         state_dict = torch.load(f, weights_only=True)
-    with open(model_path / "metadata.pkl", 'rb') as f:
-        metadata = pickle.load(f)
+    with open(model_path / "metadata.yaml", 'r') as f:
+        metadata: dict = yaml.load(f, Loader=yaml.FullLoader)
 
     pprint(metadata)
 
@@ -66,8 +69,7 @@ def main():
 
     time_horizon = metadata["data_args"]["time_horizon"]
 
-    for _ in range(10):
-
+    while True:
         time_integrate = time()
         x0, t, y, u = sampler.get_example(time_horizon=time_horizon,
                                           n_samples=int(1 +

@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 
 torch.set_default_dtype(torch.float32)
 
-import pickle
+import pickle, yaml
 from pathlib import Path
 
 from flumen import CausalFlowModel, print_gpu_info, TrajectoryDataset
@@ -15,7 +15,7 @@ import time
 import wandb
 
 hyperparams = {
-    'control_rnn_size': 16,
+    'control_rnn_size': 12,
     'control_rnn_depth': 1,
     'encoder_size': 1,
     'encoder_depth': 2,
@@ -24,9 +24,9 @@ hyperparams = {
     'batch_size': 128,
     'lr': 0.001,
     'n_epochs': 1000,
-    'es_patience': 50,
+    'es_patience': 20,
     'es_delta': 1e-7,
-    'sched_patience': 20,
+    'sched_patience': 10,
     'sched_factor': 2,
     'loss': "mse",
 }
@@ -94,11 +94,11 @@ def main():
     # Prepare for saving the model
     model_save_dir = Path(
         f"./outputs/{sys_args.name}/{sys_args.name}_{run.id}")
-    model_save_dir.mkdir(exist_ok=True)
+    model_save_dir.mkdir(parents=True, exist_ok=True)
 
     # Save local copy of metadata
-    with open(model_save_dir / "metadata.pkl", 'wb') as f:
-        pickle.dump(model_metadata, f, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(model_save_dir / "metadata.yaml", 'w') as f:
+        yaml.dump(model_metadata, f)
 
     model = CausalFlowModel(**model_args)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -140,7 +140,6 @@ def main():
     )
 
     start = time.time()
-    best_epoch = 0
 
     for epoch in range(wandb.config['n_epochs']):
         model.train()
@@ -161,14 +160,17 @@ def main():
         )
 
         if early_stop.best_model:
-            best_epoch = epoch
             torch.save(model.state_dict(), model_save_dir / "state_dict.pth")
             run.log_model(model_save_dir.as_posix(), name=model_name)
 
+            run.summary["best_train"] = train_loss
+            run.summary["best_val"] = val_loss
+            run.summary["best_test"] = test_loss
+            run.summary["best_epoch"] = epoch + 1
+
         wandb.log({
             'time': time.time() - start,
-            'best_epoch': best_epoch,
-            'epoch': epoch,
+            'epoch': epoch + 1,
             'lr': sched.get_last_lr()[0],
             'train_loss': train_loss,
             'val_loss': val_loss,
