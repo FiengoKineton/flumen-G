@@ -9,7 +9,7 @@ This repository also contains scripts to train a model using synthetic data.
 To generate the data, the [`semble`](https://github.com/mcpca/semble) package is required.
 To learn e.g. the Van der Pol dynamics, first create a data file as follows:
 ```shell
-  python data_generation/semble_generate.py --n_trajectories 200 --n_samples 200 data_generation/vdp.yaml vdp_test_data
+  python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 data_generation/vdp.yaml vdp_test_data
 ```
 This will create a data file in `./data/vdp_test_data.pkl`.
 
