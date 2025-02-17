@@ -61,7 +61,7 @@ def main():
     sys_args = ap.parse_args()
     data_path = Path(sys_args.load_path)
 
-    run = wandb.init(project='g7-fiengo-msc-thesis', name=sys_args.name, config=hyperparams)
+    run = wandb.init(entity='aguiar-kth-royal-institute-of-technology', project='g7-fiengo-msc-thesis', name=sys_args.name, config=hyperparams)
 
     with data_path.open('rb') as f:
         data = pickle.load(f)
