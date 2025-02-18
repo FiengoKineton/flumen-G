@@ -3,6 +3,13 @@ import numpy as np
 from argparse import ArgumentParser, ArgumentTypeError
 
 
+
+# ------------------------------------------------- #
+#   Stampa informazioni sulla GPU disponibile.      #
+#   Se CUDA è disponibile, mostra il numero di      #
+#   dispositivi e il nome di ciascuna GPU.          #
+# ------------------------------------------------- #
+
 def print_gpu_info():
     if torch.cuda.is_available():
         n_gpus = torch.cuda.device_count()
@@ -17,6 +24,12 @@ def print_gpu_info():
 
             print(msg)
 
+
+# ------------------------------------------------- #
+#   Crea e restituisce un parser di argomenti CLI.  #
+#   Definisce gli iperparametri del modello e       #
+#   dell'ottimizzazione.                            #
+# ------------------------------------------------- #
 
 def get_arg_parser():
     ap = ArgumentParser()
@@ -130,6 +143,12 @@ def get_arg_parser():
     return ap
 
 
+
+# ------------------------------------------------- #
+#   Funzioni di validazione per gli argomenti CLI   #
+#   Controllano che i valori siano validi.          #
+# ------------------------------------------------- #
+
 def positive_int(value):
     value = int(value)
 
@@ -165,6 +184,12 @@ def max_seq_len(value):
     return value
 
 
+# ------------------------------------------------- #
+#   Prepara gli input per il modello RNN.           #
+#   Converte gli input in tensori e crea una        #
+#   sequenza impacchettata per PyTorch RNN.         #
+# ------------------------------------------------- #
+
 def pack_model_inputs(x0, t, u, delta):
     t = torch.Tensor(t.reshape((-1, 1))).flip(0)
     x0 = torch.Tensor(x0.reshape((1, -1))).repeat(t.shape[0], 1)
@@ -175,13 +200,16 @@ def pack_model_inputs(x0, t, u, delta):
         control_seq = torch.from_numpy(u)
         deltas = torch.ones((u.shape[0], 1))
 
+        # Determina la lunghezza effettiva della sequenza
         seq_len = 1 + int(np.floor(t_ / delta))
         lengths[idx] = seq_len
         deltas[seq_len - 1] = ((t_ - delta * (seq_len - 1)) / delta).item()
         deltas[seq_len:] = 0.
 
+        # Combina i controlli con il vettore delle delte
         u_[:] = torch.hstack((control_seq, deltas))
 
+    # Crea una sequenza impacchettata per PyTorch RNN
     u_packed = torch.nn.utils.rnn.pack_padded_sequence(rnn_inputs,
                                                        lengths,
                                                        batch_first=True,

@@ -3,6 +3,12 @@ import torch
 from torch.utils.data import Dataset
 
 
+# ------------------------------------------------- #
+#   Dataset per memorizzare traiettorie raw.        #
+#   Contiene stati iniziali, sequenze di controllo  #
+#   e variabili temporali associate.                #
+# ------------------------------------------------- #
+
 class RawTrajectoryDataset(Dataset):
 
     def __init__(self,
@@ -54,6 +60,14 @@ class RawTrajectoryDataset(Dataset):
                 torch.from_numpy(sample["control"]).type(
                     torch.get_default_dtype()).reshape((-1, self.control_dim)))
 
+
+    
+    # ------------------------------------------------- #
+    #   Genera un dataset a partire da un generatore.   #
+    #   Crea traiettorie casuali basate sui parametri   #
+    #   specificati.                                    #
+    # ------------------------------------------------- #
+
     @classmethod
     def generate(cls, generator, time_horizon, n_trajectories, n_samples,
                  noise_std):
@@ -85,6 +99,13 @@ class RawTrajectoryDataset(Dataset):
                 self.control_seq[index])
 
 
+
+# ------------------------------------------------- #
+#   Dataset per la preparazione delle sequenze RNN. #
+#   Converte le traiettorie raw in input            #
+#   strutturati per modelli basati su RNN.          #
+# ------------------------------------------------- #
+
 class TrajectoryDataset(Dataset):
 
     def __init__(self,
@@ -106,7 +127,7 @@ class TrajectoryDataset(Dataset):
 
         rng = np.random.default_rng()
 
-        k_tr = 0
+        k_tr = 0        # --- what does it do?
 
         for (x0, x0_n, t, y, y_n, u) in raw_data:
             y += y_n
@@ -156,6 +177,12 @@ class TrajectoryDataset(Dataset):
 
         self.len = len(init_state)
 
+
+    # ------------------------------------------------- #
+    #   Prepara un esempio per l'input RNN.             #
+    #   Determina gli indici e costruisce la sequenza.  #
+    # ------------------------------------------------- #  
+
     @staticmethod
     def process_example(start_idx, end_idx, t, u, delta):
         init_time = 0.
@@ -163,6 +190,7 @@ class TrajectoryDataset(Dataset):
         u_start_idx = int(np.floor((t[start_idx] - init_time) / delta))
         u_end_idx = int(np.floor((t[end_idx] - init_time) / delta))
         u_sz = 1 + u_end_idx - u_start_idx
+        # print("\nu_sz: ", u_sz)         # output | 75
 
         u_seq = torch.zeros_like(u)
         u_seq[0:u_sz] = u[u_start_idx:(u_end_idx + 1)]
@@ -179,8 +207,10 @@ class TrajectoryDataset(Dataset):
 
         deltas[u_sz:] = 0.
 
+        # print("\nu_seq shape: ", u_seq.shape)         # , output | torch.Size([76, 1])
+        # print("\ndeltas shape: ", deltas.shape)       # , output | torch.Size([76, 1])
         rnn_input = torch.hstack((u_seq, deltas))
-
+        
         return rnn_input, u_sz
 
     def __len__(self):

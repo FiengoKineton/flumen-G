@@ -1,6 +1,13 @@
 import torch
 
 
+# ------------------------------------------------- #
+#   Prepara gli input per il modello.               #
+#   Riordina i dati per lunghezza decrescente,      #
+#   impacchetta le sequenze per l'RNN e le invia    #
+#   al dispositivo corretto.                        #
+# ------------------------------------------------- #
+
 def prep_inputs(x0, y, u, lengths, device):
     sort_idxs = torch.argsort(lengths, descending=True)
 
@@ -24,6 +31,13 @@ def prep_inputs(x0, y, u, lengths, device):
     return x0, y, u, deltas
 
 
+
+# ------------------------------------------------- #
+#   Valida il modello sul dataset di validazione.   #
+#   Calcola la loss media sui dati di validazione   #
+#   senza aggiornare i pesi del modello.            #
+# ------------------------------------------------- #
+
 def validate(data, loss_fn, model, device):
     vl = 0.
 
@@ -35,6 +49,18 @@ def validate(data, loss_fn, model, device):
             vl += loss_fn(y, y_pred).item()
 
     return model.state_dim * vl / len(data)
+
+
+
+# ------------------------------------------------- #
+#   Esegue un singolo passo di addestramento.       #
+#   Calcola la predizione, la loss, esegue il       #
+#   backpropagation e aggiorna i pesi del modello.  #
+# ------------------------------------------------- #
+
+# Enable-anomaly-detection --------------------------------------- #
+torch.autograd.set_detect_anomaly(True)     # --- ADDED for LSTM_my!
+# ---------------------------------------------------------------- #
 
 
 def train_step(example, loss_fn, model, optimizer, device):
@@ -50,6 +76,12 @@ def train_step(example, loss_fn, model, optimizer, device):
 
     return loss.item()
 
+
+# ------------------------------------------------- #
+#   Implementa l'early stopping.                    #
+#   Ferma l'addestramento se la loss di validazione #
+#   non migliora per un numero definito di epoche.  #
+# ------------------------------------------------- #
 
 class EarlyStopping:
 
@@ -70,6 +102,7 @@ class EarlyStopping:
             self.best_model = True
             self.counter = 0
         else:
+            print("\tEarlyStopping counter: ", self.counter, " - must be <", self.patience, "\n")   # --- ADDED!
             self.counter += 1
 
         if self.counter >= self.patience:
