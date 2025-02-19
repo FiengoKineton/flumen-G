@@ -11,10 +11,16 @@ COMMANDs:
 >> python experiments/interactive_test.py --wandb (name of the best model from a general experiment)
 ________________________________________________________________________________________________________________________
 
+W&B workspace:  https://wandb.ai/aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis?nw=nwuserg7fiengo
+
+Slack general:  https://app.slack.com/client/T080VKDGZMY/C080SPVEXA9
+________________________________________________________________________________________________________________________
+
 GITs:
 
 >> git reset --hard origin/master
 >> git pull origin master
+________________________________________________________________________________________________________________________
 """
 
 
@@ -134,8 +140,8 @@ class CausalFlowModel(nn.Module):
             print("\nh0_stack shape:", h0_stack.shape)                      # output | torch.Size([1, 512, 18])
             print("\nc0 shape:", c0.shape)                                  # output | torch.Size([1, 512, 18])
 
-            # print("\nrnn_input_unpacked shape:", rnn_input_unpacked.shape)  # output | torch.Size([512, 75, 2])
-            # print("\nrnn_input shape:", rnn_input.shape)                    # output | bho!  
+            print("\nrnn_input_unpacked shape:", rnn_input_unpacked.shape)  # output | torch.Size([512, 75, 2])
+            print("\nrnn_input shape:", rnn_input.shape)                    # output | bho!  
             print("\ndecoder_input shape:", decoder_input.shape)            # output | torch.Size([512, 75, 18])
             print("\n\n")
         """
