@@ -99,7 +99,7 @@ class CausalFlowModel(nn.Module):
         c0 = torch.zeros_like(h0_stack)  
 
         if tau is None: 
-            tau = torch.full((x.shape[0], x.shape[1], 1), 0.01, device=x.device)
+            tau = torch.full((x.shape[0], x.shape[1]), 0.01, device=x.device)
 
         """
     #-- num_layers, batch_size, hidden_size + state_dim = h0_stack.shape
@@ -107,7 +107,7 @@ class CausalFlowModel(nn.Module):
         print("\nh0.shape", h0.shape)                   # output | torch.Size([128, 12])
         print("\nh0_stack.shape: ", h0_stack.shape)     # output | torch.Size([1, 128, 14])
         print("\nc0.shape: ", c0.shape)                 # output | torch.Size([1, 128, 14])
-        print("\ntau.shape: ", tau.shape)               # output | torch.Size([128, 2, 1])
+        print("\ntau.shape: ", tau.shape)               # output | torch.Size([128, 2])
 
         if isinstance(rnn_input, torch.nn.utils.rnn.PackedSequence):
             rnn_input_unpacked, lengths = torch.nn.utils.rnn.pad_packed_sequence(rnn_input, batch_first=True)
@@ -123,7 +123,7 @@ class CausalFlowModel(nn.Module):
 
     #-- for new LSTM!
         rnn_input_packed = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=torch.full((x.shape[0],), x.shape[1], dtype=torch.long, device=x.device), batch_first=True, enforce_sorted=False)
-        rnn_out_seq_packed, _ = self.u_rnn(rnn_input_packed, (h0_stack, c0), rnn_input, tau)
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0), x, tau)
 
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
