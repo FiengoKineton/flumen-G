@@ -62,6 +62,17 @@ class LSTM(nn.Module):
 
         u: control input
         tau: time step factor
+
+
+        before:
+          - x correspond to rnn_input
+          - hidden_state correspond to (h0_stack, c0)
+        
+        now:
+          - x correspond to rnn_input_packed
+          - z correspond to (h0_stack, c0)
+          - u correspond to rnn_input   
+          - tau correspond to tau
         """
 
         is_packed = isinstance(x, torch.nn.utils.rnn.PackedSequence)
@@ -158,6 +169,7 @@ class LSTMCell(nn.Module):
         self.hidden_size = hidden_size
         self.mhu = 1.5      # \mhu \in [0.1, 3.0] --- fromo wikipedia
 
+
         # Input-to-hidden weights and biases (used to process input data)
         self.W_i = nn.Linear(input_size, hidden_size, bias=bias)    # Input gate
         self.W_f = nn.Linear(input_size, hidden_size, bias=bias)    # Forget gate
@@ -170,17 +182,18 @@ class LSTMCell(nn.Module):
         self.U_c = nn.Linear(hidden_size, hidden_size, bias=False)
         self.U_o = nn.Linear(hidden_size, hidden_size, bias=False)
     
+        """
     #-- Weights shapes
-        #print(f"\nW_i weight shape: {self.W_i.weight.shape}")       # output | torch.Size([14, 4])
-        #print(f"\nW_f weight shape: {self.W_f.weight.shape}")       # output | torch.Size([14, 4])
-        #print(f"\nW_c weight shape: {self.W_c.weight.shape}")       # output | torch.Size([14, 4])
-        #print(f"\nW_o weight shape: {self.W_o.weight.shape}")       # output | torch.Size([14, 4])
+        print(f"\nW_i weight shape: {self.W_i.weight.shape}")       # output | torch.Size([14, 4])
+        print(f"\nW_f weight shape: {self.W_f.weight.shape}")       # output | torch.Size([14, 4])
+        print(f"\nW_c weight shape: {self.W_c.weight.shape}")       # output | torch.Size([14, 4])
+        print(f"\nW_o weight shape: {self.W_o.weight.shape}")       # output | torch.Size([14, 4])
 
-        #print(f"\nU_i weight shape: {self.U_i.weight.shape}")       # output | torch.Size([14, 4])
-        #print(f"\nU_f weight shape: {self.U_f.weight.shape}")       # output | torch.Size([14, 4])
-        #print(f"\nU_c weight shape: {self.U_c.weight.shape}")       # output | torch.Size([14, 4])
-        #print(f"\nU_o weight shape: {self.U_o.weight.shape}")       # output | torch.Size([14, 4])
-
+        print(f"\nU_i weight shape: {self.U_i.weight.shape}")       # output | torch.Size([14, 4])
+        print(f"\nU_f weight shape: {self.U_f.weight.shape}")       # output | torch.Size([14, 4])
+        print(f"\nU_c weight shape: {self.U_c.weight.shape}")       # output | torch.Size([14, 4])
+        print(f"\nU_o weight shape: {self.U_o.weight.shape}")       # output | torch.Size([14, 4])
+        #"""
 
     def forward(self, z, x, u=None, tau=None):      # before | def forward(self, x, h, c):
         """
@@ -203,6 +216,7 @@ class LSTMCell(nn.Module):
             x_next = x  # OLD LSTM: No physics update
 
 
+
         # Compute LSTM gate activations
         i = torch.sigmoid(self.W_i(x) + self.U_i(z))  # Input gate
         f = torch.sigmoid(self.W_f(x) + self.U_f(z))  # Forget gate
@@ -220,13 +234,13 @@ class LSTMCell(nn.Module):
         else:
             z_next = h_next
 
-
+        #"""
     #-- Initial Variable shapes
-        #print(f"x.shape: {x.shape}")        # output | torch.Size([128, 2])
-        print(f"z.shape: {z.shape}")        # output | 
-        print(f"u.shape: {u.shape}")        # output | 
-        #print(f"tau.shape: {tau.shape}")    # output | torch.Size([128, 1])
-        #print(f"A.shape: {A.shape}")        # output | torch.Size([2, 2]) 
+        print(f"x.shape: {x.shape}")        # output | torch.Size([128, 2])
+        #print(f"z.shape: {z.shape}")        # output | 
+        print(f"u.shape: {u.shape}")        # output | torch.Size([3266, 1])
+        print(f"tau.shape: {tau.shape}")    # output | torch.Size([128, 1])
+        print(f"A.shape: {A.shape}")        # output | torch.Size([2, 2]) 
 
     #-- Final Variable shapes
         print(f"i.shape: {i.shape}")  
@@ -236,6 +250,6 @@ class LSTMCell(nn.Module):
         print(f"c_next.shape: {c_next.shape}") 
         print(f"h_next.shape: {h_next.shape}")  
         print(f"z_next.shape: {z_next.shape}")  
-
+        #"""
 
         return z_next, c_next       # before | z_next <-- h_next

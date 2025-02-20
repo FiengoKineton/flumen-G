@@ -49,41 +49,41 @@ class CausalFlowModel(nn.Module):
 
         
         """
-        self.check = True
-
-        if self.check:
-            print("control_dim:", control_dim)
-            print("control_rnn_size:", control_rnn_size)
-            print("control_rnn_depth:", control_rnn_depth)
-            print("state_dim:", state_dim)
-            print("output_dim:", output_dim)
-            print("\n")
-        """
+        print("\nstate_dim: ", state_dim)               # output | 2
+        print("control_dim: ", control_dim)             # output | 1
+        print("output_dim: ", output_dim)               # output | 2
+        print("control_rnn_size: ", control_rnn_size)   # output | 12
+        print("control_rnn_depth: ", control_rnn_depth) # output | 1
+        print("encoder_size: ", encoder_size)           # output | 1
+        print("encoder_depth: ", encoder_depth)         # output | 2
+        print("decoder_size: ", decoder_size)           # output | 1
+        print("decoder_depth: ", decoder_depth)         # output | 2
+        #"""
 
 
 
     ### LSTM with depth=1, as suggested ----- LSTM() eller torch.nn.LSTM()
-        self.u_rnn = torch.nn.LSTM(
-            input_size=control_dim + 1 + state_dim*0,       # before | no +state_dim | for new LSTM
-            hidden_size=control_rnn_size + state_dim,       # before | no +state_dim | for new Encoder
+        self.u_rnn = LSTM(
+            input_size=control_dim + 1 + state_dim*0,       # output | 2
+            hidden_size=control_rnn_size + state_dim,       # output | 14
             batch_first=True,
-            num_layers=self.control_rnn_depth,    
+            num_layers=self.control_rnn_depth,              # output | 1
             dropout=0,
         )
 
     ### ENCODER
-        x_dnn_osz = control_rnn_size * self.control_rnn_depth + state_dim*0 
-        self.x_dnn = FFNet(in_size=state_dim,
-                        out_size=x_dnn_osz,
-                        hidden_size=encoder_depth *
+        x_dnn_osz = control_rnn_size * self.control_rnn_depth
+        self.x_dnn = FFNet(in_size=state_dim,               # output | 2
+                        out_size=x_dnn_osz,                 # output | 12
+                        hidden_size=encoder_depth *         # output | 24
                         (encoder_size * x_dnn_osz, ),
                         use_batch_norm=use_batch_norm)
 
     ### Updated DECODER that takes [x_tilde, h_tilde]
-        u_dnn_isz = control_rnn_size + state_dim        # before | no +state_dim | for new Encoder
-        self.u_dnn = FFNet(in_size=u_dnn_isz,
-                        out_size=output_dim,
-                        hidden_size=decoder_depth *
+        u_dnn_isz = control_rnn_size + state_dim            # before | no +state_dim | for new Encoder
+        self.u_dnn = FFNet(in_size=u_dnn_isz,               # output | 14
+                        out_size=output_dim,                # output | 2
+                        hidden_size=decoder_depth *         # output | 28
                         (decoder_size * u_dnn_isz, ),
                         use_batch_norm=use_batch_norm)
             
@@ -101,21 +101,29 @@ class CausalFlowModel(nn.Module):
         if tau is None: 
             tau = torch.full((x.shape[0], x.shape[1], 1), 0.01, device=x.device)
 
-
+        """
     #-- num_layers, batch_size, hidden_size + state_dim = h0_stack.shape
-        #print("\nx.shape", x.shape)                     # output | torch.Size([128, 2])
-        #print("\nh0.shape", h0.shape)                   # output | torch.Size([128, 12])
-        #print("\nh0_stack.shape: ", h0_stack.shape)     # output | torch.Size([1, 128, 14])
-        #print("\nc0.shape: ", c0.shape)                 # output | torch.Size([1, 128, 14])
-        #print("\ntau.shape: ", tau.shape)               # output | torch.Size([128, 2, 1])
+        print("\nx.shape", x.shape)                     # output | torch.Size([128, 2])
+        print("\nh0.shape", h0.shape)                   # output | torch.Size([128, 12])
+        print("\nh0_stack.shape: ", h0_stack.shape)     # output | torch.Size([1, 128, 14])
+        print("\nc0.shape: ", c0.shape)                 # output | torch.Size([1, 128, 14])
+        print("\ntau.shape: ", tau.shape)               # output | torch.Size([128, 2, 1])
+
+        if isinstance(rnn_input, torch.nn.utils.rnn.PackedSequence):
+            rnn_input_unpacked, lengths = torch.nn.utils.rnn.pad_packed_sequence(rnn_input, batch_first=True)
+            print("\nrnn_input (unpacked) shape:", rnn_input_unpacked.shape)    # output | torch.Size([128, 50, 2])
+            print("\nSequence lengths:", lengths)
+        else:
+            print("\nrnn_input.shape:", rnn_input.shape)
+        #"""
 
 
     #-- for new Encoder!
-        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0))       
+        #rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0))       
 
     #-- for new LSTM!
-        #rnn_input_packed = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=torch.full((x.shape[0],), x.shape[1], dtype=torch.long, device=x.device), batch_first=True, enforce_sorted=False)
-        #rnn_out_seq_packed, _ = self.u_rnn(rnn_input_packed, (h0_stack, c0), rnn_input, tau)
+        rnn_input_packed = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=torch.full((x.shape[0],), x.shape[1], dtype=torch.long, device=x.device), batch_first=True, enforce_sorted=False)
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input_packed, (h0_stack, c0), rnn_input, tau)
 
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
@@ -127,6 +135,8 @@ class CausalFlowModel(nn.Module):
         decoder_input = encoded_controls  
         output = self.u_dnn(decoder_input[range(encoded_controls.shape[0]), h_lens - 1, :])
         output = output[:, :self.state_dim]  # Ensure only x_tilde is output | for new Encoder
+
+
 
 
         """
@@ -144,7 +154,7 @@ class CausalFlowModel(nn.Module):
             print("\nrnn_input shape:", rnn_input.shape)                    # output | bho!  
             print("\ndecoder_input shape:", decoder_input.shape)            # output | torch.Size([512, 75, 18])
             print("\n\n")
-        """
+        #"""
 
         return output
 
