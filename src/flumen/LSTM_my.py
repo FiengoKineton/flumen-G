@@ -108,15 +108,16 @@ class LSTM(nn.Module):
         outputs = []
 
 
+
         # Iterate over time steps
         for t in range(seq_len):
+            #print("\nt: ", t)      
+
             xt = x_unpacked[:, t, :] if is_packed else x[:, t, :]
             #print("\nxt.shape: ", xt.shape)     # output | torch.Size([128, 2])
-
             #if isinstance(u, tuple): u = u[0]  
             #if u.dim() == 2: u = u.unsqueeze(-1)
-
-            ut = u[:, t] if u is not None else None
+            #ut = u[:, t] if u is not None else None
             tau_t = tau if tau is not None else None
 
             """
@@ -127,7 +128,7 @@ class LSTM(nn.Module):
 
             for layer in range(self.num_layers):
                 new_h, new_c = [], []
-                zt, ct = self.lstm_cells[layer](xt, h[layer], c[layer], ut, tau_t)  
+                zt, ct = self.lstm_cells[layer](xt, h[layer], c[layer], tau_t)  
                 xt = zt[:, :2]
                 ht = zt[:, 2:]    
 
@@ -148,6 +149,7 @@ class LSTM(nn.Module):
             outputs.append(xt)
 
         outputs = torch.stack(outputs, dim=1)
+        #print("\noutputs.shape: ", outputs.shape)       # output | torch.Size([128, 50, 2])
 
         if is_packed:
             # Re-pack the sequence if the input was originally packed
@@ -155,7 +157,10 @@ class LSTM(nn.Module):
 
         # Apply fully connected layer if defined
         if self.fc is not None:
-            outputs = self.fc(outputs[:, -1, :])  # Use last time step
+            outputs = self.fc(outputs[:, -1, :])        # Use last time step
+        
+        #print("\nh.shape: ", h.shape)                   # output | torch.Size([1, 128, 14])
+        #print("\nc.shape: ", c.shape)                   # output | torch.Size([1, 128, 14]) 
 
         return outputs, (h, c)
 
@@ -212,7 +217,7 @@ class LSTMCell(nn.Module):
         #"""
 
 
-    def forward(self, x, z, c, u=None, tau=None):      # before | def forward(self, x, h, c):
+    def forward(self, x, z, c, tau=None, u=None):      # before | def forward(self, x, h, c):
         """
         Forward pass through the LSTM cell.
 
@@ -226,7 +231,7 @@ class LSTMCell(nn.Module):
         - c_next (Tensor): Next cell state.
         """
 
-        if u is not None and tau is not None:
+        if tau is not None:
             A = torch.tensor([[self.mhu, -self.mhu], [1/self.mhu, 0]], device=x.device)
             x_next = x + tau * torch.matmul(A, x.T).T
         else:
@@ -259,7 +264,7 @@ class LSTMCell(nn.Module):
         # Compute next hidden state
         h_next = o * torch.tanh(c_next)                 # Next hidden state
 
-        if u is not None and tau is not None: 
+        if tau is not None: 
             if z.shape[1] == self.hidden_size: 
                 z_next = torch.cat([x_next, h_next], dim=1) 
             else:
@@ -268,7 +273,7 @@ class LSTMCell(nn.Module):
             z_next = h_next
 
 
-        #"""
+        """
     #-- Final Variable shapes
         print("\nfinal VARIABLE SHAPES\n")
 

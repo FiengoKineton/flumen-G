@@ -63,7 +63,7 @@ class CausalFlowModel(nn.Module):
 
 
     ### LSTM with depth=1, as suggested ----- LSTM() eller torch.nn.LSTM()
-        self.u_rnn = LSTM(
+        self.u_rnn = torch.nn.LSTM(
             input_size=control_dim + 1 + state_dim*0,       # output | 2
             hidden_size=control_rnn_size + state_dim,       # output | 14
             batch_first=True,
@@ -122,12 +122,16 @@ class CausalFlowModel(nn.Module):
         #rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0))       
 
     #-- for new LSTM!
-        rnn_input_packed = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=torch.full((x.shape[0],), x.shape[1], dtype=torch.long, device=x.device), batch_first=True, enforce_sorted=False)
+        #rnn_input_packed = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=torch.full((x.shape[0],), x.shape[1], dtype=torch.long, device=x.device), batch_first=True, enforce_sorted=False)
         rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0), x, tau)
 
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
+        #print("\nh.shape:", h.shape)                     # output | torch.Size([128, 50, 14])
+        #print("\nh_lens.shape:", h_lens.shape)           # output | torch.Size([128])
 
         h_shift = torch.roll(h, shifts=1, dims=1)
+        #print("\nh_shift.shape:", h_shift.shape)         # output | torch.Size([128, 50, 14])
+        #print("\nh0_stack[-1].shape:", h0_stack[-1].shape) # output | torch.Size([128, 14]) 
         h_shift[:, 0, :] = h0_stack[-1]
 
         encoded_controls = (1 - deltas) * h_shift + deltas * h  
