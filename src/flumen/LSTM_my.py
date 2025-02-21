@@ -35,7 +35,8 @@ class LSTM(nn.Module):
         self.batch_first = batch_first
         self.dropout = dropout
         self.bidirectional = bidirectional
-
+        self.mhu = 1.5      # \mhu \in [0.1, 3.0] --- fromo wikipedia
+        self.state_dim = 2
 
         # Create LSTM layers manually instead of using torch.nn.LSTM
         self.lstm_cells = nn.ModuleList([
@@ -48,7 +49,7 @@ class LSTM(nn.Module):
 
 
 
-    def forward(self, x, z, u=None, tau=None):      # def forward(self, x, hidden_state=None):
+    def forward(self, x, z, u=None, tau=None):                  # def forward(self, x, hidden_state=None):
         """
         Forward pass through the custom LSTM.
 
@@ -78,45 +79,40 @@ class LSTM(nn.Module):
         """
 
         is_packed = isinstance(x, torch.nn.utils.rnn.PackedSequence)
-        #print("\nis_packed: ", is_packed)       # output | True
+        #print("\nis_packed: ", is_packed)                       # output | True
 
         if is_packed:
             x_unpacked, lengths = torch.nn.utils.rnn.pad_packed_sequence(x, batch_first=self.batch_first)
             #print("\nlengths.shape: ", lengths.shape[0])        # output | 128 (=batch_size)   
             #print("\nx_unpacked.dim: ", x_unpacked.dim())       # output | 2 (==tensor with 3 elements)
-
-            #if x_unpacked.dim() == 2: 
-             #   seq_len = x_unpacked.shape[1] if len(lengths) > 0 else 1  
-             #   x_unpacked = x_unpacked.unsqueeze(1).expand(-1, seq_len, -1)
-            
             #print("\nx_unpacked.shape: ", x_unpacked.shape)     # output | torch.Size([128, 2, 2])
             batch_size, seq_len, _ = x_unpacked.shape
+            device = x_unpacked.device
         else:
             #print("\nx.shape: ", x.shape)
+            device = x.device
             batch_size, seq_len, _ = x.shape
 
         # Initialize hidden and cell states
-        if z is not None:
-            h0, c0 = z
-        else:
-            h0 = torch.zeros(self.num_layers, batch_size, self.hidden_size, device=x.device)
-            c0 = torch.zeros(self.num_layers, batch_size, self.hidden_size, device=x.device)
+        h0, c0 = z if z is not None else (
+            torch.zeros(self.num_layers, batch_size, self.hidden_size, device=device),
+            torch.zeros(self.num_layers, batch_size, self.hidden_size, device=device)
+        )
 
-
-        h = h0.clone()      #print("\nh.shape: ", h.shape)       # output | torch.Size([1, 128, 14])
-        c = c0.clone()      #print("\nc.shape: ", c.shape)       # output | torch.Size([1, 128, 14])
+        h = h0      #print("\nh.shape: ", h.shape)       # output | torch.Size([1, 128, 14])
+        c = c0      #print("\nc.shape: ", c.shape)       # output | torch.Size([1, 128, 14])
         outputs = []
 
+        ###outputs = torch.empty((batch_size, seq_len, self.hidden_size), device=device)
+        ###A = torch.tensor([[self.mhu, -self.mhu], [1/self.mhu, 0]], device=device)
 
 
         # Iterate over time steps
-        for t in range(seq_len):
+        for t in range(seq_len):                                # seq_len = 2
             #print("\nt: ", t)      
 
             xt = x_unpacked[:, t, :] if is_packed else x[:, t, :]
-            #print("\nxt.shape: ", xt.shape)     # output | torch.Size([128, 2])
-            #if isinstance(u, tuple): u = u[0]  
-            #if u.dim() == 2: u = u.unsqueeze(-1)
+            #print("\nxt.shape: ", xt.shape)                     # output | torch.Size([128, 2])
             #ut = u[:, t] if u is not None else None
             tau_t = tau if tau is not None else None
 
@@ -126,18 +122,14 @@ class LSTM(nn.Module):
             print("\ntau_t.shape: ", tau_t.shape)  # output | torch.Size([128, 2])
             #"""
 
-            for layer in range(self.num_layers):
+            ###x_next = xt + tau_t * torch.matmul(A, xt.T).T if A is not None else xt
+
+            for layer in range(self.num_layers):                # num_layers = 1
                 new_h, new_c = [], []
                 zt, ct = self.lstm_cells[layer](xt, h[layer], c[layer], tau_t)  
-                xt = zt[:, :2]
-                ht = zt[:, 2:]    
+                xt = zt[:, :self.state_dim]
+                ht = zt[:, self.state_dim:]    
 
-                #ht, ct = self.lstm_cells[layer](z, xt, ut, tau_t)
-
-            #-- if u is not None and tau is not None:   ht, ct = self.lstm_cells[layer][0](z, xt, ut, tau_t)                # NEW LSTM: Physics-based LSTM
-            #-- else:                                   ht, ct = self.lstm_cells[layer][0](xt, h[layer][0], c[layer][0])    # OLD LSTM: Standard LSTM behavior
-
-                # Replace hidden and cell state variables instead of modifying in place
                 new_h.append(ht)
                 new_c.append(ct)
                 #xt = ht
@@ -146,10 +138,36 @@ class LSTM(nn.Module):
                 h = h_new
                 c = c_new
 
-            outputs.append(xt)
+            outputs.append(ht)
 
         outputs = torch.stack(outputs, dim=1)
-        #print("\noutputs.shape: ", outputs.shape)       # output | torch.Size([128, 50, 2])
+        
+        """
+                new_h, new_c = [], []
+                zt, ct = self.lstm_cells[layer](xt, h[layer], c[layer], tau_t)  
+                xt = zt[:, :self.state_dim]
+                h[layer] = zt[:, self.state_dim:]  
+                c[layer] = ct   
+                ht = torch.stack(h[layer])
+
+
+            #-- if u is not None and tau is not None:   ht, ct = self.lstm_cells[layer][0](z, xt, ut, tau_t)                # NEW LSTM: Physics-based LSTM
+            #-- else:                                   ht, ct = self.lstm_cells[layer][0](xt, h[layer][0], c[layer][0])    # OLD LSTM: Standard LSTM behavior
+
+                # Replace hidden and cell state variables instead of modifying in place
+                ###new_h.append(ht)
+                ###new_c.append(ct)
+                ###xt = ht
+                ###h = torch.stack(new_h)
+                ###c = torch.stack(new_c)
+
+            outputs.append(ht)
+            #outputs[:, t, :] = h[-1]
+
+
+        outputs = torch.stack(outputs, dim=1)
+        #print("\noutputs.shape: ", outputs.shape)               # output | torch.Size([128, 50, 2])
+        #"""
 
         if is_packed:
             # Re-pack the sequence if the input was originally packed
@@ -157,10 +175,10 @@ class LSTM(nn.Module):
 
         # Apply fully connected layer if defined
         if self.fc is not None:
-            outputs = self.fc(outputs[:, -1, :])        # Use last time step
+            outputs = self.fc(outputs[:, -1, :])                # Use last time step
         
-        #print("\nh.shape: ", h.shape)                   # output | torch.Size([1, 128, 14])
-        #print("\nc.shape: ", c.shape)                   # output | torch.Size([1, 128, 14]) 
+        #print("\nh.shape: ", h.shape)                           # output | torch.Size([1, 128, 14])
+        #print("\nc.shape: ", c.shape)                           # output | torch.Size([1, 128, 14]) 
 
         return outputs, (h, c)
 
@@ -184,6 +202,7 @@ class LSTMCell(nn.Module):
         super(LSTMCell, self).__init__()
         self.hidden_size = hidden_size
         self.mhu = 1.5      # \mhu \in [0.1, 3.0] --- fromo wikipedia
+        self.A = torch.tensor([[self.mhu, -self.mhu], [1/self.mhu, 0]])
 
 
         # Input-to-hidden weights and biases (used to process input data)
@@ -217,7 +236,7 @@ class LSTMCell(nn.Module):
         #"""
 
 
-    def forward(self, x, z, c, tau=None, u=None):      # before | def forward(self, x, h, c):
+    def forward(self, x, z, c, tau=None, u=None):                   # before | def forward(self, x, h, c):
         """
         Forward pass through the LSTM cell.
 
@@ -231,12 +250,8 @@ class LSTMCell(nn.Module):
         - c_next (Tensor): Next cell state.
         """
 
-        if tau is not None:
-            A = torch.tensor([[self.mhu, -self.mhu], [1/self.mhu, 0]], device=x.device)
-            x_next = x + tau * torch.matmul(A, x.T).T
-        else:
-            x_next = x  # OLD LSTM: No physics update
-
+        x_next = x + tau * torch.matmul(self.A, x.T).T if tau is not None else x
+        x = x_next
 
         """
     #-- Initial Variable shapes
@@ -253,22 +268,22 @@ class LSTMCell(nn.Module):
 
 
         # Compute LSTM gate activations
-        i = torch.sigmoid(self.W_i(x) + self.U_i(z))  # Input gate
-        f = torch.sigmoid(self.W_f(x) + self.U_f(z))  # Forget gate
-        g = torch.tanh(self.W_c(x) + self.U_c(z))     # Cell state candidate
-        o = torch.sigmoid(self.W_o(x) + self.U_o(z))  # Output gate
+        i = torch.sigmoid(self.W_i(x) + self.U_i(z))   # Input gate
+        f = torch.sigmoid(self.W_f(x) + self.U_f(z))   # Forget gate
+        g = torch.tanh(self.W_c(x) + self.U_c(z))      # Cell state candidate
+        o = torch.sigmoid(self.W_o(x) + self.U_o(z))   # Output gate
 
         # Update cell state (Avoid in-place modification)
-        c_next = f * z + i * g      # before | z <-- c  # Next cell state
+        c_next = f * z + i * g      # before | z <-- c      # Next cell state
 
         # Compute next hidden state
-        h_next = o * torch.tanh(c_next)                 # Next hidden state
+        h_next = o * torch.tanh(c_next)                     # Next hidden state
 
         if tau is not None: 
             if z.shape[1] == self.hidden_size: 
-                z_next = torch.cat([x_next, h_next], dim=1) 
+                z_next = torch.cat([x, h_next], dim=1) 
             else:
-                z_next = torch.cat([x_next, h_next[:, 2:]], dim=1)
+                z_next = torch.cat([x, h_next[:, 2:]], dim=1)
         else:
             z_next = h_next
 
@@ -289,4 +304,4 @@ class LSTMCell(nn.Module):
         print("\n\n")
         #"""
 
-        return z_next, c_next       # before | z_next <-- h_next
+        return z_next, c_next                               # before | z_next <-- h_next
