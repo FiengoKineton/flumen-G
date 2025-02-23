@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+#######################################################################################
 
 class LSTM(nn.Module):
     """
@@ -182,8 +183,7 @@ class LSTM(nn.Module):
 
         return outputs, (h, c)
 
-
-
+#######################################################################################
 
 class LSTMCell(nn.Module):
     """
@@ -305,3 +305,6 @@ class LSTMCell(nn.Module):
         #"""
 
         return z_next, c_next                               # before | z_next <-- h_next
+    
+
+    

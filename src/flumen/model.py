@@ -69,7 +69,7 @@ class CausalFlowModel(nn.Module):
             batch_first=True,
             num_layers=self.control_rnn_depth,              # output | 1
             dropout=0
-            #,state_dim=state_dim                             # for LSTM_my.py                                             
+            #,state_dim=state_dim                            # for LSTM_my.py                                             
         )
 
     ### ENCODER
