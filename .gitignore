@@ -162,7 +162,7 @@ cython_debug/
 *.pth
 *.out
 outputs/
-*.png
+.png
 *.eps
 *.pdf
 *.csv
