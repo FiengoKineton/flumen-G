@@ -1,0 +1,650 @@
+
+Experiment 000 - Template. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> command
+
+output
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 001 - new Encoder. 	
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+  experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250205_150430_9176807c46ab49ab87cc23274bb20634
+Timestamp:      20250205_155635
+Git hash:       3ea662259be3cbb4d56fb37d1995587e12cbf23a (dirty)
+Command line:   experiments/load_data.py --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=1e-4 --es_patience=15 --sched_patience=5 --sched_factor=10 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     3120.78
+Loss:           tr=5.150e-02 // vl=2.197e-01 // ts=4.373e-01
+control_dim: 1
+control_rnn_size: 16
+control_rnn_depth: 1
+state_dim: 2
+output_dim: 2
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 002 - old Encoder. 	
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+  experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250206_121414_926845c6929347cd8adb23110709553e
+Timestamp:      20250206_122821
+Git hash:       305cdccf8bfbbc6d5f01e136cdf29de9c251f1be (dirty)
+Command line:   experiments/load_data.py --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=1e-4 --es_patience=15 --sched_patience=5 --sched_factor=10 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     845.60
+Loss:           tr=5.294e-02 // vl=4.425e-02 // ts=1.668e-01
+control_dim: 1
+control_rnn_size: 16
+control_rnn_depth: 1
+state_dim: 2
+output_dim: 2
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 003 - new Encoder (wrong). 	
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+  experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250206_163914_3e29b9b63ddd4272ae3a6882093f5082
+Timestamp:      20250206_170207
+Git hash:       305cdccf8bfbbc6d5f01e136cdf29de9c251f1be (dirty)
+Command line:   experiments/load_data.py --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=1e-4 --es_patience=15 --sched_patience=5 --sched_factor=10 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     1370.39
+Loss:           tr=1.343e+00 // vl=1.690e+00 // ts=1.485e+00
+control_dim: 1
+control_rnn_size: 16
+control_rnn_depth: 1
+state_dim: 2
+output_dim: 2
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 004 - old Encoder (naive). 	
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+  experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250206_200152_3789bf81cc5848ebbea0a02e4a0a6703
+Timestamp:      20250206_201315
+Git hash:       89b7554b8d561b5fffa4deddc3f681a2954627ac (dirty)
+Command line:   experiments/load_data.py --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=1e-4 --es_patience=15 --sched_patience=5 --sched_factor=10 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     682.07
+Loss:           tr=4.783e-01 // vl=7.351e-01 // ts=7.969e-01
+control_dim: 1
+control_rnn_size: 16
+control_rnn_depth: 1
+state_dim: 2
+output_dim: 2
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 005 - new Encoder (initial parameters).  
+
+ 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~·  
+
+>> python experiments/load_data.py  --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=1e-4 --es_patience=15 --sched_patience=5 --sched_factor=10 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard  outputs/vdp_standard_data.pth  
+
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250207_164506_69f78160db604590b15c2b8ffbf71822
+Timestamp:      20250207_170522
+Git hash:       23d7a950cfa3472d9398f375736c163baa237b74 (dirty)
+Command line:   experiments/load_data.py --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=1e-4 --es_patience=15 --sched_patience=5 --sched_factor=10 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     1213.49
+Loss:           tr=2.321e-02 // vl=3.949e-02 // ts=7.474e-02
+control_dim: 1
+control_rnn_size: 16
+control_rnn_depth: 1
+state_dim: 2
+output_dim: 2
+
+
+
+x shape: torch.Size([6002, 2])
+
+h0 shape: torch.Size([6002, 16])
+
+h0_stack shape: torch.Size([1, 6002, 18])
+
+c0 shape: torch.Size([1, 6002, 18])
+
+decoder_input shape: torch.Size([6002, 300, 18])
+
+
+
+1.041054208170212
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 006 - new Encoder.
+
+ 		  
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+  experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250210_114619_49d1d482668346be8985e38ca22608be
+Timestamp:      20250210_115727
+Git hash:       0894709fe2f3c834bb4c01859b8956842806a4f3 (clean)
+Command line:   experiments/load_data.py --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=1e-4 --es_patience=15 --sched_patience=5 --sched_factor=10 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     665.64
+Loss:           tr=4.036e-02 // vl=1.731e-01 // ts=3.100e-01
+control_dim: 1
+control_rnn_size: 16
+control_rnn_depth: 1
+state_dim: 2
+output_dim: 2
+
+
+
+x shape: torch.Size([6002, 2])
+
+h0 shape: torch.Size([6002, 16])
+
+h0_stack shape: torch.Size([1, 6002, 18])
+
+c0 shape: torch.Size([1, 6002, 18])
+
+decoder_input shape: torch.Size([6002, 300, 18])
+
+
+
+0.016757442452213472
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~·
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 007 - new Encoder (different parameters). 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+  experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250210_123057_60c8124b5f4a4608a32820d2282cfdd7
+Timestamp:      20250210_124802
+Git hash:       0894709fe2f3c834bb4c01859b8956842806a4f3 (dirty)
+Command line:   experiments/load_data.py --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=2e-4 --es_patience=15 --sched_patience=5 --sched_factor=7 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     1023.45
+Loss:           tr=4.514e-02 // vl=3.655e-01 // ts=8.005e-02
+0.025126457925460945
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 008 - new LSTM (wrong). 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py --lr=0.0003 --n_epochs=500 --batch_size=512 --es_delta=1e-3 --es_patience=30 --sched_patience=3 --sched_factor=5 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250213_163428_43abb8df48f245d1920669b29cf67ccc
+Timestamp:      20250213_165753
+Git hash:       8d386da06e504e28ce3178f3aacbcc5932ac2473 (dirty)
+Command line:   experiments/load_data.py --lr=0.0003 --n_epochs=500 --batch_size=512 --es_delta=1e-3 --es_patience=30 --sched_patience=3 --sched_factor=5 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     1401.93
+Loss:           tr=3.990e+00 // vl=3.841e+00 // ts=4.053e+00
+1.8998899698669658
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 009 - new Parameter & old LSTM. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+--sched_factor=7  
+--es_delta=2e-4
+
+
+  experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250210_164509_61bbebf5064d4ad385cf9af6f563487b
+Timestamp:      20250210_175842
+Git hash:       600a706fda7851c2805e453f43608008d62e21a6 (dirty)
+Command line:   experiments/load_data.py --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=4e-4 --es_patience=15 --sched_patience=5 --sched_factor=7 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     4409.84
+Loss:           tr=2.059e-02 // vl=3.325e-02 // ts=7.121e-02
+0.01823528524262558
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 010 - new Parameter & old LSTM. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py --lr=0.0002 --n_epochs=200 --batch_size=1024 --es_delta=1e-4 --es_patience=20 --sched_patience=10 --sched_factor=5 --control_rnn_size=32 --encoder_depth=4 --encoder_size=1 --decoder_depth=4 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+
+
+  experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250211_160014_2452a252810d448f819a7e57a451de38
+Timestamp:      20250211_174515
+Git hash:       600a706fda7851c2805e453f43608008d62e21a6 (dirty)
+Command line:   experiments/load_data.py --lr=0.0002 --n_epochs=200 --batch_size=1024 --es_delta=1e-4 --es_patience=20 --sched_patience=10 --sched_factor=5 --control_rnn_size=32 --encoder_depth=4 --encoder_size=1 --decoder_depth=4 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     6298.78
+Loss:           tr=2.556e-02 // vl=3.351e-02 // ts=6.327e-02
+0.0881597448753577
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 011 - new Parameter & old LSTM. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py --lr=0.0003 --n_epochs=200 --batch_size=1024 --es_delta=5e-5 --es_patience=20 --sched_patience=10 --sched_factor=10 --control_rnn_size=24 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+
+  experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250211_183104_68c8674811784de9a15ce9f2c0f4a7ae
+Timestamp:      20250211_201355
+Git hash:       600a706fda7851c2805e453f43608008d62e21a6 (dirty)
+Command line:   experiments/load_data.py --lr=0.0003 --n_epochs=200 --batch_size=1024 --es_delta=5e-5 --es_patience=20 --sched_patience=10 --sched_factor=10 --control_rnn_size=24 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     6168.20
+Loss:           tr=7.206e-02 // vl=2.327e-01 // ts=7.613e-02
+0.0689650145506752
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 012 - new Parameter & old LSTM.
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py --lr=0.0003 --n_epochs=250 --batch_size=256 --es_delta=1e-4 --es_patience=20 --sched_patience=5 --sched_factor=5 --control_rnn_size=16 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250211_202123_51b5f709474d48faac513ae28a6f9b2c
+Timestamp:      20250211_213200
+Git hash:       600a706fda7851c2805e453f43608008d62e21a6 (dirty)
+Command line:   experiments/load_data.py --lr=0.0003 --n_epochs=250 --batch_size=256 --es_delta=1e-4 --es_patience=20 --sched_patience=5 --sched_factor=5 --control_rnn_size=16 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     4234.78
+Loss:           tr=2.590e-02 // vl=3.957e-02 // ts=9.337e-02
+0.025248262733533595
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 013 - new Parameter & old LSTM (good good). 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py --lr=0.00025 --n_epochs=250 --batch_size=512 --es_delta=1e-4 --es_patience=20 --sched_patience=7 --sched_factor=4 --control_rnn_size=24 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250211_221544_b5f818320adc423c87a8b501b124d702
+Timestamp:      20250211_235937
+Git hash:       52e65a29cc5b993f05c3112d9489b14fcd755b19 (dirty)
+Command line:   experiments/load_data.py --lr=0.00025 --n_epochs=250 --batch_size=512 --es_delta=1e-4 --es_patience=20 --sched_patience=7 --sched_factor=4 --control_rnn_size=24 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     6229.21
+Loss:           tr=1.777e-02 // vl=9.745e-02 // ts=3.222e-02
+0.010090025414175762
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+### **Analysis of Experiment 013 - New Parameter & Old LSTM**
+---
+#### **1. Observations on the Loss Curves**
+- **Train loss (blue line)**: Continues decreasing, indicating the model is learning properly.
+- **Validation loss (orange line)**: Decreases but stabilizes at a higher level than train loss. There is a noticeable gap, which may indicate **overfitting**.
+- **Test loss (green line)**: Also stabilizes at a higher value, suggesting that the model is not generalizing perfectly to unseen data.
+
+##### **Main Takeaways:**
+- The model **still shows overfitting**, even if it is reduced compared to previous runs.
+- The test loss **is not significantly decreasing anymore**, which means the model might have reached its learning limit with the current configuration.
+
+---
+#### **2. Observations on the Predictions**
+- The **predicted trajectory (orange)** aligns well with the **true trajectory (blue)**.
+- The model captures the overall dynamics well, but towards the end of the time sequence, some deviations appear.
+- This suggests that the model **might struggle to generalize over longer horizons**.
+
+##### **Main Takeaways:**
+- The **short-term predictions are accurate**, but long-term accuracy could be improved.
+- A possible reason could be **insufficient recurrent state size** or **not enough regularization**.
+
+---
+### **Updated Parameters for Experiment 014**
+Given the previous results, let's update the parameters to **reduce overfitting and improve long-term prediction accuracy**:
+
+1. **Lower Learning Rate**  
+   - The previous learning rate of **0.00025** might still be too high, leading to overfitting.  
+   - **New learning rate:** `0.0002`
+
+2. **Increase Regularization (Early Stopping Sensitivity)**
+   - The **es_delta (minimum improvement in validation loss)** should be reduced to **encourage earlier stopping when overfitting begins**.
+   - **New es_delta:** `5e-5` (instead of `1e-4`)
+
+3. **Increase Control RNN Size**
+   - Increasing the **RNN hidden state size** might improve the ability to capture long-term dependencies.
+   - **New control_rnn_size:** `32` (instead of `24`)
+
+4. **Slightly Decrease Batch Size**
+   - A smaller batch size **adds noise to training**, which can improve generalization.
+   - **New batch size:** `384` (instead of `512`)
+
+5. **Slightly Increase Encoder & Decoder Depth**
+   - Increasing depth might **help capture more complex relationships** in the data.
+   - **New encoder_depth:** `3` (instead of `2`)  
+   - **New decoder_depth:** `3` (instead of `2`)  
+
+
+---
+### **Expected Improvements**
+- **Better generalization** (less overfitting).  
+- **More stable long-term predictions**.  
+- **Possibly reduced test loss** while maintaining good train loss.  
+
+Try running this setup and let's analyze the next results! 
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 014 - new Parameter & old LSTM. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py --lr=0.0002 --n_epochs=250 --batch_size=384 --es_delta=5e-5 --es_patience=20 --sched_patience=7 --sched_factor=4 --control_rnn_size=32 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250212_003629_109acfcf89344f0e90754fcbe6f99f6e
+Timestamp:      20250212_023408
+Git hash:       a2474a925b1ddf37c052dd7c372407d8c990d730 (clean)
+Command line:   experiments/load_data.py --lr=0.0002 --n_epochs=250 --batch_size=384 --es_delta=5e-5 --es_patience=20 --sched_patience=7 --sched_factor=4 --control_rnn_size=32 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     7054.94
+Loss:           tr=1.514e-02 // vl=2.707e-02 // ts=3.760e-02
+0.023902047057486442
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 015 - new Parameter & old LSTM. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py --lr=0.00015 --n_epochs=300 --batch_size=256 --es_delta=5e-5 --es_patience=25 --sched_patience=5 --sched_factor=3 --control_rnn_size=40 --encoder_depth=4 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250212_135121_893a8410d940455cb92d70dfa6e6a110
+Timestamp:      20250212_153041
+Git hash:       a2474a925b1ddf37c052dd7c372407d8c990d730 (dirty)
+Command line:   experiments/load_data.py --lr=0.00015 --n_epochs=300 --batch_size=256 --es_delta=5e-5 --es_patience=25 --sched_patience=5 --sched_factor=3 --control_rnn_size=40 --encoder_depth=4 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     5955.97
+Loss:           tr=2.276e-02 // vl=8.348e-02 // ts=4.943e-02
+0.028104645528855922
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 016 - new Parameter & old LSTM. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py --lr=0.00025 --n_epochs=250 --batch_size=512 --es_delta=1e-4 --es_patience=20 --sched_patience=7 --sched_factor=4 --control_rnn_size=24 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250212_154951_c9a55fa0caba42ccb199d8bafc12cf16
+Timestamp:      20250212_174028
+Git hash:       a2474a925b1ddf37c052dd7c372407d8c990d730 (dirty)
+Command line:   experiments/load_data.py --lr=0.00025 --n_epochs=250 --batch_size=512 --es_delta=1e-4 --es_patience=20 --sched_patience=7 --sched_factor=4 --control_rnn_size=24 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     6634.50
+Loss:           tr=1.413e-02 // vl=9.919e-02 // ts=9.510e-02
+0.03690966005148964
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 017 - test Hypothesis. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py --lr=0.0003 --n_epochs=250 --batch_size=256 --es_delta=1e-4 --es_patience=20 --sched_patience=5 --sched_factor=3 --control_rnn_size=16 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth 
+
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250212_174413_0f0a07887aca43c585a43711fd594b58
+Timestamp:      20250212_184820
+Git hash:       a2474a925b1ddf37c052dd7c372407d8c990d730 (dirty)
+Command line:   experiments/load_data.py --lr=0.0003 --n_epochs=250 --batch_size=256 --es_delta=1e-4 --es_patience=20 --sched_patience=5 --sched_factor=3 --control_rnn_size=16 --encoder_depth=2 --encoder_size=1 --decoder_depth=2 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     3843.88
+Loss:           tr=3.446e-02 // vl=5.433e-02 // ts=8.454e-02
+0.25954497892852874
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 018 - old Encoder (default code). 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+>> python experiments/load_data.py  --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=1e-4 --es_patience=15 --sched_patience=5 --sched_factor=10 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard  outputs/vdp_standard_data.pth 
+
+experiment: Experiment = torch.load(args.path,
+--- Trained model   vdp_standard_20250212_220552_1a68446f3d514f6f97e73daa120b4559
+Timestamp:      20250212_225239
+Git hash:       8d386da06e504e28ce3178f3aacbcc5932ac2473 (dirty)
+Command line:   experiments/load_data.py --lr=0.0005 --n_epochs=200 --batch_size=512 --es_delta=1e-4 --es_patience=15 --sched_patience=5 --sched_factor=10 --control_rnn_size=16 --encoder_depth=3 --encoder_size=1 --decoder_depth=3 --decoder_size=1 --experiment_id=vdp_standard outputs/vdp_standard_data.pth
+Train time:     2805.25
+Loss:           tr=3.051e-02 // vl=1.087e-01 // ts=7.643e-02
+0.013904910751165728
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 019 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 020 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 021 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 022 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 023 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 024 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 025 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 026 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 027 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 028 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 029 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+Experiment 030 - _. 
+
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· ~· 
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+
+
+
+
+
+

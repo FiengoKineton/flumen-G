@@ -45,9 +45,7 @@ class CausalFlowModel(nn.Module):
         self.output_dim = output_dim
 
         self.control_rnn_size = control_rnn_size
-        self.control_rnn_depth = control_rnn_depth   
-
-        self.mode = True                
+        self.control_rnn_depth = control_rnn_depth                   
 
         
         """
@@ -66,17 +64,12 @@ class CausalFlowModel(nn.Module):
 
     ### LSTM with depth=1, as suggested ----- LSTM() eller torch.nn.LSTM()
         self.u_rnn = LSTM(
-            input_size=control_dim + 1,                     # output | 2
+            input_size=control_dim + 1 + state_dim*0,       # output | 2
             hidden_size=control_rnn_size + state_dim,       # output | 14
             batch_first=True,
             num_layers=self.control_rnn_depth,              # output | 1
             dropout=0
-        ) if self.mode else torch.nn.LSTM(
-            input_size=control_dim + 1,                     # output | 2
-            hidden_size=control_rnn_size + state_dim,       # output | 14
-            batch_first=True,
-            num_layers=self.control_rnn_depth,              # output | 1
-            dropout=0      
+            #,state_dim=state_dim                            # for LSTM_my.py                                             
         )
 
     ### ENCODER
@@ -99,14 +92,24 @@ class CausalFlowModel(nn.Module):
 
 
     def forward(self, x, rnn_input, deltas, tau=None):
-        #print("\nx.shape", x.shape)                # output | torch.Size([128, 2])  
+        #print("\nx.shape", x.shape)             # output | torch.Size([128, 2])  
         h0 = self.x_dnn(x)  
-        h0_stack = torch.cat((x, h0), dim=1)        # [x, h0]
+        h0_stack = torch.cat((x, h0), dim=1)    # [x, h0]
         h0_stack = h0_stack.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
+
         c0 = torch.zeros_like(h0_stack)  
 
-        tau = torch.full((x.shape[0], x.shape[1]), 0.01, device=x.device) if self.mode else None
-        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0), tau)
+        if tau is None: 
+            tau = torch.full((x.shape[0], x.shape[1]), 0.01, device=x.device)
+
+
+
+    #-- for new Encoder!
+        #rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0))       
+
+    #-- for new LSTM!
+        ###rnn_input_packed = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=torch.full((x.shape[0],), x.shape[1], dtype=torch.long, device=x.device), batch_first=True, enforce_sorted=False)
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0), x, tau)
 
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
         #print("\nh.shape:", h.shape)                        # output | torch.Size([128, 50, 14])
@@ -142,6 +145,23 @@ class CausalFlowModel(nn.Module):
             print("\nSequence lengths:", lengths)
         else:
             print("\nrnn_input.shape:", rnn_input.shape)
+
+
+
+        for model WITHOUT new LSTM
+        -----------------------------------------------------------------------------------------------------------------
+        if self.check:
+            self.check = False
+
+            print("\nx shape:", x.shape)                                    # output | torch.Size([512, 2])
+            print("\nh0 shape:", h0.shape)                                  # output | torch.Size([512, 16])
+            print("\nh0_stack shape:", h0_stack.shape)                      # output | torch.Size([1, 512, 18])
+            print("\nc0 shape:", c0.shape)                                  # output | torch.Size([1, 512, 18])
+
+            print("\nrnn_input_unpacked shape:", rnn_input_unpacked.shape)  # output | torch.Size([512, 75, 2])
+            print("\nrnn_input shape:", rnn_input.shape)                    # output | bho!  
+            print("\ndecoder_input shape:", decoder_input.shape)            # output | torch.Size([512, 75, 18])
+            print("\n\n")
         #"""
 
         return output
