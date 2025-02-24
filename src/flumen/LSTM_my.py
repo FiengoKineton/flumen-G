@@ -7,17 +7,33 @@ from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 
 class LSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers=1, output_size=None,
-                 bias=True, batch_first=True, dropout=0.0, bidirectional=False):
+                 bias=True, batch_first=True, dropout=0.0, bidirectional=False, state_dim=None):
         super(LSTM, self).__init__()
 
+        self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.bidirectional = bidirectional
+        self.output_size = output_size
+        self.bias = bias
         self.batch_first = batch_first
         self.dropout = dropout
+        self.bidirectional = bidirectional
+        self.state_dim = state_dim
+
+        """
+        print("\n\nLSTM init variables:")           
+        print("\tinput_size:", input_size)          # output | 2
+        print("\thidden_size:", hidden_size)        # output | 10
+        print("\tnum_layers:", num_layers)          # output | 1
+        print("\toutput_size:", output_size)        # output | None
+        print("\tbias:", bias)                      # output | True
+        print("\tbatch_first:", batch_first)        # output | True
+        print("\tdropout:", dropout)                # output | 0
+        print("\tbidirectional:", bidirectional)    # output | False
+        print("\tstate_dim:", state_dim)            # output | 2
+        #"""
 
         self.mhu = 1.5
-        self.state_dim = 2
 
         self.lstm_cells = nn.ModuleList([
             LSTMCell(input_size if layer==0 else hidden_size, hidden_size, bias)
@@ -39,34 +55,39 @@ class LSTM(nn.Module):
 
     def forward(self, rnn_input, hidden_state, tau=None):
 
-        is_packed = isinstance(rnn_input, torch.nn.utils.rnn.PackedSequence)
-
-        if is_packed:
-            rnn_input_unpacked, lengths = torch.nn.utils.rnn.pad_packed_sequence(x, batch_first=self.batch_first)
-            batch_size, seq_len, _ = rnn_input_unpacked.shape
-            device = rnn_input_unpacked.device
-        else:
-            device = rnn_input_unpacked.device
-            batch_size, seq_len, _ = rnn_input.shape
+        rnn_input_unpacked, lengths = torch.nn.utils.rnn.pad_packed_sequence(rnn_input, batch_first=self.batch_first)
+        _, seq_len, _ = rnn_input_unpacked.shape
+        device = rnn_input_unpacked.device
 
 
-        h0, c0 = hidden_state if hidden_state is not None else (
-            torch.zeros(self.num_layers, batch_size, self.hidden_size, device=device),
-            torch.zeros(self.num_layers, batch_size, self.hidden_size, device=device)
-        )
-
+        h0, c0 = hidden_state
         self.A = torch.tensor([[self.mhu, -self.mhu], [1/self.mhu, 0]], device=device)
 
         h_prev = h0.clone()
         c_prev = c0.clone()
         outputs = []
 
+        """
+        print("\n\nLSTM forward variables:")
+        print("\trnn_input_unpacked.shape:", rnn_input_unpacked.shape)  # output | torch.Size([128, 75, 2])
+        print("\tlengths.shape:", lengths.shape[0])                     # output | 128
+        print("\tseq_len:", seq_len)                                    # output | 75
+        print("\n") 
+        print("\th0.shape:", h0.shape)                                  # output | torch.Size([1, 128, 10])
+        print("\tc0.shape:", c0.shape)                                  # output | torch.Size([1, 128, 10])
+        print("\tdevice:", device)                                      # output | cpu
+        print("\tA.shape:", self.A.shape)                               # output | torch.Size([2, 2])
+        print("\th_prev.shape:", h_prev.shape)                          # output | torch.Size([1, 128, 10])
+        print("\tc_prev.shape:", c_prev.shape)                          # output | torch.Size([1, 128, 10])
+        #"""
+
+
         for t in range(seq_len):
-            rnn_input_t = rnn_input_unpacked[:, t, :] if is_packed else rnn_input[:, t, :]
+            rnn_input_t = rnn_input_unpacked[:, t, :]
 
             if t==0: 
                 tau_prev = tau[t, :] if tau is not None else None
-                h_prev = h_prev[:, t] 
+                h_prev = h_prev[:, t, :] 
             else: 
                 tau_prev = tau[t-1, :] if tau is not None else None
                 x_prev = h_prev[:, :self.state_dim]
@@ -90,9 +111,7 @@ class LSTM(nn.Module):
             outputs.append(rnn_input_t)
 
         outputs = torch.stack(outputs, dim=1 if self.batch_first else 0)
-
-        if is_packed:
-            outputs = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
+        outputs = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
 
         if self.fc is not None:
             outputs = self.fc(outputs[:, -1, :])  # Use last time step
@@ -125,6 +144,29 @@ class LSTMCell(nn.Module):
         self.b_g = nn.Parameter(torch.zeros(hidden_size)) if bias else None
         self.b_o = nn.Parameter(torch.zeros(hidden_size)) if bias else None
 
+        """
+        print("\n\nLSTMCell init variables:")
+        print("\tinput_size:", input_size)              # output | 2
+        print("\thidden_size:", hidden_size)            # output | 10
+        print("\tbias:", bias)                          # output | True
+        print("\n")
+        print("\tW_i.shape:", self.W_i.weight.shape)    # output | torch.Size([10, 2])
+        print("\tW_f.shape:", self.W_f.weight.shape)    # output | torch.Size([10, 2])
+        print("\tW_g.shape:", self.W_g.weight.shape)    # output | torch.Size([10, 2])
+        print("\tW_o.shape:", self.W_o.weight.shape)    # output | torch.Size([10, 2])
+        print("\n")
+        print("\tU_i.shape:", self.U_i.weight.shape)    # output | torch.Size([10, 10])
+        print("\tU_f.shape:", self.U_f.weight.shape)    # output | torch.Size([10, 10])
+        print("\tU_g.shape:", self.U_g.weight.shape)    # output | torch.Size([10, 10])
+        print("\tU_o.shape:", self.U_o.weight.shape)    # output | torch.Size([10, 10])
+        print("\n")
+        print("\tb_i.shape:", self.b_i.shape)           # output | torch.Size([10])
+        print("\tb_f.shape:", self.b_f.shape)           # output | torch.Size([10])
+        print("\tb_g.shape:", self.b_g.shape)           # output | torch.Size([10])
+        print("\tb_o.shape:", self.b_o.shape)           # output | torch.Size([10])
+        #"""
+
+
     def forward(self, u, h, c):
         """
         u = u_t         h = h_{t-1}     c = c_{t-1}
@@ -142,5 +184,19 @@ class LSTMCell(nn.Module):
         c_next = f * c + i * g
         h_next = o * torch.tanh(c_next)
 
+        #"""
+        print("\n\nLSTMCell forward variables:")
+        print(f"u.shape: {u.shape}")                # output | torch.Size([128, 2])
+        print(f"h.shape: {h.shape}")                # output | torch.Size([10])
+        print(f"c.shape: {c.shape}")                # output | torch.Size([128, 10])
+        print("\n")
+        print(f"i.shape: {i.shape}")                # output | torch.Size([128, 10])
+        print(f"f.shape: {f.shape}")                # output | torch.Size([128, 10])
+        print(f"g.shape: {g.shape}")                # output | torch.Size([128, 10])
+        print(f"o.shape: {o.shape}")                # output | torch.Size([128, 10])
+        print("\n")
+        print(f"c_next.shape: {c_next.shape}")      # output | torch.Size([128, 10])
+        print(f"h_next.shape: {h_next.shape}")      # output | torch.Size([128, 10])
+        #"""
         return h_next, c_next
 

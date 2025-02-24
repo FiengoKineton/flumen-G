@@ -15,7 +15,7 @@ import time
 import wandb
 
 hyperparams = {
-    'control_rnn_size': 12,
+    'control_rnn_size': 8,         ### default 12
     'control_rnn_depth': 1,
     'encoder_size': 1,
     'encoder_depth': 2,

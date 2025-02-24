@@ -67,7 +67,7 @@ def main():
     fig.canvas.mpl_connect('close_event', on_close_window)
     xx = np.linspace(0., 1., model.output_dim)
 
-    time_horizon = metadata["data_args"]["time_horizon"]
+    time_horizon = 2 * metadata["data_args"]["time_horizon"]
 
     while True:
         time_integrate = time()
