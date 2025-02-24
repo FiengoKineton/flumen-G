@@ -171,7 +171,7 @@ def main():
         wandb.log({
             'time': time.time() - start,
             'epoch': epoch + 1,
-            'lr': sched.get_last_lr()[0],
+            'lr': optimiser.param_groups[0]['lr'],
             'train_loss': train_loss,
             'val_loss': val_loss,
             'test_loss': test_loss,
