@@ -60,7 +60,7 @@ class CausalFlowModel(nn.Module):
         print("\tencoder_depth: ", encoder_depth)           # output | 2
         print("\tdecoder_size: ", decoder_size)             # output | 1
         print("\tdecoder_depth: ", decoder_depth)           # output | 2
-        print("\nmode: ", self.mode)                       # output | True/False
+        print("\nmode: ", self.mode)                        # output | True/False
         #"""
 
 
@@ -107,7 +107,7 @@ class CausalFlowModel(nn.Module):
         c0 = torch.zeros_like(h0_stack) if self.mode else torch.zeros_like(h0)
 
         ###tau = torch.full((x.shape[0], x.shape[1]), 0.01, device=x.device) if self.mode else None
-        tau = 0.01 if self.mode else None
+        tau = 0.05 if self.mode else None
 
         """
         print("\n\nCasualFlowModel variables's shape:\n---------------------------\n")
@@ -122,8 +122,7 @@ class CausalFlowModel(nn.Module):
         rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0), tau) if self.mode else self.u_rnn(rnn_input, (h0, c0))
 
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
-
-        h_shift = torch.roll(h, shifts=1, dims=1)        
+        h_shift = torch.roll(h, shifts=1, dims=1)   
         h_temp = h0_stack[-1] if self.mode else h0[-1]
         h_shift[:, 0, :] = h_temp
 

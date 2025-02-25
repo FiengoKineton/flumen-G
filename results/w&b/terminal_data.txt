@@ -130,7 +130,7 @@ Timings: 0.03832221031188965, 0.8199701309204102
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-007___new-LSTM(1)
+007___new-LSTM(1) / LSTM_06___first_DM.py
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-9qyo6x4r:v30
@@ -164,7 +164,7 @@ Timings: 0.02952122688293457, 1.0127673149108887
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-007___new-LSTM(2)
+007___new-LSTM(2) / LSTM_06___first_DM.py
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-9qyo6x4r:v30
@@ -198,7 +198,7 @@ Timings: 0.026093006134033203, 1.1834354400634766
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-007___new-LSTM(3)
+007___new-LSTM(3) / LSTM_06___first_DM.py
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-9qyo6x4r:v30
@@ -232,7 +232,7 @@ Timings: 0.02253127098083496, 0.8703534603118896
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-007___new-LSTM(4)
+007___new-LSTM(4) / LSTM_06___first_DM.py
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-9qyo6x4r:v30
@@ -266,7 +266,7 @@ Timings: 0.02807164192199707, 0.8634185791015625
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-007___new-LSTM(5)
+007___new-LSTM(5) / LSTM_06___first_DM.py
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-9qyo6x4r:v30
@@ -300,7 +300,7 @@ Timings: 0.025409460067749023, 0.8903036117553711
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-007___new-LSTM(6)
+007___new-LSTM(6) / LSTM_06___first_DM.py
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-9qyo6x4r:v30
@@ -334,7 +334,7 @@ Timings: 0.028296947479248047, 1.0342297554016113
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-007___new-LSTM(7)
+007___new-LSTM(7) / LSTM_06___first_DM.py
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-9qyo6x4r:v33
@@ -368,7 +368,7 @@ Timings: 0.022000789642333984, 0.9927160739898682
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-007___new-LSTM(8) --- good!
+007___new-LSTM(8) --- good! / LSTM_06___first_DM.py
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-9qyo6x4r:v33
@@ -402,7 +402,7 @@ Timings: 0.020822525024414062, 1.0024137496948242
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-007___new-LSTM(9)
+007___new-LSTM(9) / LSTM_06___first_DM.py
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-9qyo6x4r:v33
@@ -436,38 +436,152 @@ Timings: 0.07027196884155273, 2.9603986740112305
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-00_
+008___new-LSTM --- bad! / LSTM_07___pyscript.py
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-8susxagj:v5
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 2636.0262737, '_step': 16, '_timestamp': 1740500096.9792206, '_wandb': {'runtime': 2747}, 'best_epoch': 8, 'best_test': 3.442047153200422, 'best_train': 2.4628484375262385, 'best_val': 3.3493364046490384, 'epoch': 17, 'lr': 0.001, 'test_loss': 3.4538647977132646, 'time': 2615.143908262253, 'train_loss': 2.227383645123275, 'val_loss': 3.5494111530364507}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False},       
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,     
+               'noise_seed': None,        
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},     
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,  
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},     
+                   'sequence_generator': {'args': {'period': 5},
+                                          
+'name': 'GaussianSqWave'}}}
+Timings: 0.018863201141357422, 0.5061979293823242
+2.943343860903476
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-00_
+009___new-LSTM(1) / LSTM_08.py
 
 
-PC ...
-
-------------------------------------------------------------------------------------------------------------------------------------------------
-
-00_
-
-
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-inkc5cfk:v29
+# forgot to same the terminal output
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-00_
+009___new-LSTM(2) / LSTM_08.py
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-inkc5cfk:v29
+C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\src\flumen\LSTM_my.py:60: SyntaxWarning: invalid escape sequence '\i'
+  """
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 6920.9206076, '_step': 43, '_timestamp': 1740507916.2359128, '_wandb': {'runtime': 6920}, 'best_epoch': 43, 'best_test': 0.05673211369486082, 'best_train': 0.03496907723367845, 'best_val': 0.2796749094175914, 'epoch': 44, 'lr': 0.001, 'test_loss': 0.058428846299648285, 'time': 6897.475360393524, 'train_loss': 0.029711594164529176, 'val_loss': 0.28459808395968544}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',   
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.03357386589050293, 1.0300509929656982
+0.018999769180674173
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-00_
+009___new-LSTM(3) / LSTM_08.py
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-inkc5cfk:v32
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 7290.709749, '_step': 45, '_timestamp': 1740508286.025054, '_wandb': {'runtime': 7290}, 'best_epoch': 45, 'best_test': 0.057728635649832466, 'best_train': 0.02921068677727981, 'best_val': 0.27701510891081793, 'epoch': 46, 'lr': 0.001, 'test_loss': 0.05660884188754218, 'time': 7267.264501571655, 'train_loss': 0.05261738786582278, 'val_loss': 0.2823867861713682}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',   
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.020520448684692383, 0.5966277122497559
+0.01635100720687167
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+009___new-LSTM(3) / LSTM_08.py
+
+
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-inkc5cfk:v34
+C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\src\flumen\LSTM_my.py:60: SyntaxWarning: invalid escape sequence '\i'
+  """
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 8055.6265541, '_step': 50, '_timestamp': 1740509050.941317, '_wandb': {'runtime': 8055}, 'best_epoch': 50, 'best_test': 0.052941458270190256, 'best_train': 0.026101484303436583, 'best_val': 0.26213606121757677, 'epoch': 51, 'lr': 0.001, 'test_loss': 0.05675290956620186, 'time': 8032.18076467514, 'train_loss': 0.026066893007034665, 'val_loss': 0.26720066214837723}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.013382673263549805, 0.7032470703125
+0.011425635212889597
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 

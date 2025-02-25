@@ -110,10 +110,10 @@ class LSTM(nn.Module):
                 h = torch.stack(new_h)
                 c = torch.stack(new_c)
 
-                """
+                #"""
                 print("\t\tlayer:", layer)
                 print("\t\tht.shape:", ht.shape)                        # output | torch.Size([128, 10])
-                print("\t\tct.shape:", ct.shape)                        # output | torch.Size([])                print("\t\tht.shape:", ht.shape)                        # output | torch.Size([128, 10])
+                print("\t\tct.shape:", ct.shape)                        # output | torch.Size([])        
                 print("\t\th[layer].shape:", h[layer].shape)            # output | torch.Size([])
                 print("\t\tc[layer].shape:", c[layer].shape)            # output | torch.Size([])
                 print("\t\th.shape (after):", h.shape)                  # output | torch.Size([1, 128, 10])
@@ -124,6 +124,7 @@ class LSTM(nn.Module):
             outputs.append(ht)
 
         outputs = torch.stack(outputs, dim=1 if self.batch_first else 0)
+        ###print(outputs.shape)                                            # output | torch.Size([128, 75, 10])
         outputs = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
         ###outputs = self.fc(outputs[:, -1, :])  if self.fc is not None else outputs
 
