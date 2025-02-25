@@ -66,13 +66,14 @@ torch.autograd.set_detect_anomaly(True)     # --- ADDED for LSTM_my!
 
 
 def train_step(example, loss_fn, model, optimizer, device):
-    mode="default"
+    mode="tbptt"
     function_name = f"train_step_{mode}"
     train_step_function = globals().get(function_name)
 
     if train_step_function is None:
         raise ValueError(f"Unknown training mode: {mode}. Available modes: default, tbptt, nesterov, newton, adam")
 
+    ###print("\n\nGradient Propagation mode: ", function_name, "\n\n")   # --- ADDED!
     return train_step_function(example, loss_fn, model, optimizer, device)
 
 
