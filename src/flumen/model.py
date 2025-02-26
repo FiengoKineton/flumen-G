@@ -106,6 +106,7 @@ class CausalFlowModel(nn.Module):
         h0_stack = h0_stack.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
         c0 = torch.zeros_like(h0_stack) if self.mode else torch.zeros_like(h0)
 
+    #-- tau must be chosen considering the frequency of x0 and \phi | tau = 2*w_{BW} (no aliasing)
         ###tau = torch.full((x.shape[0], x.shape[1]), 0.01, device=x.device) if self.mode else None
         tau = 0.05 if self.mode else None
 

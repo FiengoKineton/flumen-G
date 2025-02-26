@@ -54,6 +54,7 @@ class LSTM(nn.Module):
 
         h, c = hidden_state
         self.A = self.A.to(device)
+        self.I = torch.eye(self.A.shape[0], dtype=self.A.dtype, device=device)
 
         outputs = torch.zeros(h.size(1), seq_len, self.hidden_size, device=device)
 
@@ -83,7 +84,13 @@ class LSTM(nn.Module):
             rnn_input_t = rnn_input_unpacked[:, t, :]           
 
             x_prev = h[:, :, :self.state_dim]
-            x_next = x_prev + tau * torch.matmul(x_prev, self.A) if tau is not None and t!=0 else x_prev
+
+        #-- F.E.    (forward euler)     --- s = (z-1) / tau
+            #x_next = x_prev + tau * torch.matmul(x_prev, self.A) if tau is not None and t!=0 else x_prev
+        #-- B.E.    (backward euler)    --- s = (z-1)/(tau*z)
+            #x_next = torch.matmul(x_prev, torch.inverse(self.I-tau*self.A)) if tau is not None and t!=0 else x_prev
+        #-- TU.     (tustin)            --- s = 2/tau * (z-1)/(z+1)
+            x_next = torch.matmul(x_prev, torch.matmul(self.I+tau/2*self.A, torch.inverse(self.I-tau/2*self.A))) if tau is not None and t!=0 else x_prev
             h[:, :, :self.state_dim] = x_next
 
             """

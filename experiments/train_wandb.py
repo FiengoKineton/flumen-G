@@ -115,7 +115,7 @@ def main():
     # Define the optimizer based on mode
     # Default is Adam --- adam (Adam), tbptt (Adam), nesterov (SGD), newton (LBFGS)
 
-    optimiser_mode = "nesterov"          
+    optimiser_mode = "adam"          
 
     if optimiser_mode == "adam":
         optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
