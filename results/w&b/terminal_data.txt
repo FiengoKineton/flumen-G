@@ -691,7 +691,41 @@ Timings: 0.0623779296875, 1.2984695434570312
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-011___new-GD_adam
+010___new-GD_nesterov(3)
+
+
+(base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-jzfymh4n:v27
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 18875.3433391, '_step': 59, '_timestamp': 1740607624.1233895, '_wandb': {'runtime': 19230}, 'best_epoch': 59, 'best_test': 0.1605906319760141, 'best_train': 0.10775734235843022, 'best_val': 0.3206177320745256, 'epoch': 60, 'lr': 0.001, 'test_loss': 0.08963417326883664, 'time': 18832.97823524475, 'train_loss': 0.07082183136747627, 'val_loss': 0.38437215108720085}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.15021491050720215, 4.31624436378479
+0.08070046092411808
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+011___new-GD_adam(1)
 
 
 (base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flum
@@ -724,6 +758,102 @@ wandb:   2 of 2 files downloaded.
                                           'name': 'GaussianSqWave'}}}
 Timings: 0.02794504165649414, 1.1743648052215576
 0.05995768312289936
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+011___new-GD_adam(2)
+
+
+(base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-5d4gglun:v35
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 15459.252407111, '_step': 87, '_timestamp': 1740607366.2069504, '_wandb': {'runtime': 15459}, 'best_epoch': 82, 'best_test': 0.06091362787854104, 'best_train': 0.027139563448530024, 'best_val': 0.13379445110285093, 'epoch': 88, 'lr': 0.001, 'test_loss': 0.06867336162499019, 'time': 15431.84812116623, 'train_loss': 0.042152037035930096, 'val_loss': 0.13636373296853097}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.1111445426940918, 2.600861072540283
+0.10569158619187427
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+011___new-GD_adam(3)
+
+
+(base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-5d4gglun:v35
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 15459.252407111, '_step': 87, '_timestamp': 1740607366.2069504, '_wandb': {'runtime': 15459}, 'best_epoch': 82, 'best_test': 0.06091362787854104, 'best_train': 0.027139563448530024, 'best_val': 0.13379445110285093, 'epoch': 88, 'lr': 0.001, 'test_loss': 0.06867336162499019, 'time': 15431.84812116623, 'train_loss': 0.042152037035930096, 'val_loss': 0.13636373296853097}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.09772443771362305, 2.6239466667175293
+0.014687980598002508
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -30,7 +30,7 @@ hyperparams = {
     'batch_size': 128,
     'lr': 0.001,
     'n_epochs': 1000,
-    'es_patience': 20,
+    'es_patience': 10,              ### default 20
     'es_delta': 1e-7,
     'sched_patience': 10,
     'sched_factor': 2,
