@@ -14,6 +14,12 @@ import time
 
 import wandb
 
+# --------------------------------------------------------------------------- #
+import os
+import pandas as pd
+# --------------------------------------------------------------------------- #
+
+
 hyperparams = {
     'control_rnn_size': 8,          ### default 12
     'control_rnn_depth': 1,         ### maybe try 2? (num_layer == control_rnn_depth)
@@ -104,7 +110,46 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
 
-    optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+
+    # --------------------------------------------------------------------------- #
+    # Define the optimizer based on mode
+    # Default is Adam --- adam (Adam), tbptt (Adam), nesterov (SGD), newton (LBFGS)
+
+    optimiser_mode = "nesterov"          
+
+    if optimiser_mode == "adam":
+        optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+    elif optimiser_mode == "tbptt":
+        optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+    elif optimiser_mode == "nesterov":
+        optimiser = torch.optim.SGD(model.parameters(), lr=wandb.config['lr'], momentum=0.9, nesterov=True)
+    elif optimiser_mode == "newton":
+        optimiser = torch.optim.LBFGS(model.parameters())
+    else:
+        optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+        raise ValueError(f"Unknown optimizer mode: {optimiser_mode}. Choose from: adam, sgd_nesterov, lbfgs.")
+
+
+    def get_next_filename(optimiser_mode):
+        """Find the next available filename for storing optimizer data."""
+        folder = os.path.join(os.path.dirname(__file__), "GD_comparison")  # Ensure correct folder path
+        os.makedirs(folder, exist_ok=True)  # Ensure the folder exists
+
+        # Check existing files with this optimizer name
+        existing_files = [f for f in os.listdir(folder) if f.startswith(f"{optimiser_mode}_") and f.endswith(".csv")]
+        numbers = [int(f.split("_")[-1].split(".")[0]) for f in existing_files if f.split("_")[-1].split(".")[0].isdigit()]
+        
+        next_num = max(numbers, default=0) + 1  # Increment the highest found number
+        return os.path.join(folder, f"{optimiser_mode}_{next_num}.csv")
+
+    dataset_filename = get_next_filename(optimiser_mode)  # Get filename for saving results
+    print(f"Saving training data to: {dataset_filename}")
+
+    performance_data = []  # List to store results
+    # --------------------------------------------------------------------------- #
+
+
+    ###optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
     sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimiser,
         patience=wandb.config['sched_patience'],
@@ -144,7 +189,13 @@ def main():
     for epoch in range(wandb.config['n_epochs']):
         model.train()
         for example in train_dl:
-            train_step(example, loss, model, optimiser, device)
+            loss_value = train_step(example, loss, model, optimiser, device, optimiser_mode)
+    # --------------------------------------------------------------------------- #
+            performance_data.append({
+                "epoch": epoch + 1, 
+                "optimiser": optimiser_mode,
+                "train_loss": loss_value})
+    # --------------------------------------------------------------------------- #
 
         model.eval()
         train_loss = validate(train_dl, loss, model, device)
@@ -184,6 +235,12 @@ def main():
     train_time = time.time() - start
 
     print(f"Training took {train_time:.2f} seconds.")
+
+    # --------------------------------------------------------------------------- #
+    df = pd.DataFrame(performance_data)
+    df.to_csv(dataset_filename, index=False)
+    print(f"Saved dataset: {dataset_filename}")
+    # --------------------------------------------------------------------------- #
 
 
 if __name__ == '__main__':

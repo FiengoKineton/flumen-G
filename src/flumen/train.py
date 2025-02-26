@@ -1,6 +1,7 @@
 import torch
 import torch.optim as optim
 import torch.optim.lbfgs as lbfgs
+import wandb
 
 
 # ------------------------------------------------- #
@@ -65,48 +66,52 @@ torch.autograd.set_detect_anomaly(True)     # --- ADDED for LSTM_my!
 # ---------------------------------------------------------------- #
 
 
-def train_step(example, loss_fn, model, optimizer, device):
-    mode="tbptt"
-    function_name = f"train_step_{mode}"
+def train_step(example, loss_fn, model, optimiser, device, optimizer_mode):
+    function_name = f"train_step_{optimizer_mode}"
     train_step_function = globals().get(function_name)
 
     if train_step_function is None:
-        raise ValueError(f"Unknown training mode: {mode}. Available modes: default, tbptt, nesterov, newton, adam")
+        raise ValueError(f"Unknown training mode: {optimizer_mode}. Available modes: adam, tbptt, nesterov, newton")
 
-    ###print("\n\nGradient Propagation mode: ", function_name, "\n\n")   # --- ADDED!
-    return train_step_function(example, loss_fn, model, optimizer, device)
-
-
+    ###print("\n\nGradient Propagation mode: ", function_name, "\n\n")   
+    return train_step_function(example, loss_fn, model, optimiser, device)
 
 
-def train_step_default(example, loss_fn, model, optimizer, device):
+# --------------------------------------------------------------------------- #
+
+def train_step_adam(example, loss_fn, model, optimiser, device):
     """
+    DEFAULT!
+    --------------------------------------------------------------------------------------
     Standard training step using basic gradient descent optimization.
+    Uses Adam (Adaptive Moment Estimation), an adaptive gradient-based optimiser.
+
     This function:
     1. Prepares the inputs and moves them to the device.
     2. Performs a forward pass to compute predictions.
     3. Computes the loss using the given loss function.
     4. Performs backpropagation to compute gradients.
-    5. Updates the model parameters using the optimizer.
+    5. Updates the model parameters using the optimiser.
     
     Suitable for standard training scenarios without specialized optimization techniques.
     """
     x0, y, u, deltas = prep_inputs(*example, device)
 
-    optimizer.zero_grad()
+    optimiser.zero_grad()
 
     y_pred = model(x0, u, deltas)
     loss = model.state_dim * loss_fn(y, y_pred)
 
     loss.backward()
-    optimizer.step()
+    optimiser.step()
 
     return loss.item()
 
 
-def train_step_tbptt(example, loss_fn, model, optimizer, device, tbptt_steps=5):
+def train_step_tbptt(example, loss_fn, model, optimiser, device, tbptt_steps=5):
     """
-    Not GOOD!
+    DOES NOT WORK!
+    same optimiser as default case!
     --------------------------------------------------------------------------------------
     Truncated Backpropagation Through Time (TBPTT) training step.
     Used for training recurrent models by breaking the sequence into smaller chunks.
@@ -119,8 +124,9 @@ def train_step_tbptt(example, loss_fn, model, optimizer, device, tbptt_steps=5):
 
     Suitable for training RNNs efficiently by reducing memory usage compared to full BPTT.
     """
-    x0, y, u, deltas = prep_inputs(*example, device)
-    optimizer.zero_grad()
+    x0, y, u, deltas = prep_inputs(*example, device)    ###
+    optimiser.zero_grad()                               ###
+
     loss_total = 0
     u_unpacked, lengths = torch.nn.utils.rnn.pad_packed_sequence(u, batch_first=True)
     print("\nu_unpacked.shape:", u_unpacked.shape)      # output | torch.Size([128, 75, 2])
@@ -143,82 +149,74 @@ def train_step_tbptt(example, loss_fn, model, optimizer, device, tbptt_steps=5):
         y_pred = model(x0, u_packed, deltas_t)
 
         loss = model.state_dim * loss_fn(y[:, t:t+tbptt_steps, :], y_pred)
-        loss.backward(retain_graph=True)
+        loss.backward(retain_graph=True)                ###
 
-        optimizer.step()
-        optimizer.zero_grad()
+        optimiser.step()                                ### 
+        optimiser.zero_grad()                           ###
         loss_total += loss.item()
     
     loss_item = loss_total / (u_unpacked.shape[1] // tbptt_steps)
     return loss_item
 
 
-def train_step_nesterov(example, loss_fn, optimizer, model, device):
+def train_step_nesterov(example, loss_fn, model, optimiser, device):
     """
+    SEEMS TO WORK FIN£!
+    different optimiser then the default case!
+    --------------------------------------------------------------------------------------
     Training step using Nesterov Accelerated Gradient (NAG).
     
     This function:
-    1. Uses an SGD optimizer with Nesterov momentum.
+    1. Uses an SGD optimiser with Nesterov momentum.
     2. Performs forward propagation, computes the loss, and backpropagates.
-    3. Applies an update step using the optimizer.
+    3. Applies an update step using the optimiser.
 
     Nesterov momentum looks ahead to the future position before computing gradients,
     which can lead to faster convergence in convex optimization problems.
     """
-    x0, y, u, deltas = prep_inputs(*example, device)
-    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, nesterov=True)
-    optimizer.zero_grad()
-    y_pred = model(x0, u, deltas)
-    loss = model.state_dim * loss_fn(y, y_pred)
-    loss.backward()
-    optimizer.step()
-    return loss.item()
+    x0, y, u, deltas = prep_inputs(*example, device)    ###
+
+    ###optimiser_new = optim.SGD(model.parameters(), lr=wandb.config['lr'], momentum=0.9, nesterov=True)
+    optimiser.zero_grad()                               ###
+
+    y_pred = model(x0, u, deltas)                       ###
+    loss = model.state_dim * loss_fn(y, y_pred)         ###
+
+    loss.backward()                                     ###
+    optimiser.step()                                    ###     
+
+    return loss.item()                                  ###
 
 
-def train_step_newton(example, loss_fn, optimizer, model, device):
+def train_step_newton(example, loss_fn, model, optimiser, device):
     """
-    Training step using the Newton method via L-BFGS optimizer.
+    WORKS BUT TOO SLOW!
+    different optimiser then the default case!
+    --------------------------------------------------------------------------------------
+    Training step using the Newton method via L-BFGS optimiser.
     
     This function:
     1. Uses L-BFGS, a quasi-Newton optimization method that approximates the Hessian.
     2. Defines a closure function to recompute the forward and backward pass for optimization.
-    3. Calls the optimizer step, which iteratively refines the parameter update.
+    3. Calls the optimiser step, which iteratively refines the parameter update.
 
     L-BFGS is useful for small-scale problems and second-order optimization,
     but can be computationally expensive in high-dimensional settings.
     """
-    x0, y, u, deltas = prep_inputs(*example, device)
-    optimizer = lbfgs.LBFGS(model.parameters())
+    x0, y, u, deltas = prep_inputs(*example, device)    ###
+    ###optimiser_new = lbfgs.LBFGS(model.parameters())
+
     def closure():
-        optimizer.zero_grad()
-        y_pred = model(x0, u, deltas)
-        loss = model.state_dim * loss_fn(y, y_pred)
-        loss.backward()
+        optimiser.zero_grad()                           ###
+        y_pred = model(x0, u, deltas)                   ###
+        loss = model.state_dim * loss_fn(y, y_pred)     ###
+        loss.backward()                                 ###
         return loss
-    loss = optimizer.step(closure)
-    return loss.item()
+        
+    loss = optimiser.step(closure)
+    return loss.item()                                  ###
 
-
-def train_step_adam(example, loss_fn, optimizer, model, device):
-    """
-    Training step using the Adam optimizer.
-    
-    This function:
-    1. Uses Adam (Adaptive Moment Estimation), an adaptive gradient-based optimizer.
-    2. Computes gradients and updates parameters with an adaptive learning rate.
-    3. Balances first-order momentum (similar to momentum-based SGD) and second-order moment estimation.
-
-    Adam is widely used due to its adaptive learning rates, making it effective in many deep learning tasks.
-    """
-    x0, y, u, deltas = prep_inputs(*example, device)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    optimizer.zero_grad()
-    y_pred = model(x0, u, deltas)
-    loss = model.state_dim * loss_fn(y, y_pred)
-    loss.backward()
-    optimizer.step()
-    return loss.item()
-
+# --------------------------------------------------------------------------- #
 
 
 # ------------------------------------------------- #

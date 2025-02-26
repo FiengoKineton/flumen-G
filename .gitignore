@@ -171,3 +171,10 @@ outputs/
 wandb/
 data/
 artifacts/
+
+
+# Allow tracking of GD_comparison folder
+!GD_comparison/
+!GD_comparison/*.csv
+!GD_comparison/*.png
+!GD_comparison/*.py
