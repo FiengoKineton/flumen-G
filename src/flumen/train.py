@@ -106,6 +106,8 @@ def train_step_default(example, loss_fn, model, optimizer, device):
 
 def train_step_tbptt(example, loss_fn, model, optimizer, device, tbptt_steps=5):
     """
+    Not GOOD!
+    --------------------------------------------------------------------------------------
     Truncated Backpropagation Through Time (TBPTT) training step.
     Used for training recurrent models by breaking the sequence into smaller chunks.
     
@@ -119,22 +121,36 @@ def train_step_tbptt(example, loss_fn, model, optimizer, device, tbptt_steps=5):
     """
     x0, y, u, deltas = prep_inputs(*example, device)
     optimizer.zero_grad()
-    h, c = None, None
     loss_total = 0
     u_unpacked, lengths = torch.nn.utils.rnn.pad_packed_sequence(u, batch_first=True)
+    print("\nu_unpacked.shape:", u_unpacked.shape)      # output | torch.Size([128, 75, 2])
+    print("lengths.shape:", lengths.shape)              # output | torch.Size([128])
+    print("deltas.shape:", deltas.shape)                # output | torch.Size([128, 75, 1])
     
     for t in range(0, u_unpacked.shape[1], tbptt_steps):
         u_t = u_unpacked[:, t:t+tbptt_steps, :]
+        lengths_t = torch.clamp(lengths - t, min=0, max=tbptt_steps)
+        deltas_t = deltas[:, t:t+tbptt_steps, :]
         if u_t.shape[1] == 0:
+            Warning(f"Skipping step at t={t} due to zero-length sequence")
             continue
-        u_packed = torch.nn.utils.rnn.pack_padded_sequence(u_t, lengths, batch_first=True)
-        y_pred, (h, c) = model(x0, u_packed, deltas, h, c)
+
+        print("\t--------------------------------\n\tt:", t)
+        print("\tu_t.shape:", u_t.shape)                # output | torch.Size([128, 5, 2])
+        print("\tlengths_t.shape:", lengths_t.shape)    # output | torch.Size([128])
+        print("\tdeltas_t.shape:", deltas_t.shape)      # output | torch.Size([128, 5, 1])
+        u_packed = torch.nn.utils.rnn.pack_padded_sequence(u_t, lengths_t, batch_first=True)
+        y_pred = model(x0, u_packed, deltas_t)
+
         loss = model.state_dim * loss_fn(y[:, t:t+tbptt_steps, :], y_pred)
         loss.backward(retain_graph=True)
+
         optimizer.step()
         optimizer.zero_grad()
         loss_total += loss.item()
-    return loss_total / (u_unpacked.shape[1] // tbptt_steps)
+    
+    loss_item = loss_total / (u_unpacked.shape[1] // tbptt_steps)
+    return loss_item
 
 
 def train_step_nesterov(example, loss_fn, optimizer, model, device):
