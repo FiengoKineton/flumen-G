@@ -795,7 +795,7 @@ Timings: 0.1111445426940918, 2.600861072540283
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-011___new-GD_adam(3)
+011___new-GD_adam(3) --- good!
 
 
 (base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-5d4gglun:v35

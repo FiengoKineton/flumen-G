@@ -29,54 +29,59 @@ def get_latest_files():
     return {opt: path for opt, (path, _) in optimizer_files.items()}
 
 
-def plot_comparison(dataframes):
-    """Plot training loss and validation loss for different optimizers."""
+def plot_discretization_comparison(dataframes):
+    """Plot x1, x2 values and computation time for different discretization methods."""
+    
+    # Plot x1 evolution over epochs
     plt.figure(figsize=(10, 5))
-
-    # Training Loss
-    for opt, df in dataframes.items():
-        plt.plot(df["epoch"], df["train_loss"], label=f"{opt} - x1")
+    for disc, df in dataframes.items():
+        plt.plot(df["epoch"], df["x1"], label=f"{disc} - x1")
     plt.xlabel("Epoch")
-    plt.ylabel("Train Loss")
+    plt.ylabel("x1 Value")
     plt.legend()
-    plt.title("Train Loss Comparison")
+    plt.title("x1 Evolution Comparison")
     plt.show()
-
-    # Validation Loss
+ 
+    # Plot x2 evolution over epochs
     plt.figure(figsize=(10, 5))
-    for opt, df in dataframes.items():
-        plt.plot(df["epoch"], df["val_loss"], label=f"{opt} - x2")
+    for disc, df in dataframes.items():
+        plt.plot(df["epoch"], df["x2"], label=f"{disc} - x2")
     plt.xlabel("Epoch")
-    plt.ylabel("Validation Loss")
+    plt.ylabel("x2 Value")
     plt.legend()
-    plt.title("Validation Loss Comparison")
+    plt.title("x2 Evolution Comparison")
     plt.show()
-
-    # Training Time per Epoch
+ 
+    # Plot computation time per epoch
     plt.figure(figsize=(10, 5))
-    for opt, df in dataframes.items():
-        plt.plot(df["epoch"], df["epoch_time"], label=f"{opt} - Time per Epoch")
+    for disc, df in dataframes.items():
+        plt.plot(df["epoch"], df["epoch_time"], label=f"{disc} - Time per Epoch")
     plt.xlabel("Epoch")
     plt.ylabel("Time (seconds)")
     plt.legend()
-    plt.title("Time per Epoch Comparison")
+    plt.title("Computation Time per Epoch (Discretization Methods)")
     plt.show()
-
+ 
+ 
 def main():
-    latest_files = get_latest_files()
-
-    if not latest_files:
-        print("No datasets available for comparison.")
+    # Load the latest results for discretization comparisons
+    latest_discretization_files = get_latest_discretization_files()
+ 
+    if not latest_discretization_files:
+        print("No datasets available for discretization comparison.")
         return
-
+ 
     # Load data
-    dataframes = {opt: pd.read_csv(path) for opt, path in latest_files.items()}
-
-    print("\nComparing the following optimizer runs:")
-    for opt, path in latest_files.items():
-        print(f"- {opt}: {path}")
-
-    plot_comparison(dataframes)
-
+    discretization_data = {disc: pd.read_csv(path) for disc, path in latest_discretization_files.items()}
+ 
+    # Print information
+    print("\nComparing the following discretization runs:")
+    for disc, path in latest_discretization_files.items():
+        print(f"- {disc}: {path}")
+ 
+    # Plot discretization comparisons
+    plot_discretization_comparison(discretization_data)
+ 
+ 
 if __name__ == "__main__":
-    main()  # Ensure the script only runs if executed from the terminal
+    main()
