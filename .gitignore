@@ -178,3 +178,9 @@ artifacts/
 !GD_comparison/*.csv
 !GD_comparison/*.png
 !GD_comparison/*.py
+
+# Allow tracking of DT_comparison folder
+!DT_comparison/
+!DT_comparison/*.csv
+!DT_comparison/*.png
+!DT_comparison/*.py

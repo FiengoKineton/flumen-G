@@ -47,7 +47,7 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode = True
+        self.mode = True        # if True then h0_stack, else h0
 
         """
         print("\n\nCausalFlowModel init variables:\n---------------------------\n")
@@ -98,7 +98,7 @@ class CausalFlowModel(nn.Module):
 
 
 
-    def forward(self, x, rnn_input, deltas):
+    def forward(self, x, rnn_input, deltas, discretisation_mode):
         h0 = self.x_dnn(x) 
         h0_stack = torch.cat((x, h0), dim=1)       
 
@@ -120,7 +120,7 @@ class CausalFlowModel(nn.Module):
         ###print("\ttau.shape: ", tau.shape)                   # output | torch.Size([128, 2])
         #"""
 
-        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0), tau) if self.mode else self.u_rnn(rnn_input, (h0, c0))
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0), discretisation_mode, tau) if self.mode else self.u_rnn(rnn_input, (h0, c0), discretisation_mode)
 
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
         h_shift = torch.roll(h, shifts=1, dims=1)   

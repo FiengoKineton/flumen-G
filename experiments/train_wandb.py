@@ -112,10 +112,19 @@ def main():
 
 
     # --------------------------------------------------------------------------- #
+    # Define the discretisation based on mode
+    # Default is None --- null, FE (forward euler), BE (backward euler), TU (tustim)
+
+    discretisation_mode = "TU"
+
     # Define the optimizer based on mode
     # Default is Adam --- adam (Adam), tbptt (Adam), nesterov (SGD), newton (LBFGS)
-
+ 
     optimiser_mode = "adam"          
+
+
+    #print("\n\tdiscretisation_mode:", discretisation_mode)
+    #print("\toptimiser_mode:", optimiser_mode)
 
     if optimiser_mode == "adam":
         optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
@@ -130,22 +139,27 @@ def main():
         raise ValueError(f"Unknown optimizer mode: {optimiser_mode}. Choose from: adam, sgd_nesterov, lbfgs.")
 
 
-    def get_next_filename(optimiser_mode):
+    def get_next_filename(mode, where):
         """Find the next available filename for storing optimizer data."""
-        folder = os.path.join(os.path.dirname(__file__), "GD_comparison")  # Ensure correct folder path
+        folder = os.path.join(os.path.dirname(__file__), f"{where}")  # Ensure correct folder path
         os.makedirs(folder, exist_ok=True)  # Ensure the folder exists
 
         # Check existing files with this optimizer name
-        existing_files = [f for f in os.listdir(folder) if f.startswith(f"{optimiser_mode}_") and f.endswith(".csv")]
+        existing_files = [f for f in os.listdir(folder) if f.startswith(f"{mode}_") and f.endswith(".csv")]
         numbers = [int(f.split("_")[-1].split(".")[0]) for f in existing_files if f.split("_")[-1].split(".")[0].isdigit()]
         
         next_num = max(numbers, default=0) + 1  # Increment the highest found number
-        return os.path.join(folder, f"{optimiser_mode}_{next_num}.csv")
+        return os.path.join(folder, f"{mode}_{next_num}.csv")
 
-    dataset_filename = get_next_filename(optimiser_mode)  # Get filename for saving results
-    print(f"Saving training data to: {dataset_filename}")
+    dataset_filename_optimiser = get_next_filename(optimiser_mode, "GD_comparison")  
+    print(f"\nSaving training data to: {dataset_filename_optimiser}")    
+    
+    dataset_filename_discretisation = get_next_filename(discretisation_mode, "DT_comparison")  
+    print(f"\nSaving training data to: {dataset_filename_discretisation}")
+    print("\n\n")
 
-    performance_data = []  # List to store results
+    performance_data_optimiser = []         # List to store results for optimisation
+    performance_data_discretisation = []    # List to store results for discretisation
     # --------------------------------------------------------------------------- #
 
 
@@ -174,9 +188,9 @@ def main():
 
     # Evaluate initial loss
     model.eval()
-    train_loss = validate(train_dl, loss, model, device)
-    val_loss = validate(val_dl, loss, model, device)
-    test_loss = validate(test_dl, loss, model, device)
+    train_loss = validate(train_dl, loss, model, device, discretisation_mode)   ##########################
+    val_loss = validate(val_dl, loss, model, device, discretisation_mode)       ##########################
+    test_loss = validate(test_dl, loss, model, device, discretisation_mode)     ##########################
 
     early_stop.step(val_loss)
     print(
@@ -189,18 +203,23 @@ def main():
     for epoch in range(wandb.config['n_epochs']):
         model.train()
         for example in train_dl:
-            loss_value = train_step(example, loss, model, optimiser, device, optimiser_mode)
+            loss_value, y_pred = train_step(example, loss, model, optimiser, device, optimiser_mode, discretisation_mode)   ##########################
     # --------------------------------------------------------------------------- #
-            performance_data.append({
+            performance_data_optimiser.append({
                 "epoch": epoch + 1, 
                 "optimiser": optimiser_mode,
                 "train_loss": loss_value})
+            
+            performance_data_discretisation.append({
+                "epoch": epoch + 1, 
+                "discretisation": discretisation_mode,
+                "y_pred": y_pred})
     # --------------------------------------------------------------------------- #
 
         model.eval()
-        train_loss = validate(train_dl, loss, model, device)
-        val_loss = validate(val_dl, loss, model, device)
-        test_loss = validate(test_dl, loss, model, device)
+        train_loss = validate(train_dl, loss, model, device, discretisation_mode)   ##########################
+        val_loss = validate(val_dl, loss, model, device, discretisation_mode)       ##########################
+        test_loss = validate(test_dl, loss, model, device, discretisation_mode)     ##########################
 
         sched.step(val_loss)
         early_stop.step(val_loss)
@@ -237,9 +256,13 @@ def main():
     print(f"Training took {train_time:.2f} seconds.")
 
     # --------------------------------------------------------------------------- #
-    df = pd.DataFrame(performance_data)
-    df.to_csv(dataset_filename, index=False)
-    print(f"Saved dataset: {dataset_filename}")
+    df = pd.DataFrame(performance_data_optimiser)
+    df.to_csv(dataset_filename_optimiser, index=False)
+    print(f"Saved dataset: {dataset_filename_optimiser}")    
+    
+    df = pd.DataFrame(performance_data_discretisation)
+    df.to_csv(dataset_filename_discretisation, index=False)
+    print(f"Saved dataset: {dataset_filename_discretisation}")
     # --------------------------------------------------------------------------- #
 
 

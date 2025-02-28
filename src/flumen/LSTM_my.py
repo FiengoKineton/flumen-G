@@ -45,8 +45,7 @@ class LSTM(nn.Module):
 
 
 
-
-    def forward(self, rnn_input: PackedSequence, hidden_state, tau=None):
+    def forward(self, rnn_input: PackedSequence, hidden_state, discretisation_mode, tau=None):
 
         rnn_input_unpacked, lengths = torch.nn.utils.rnn.pad_packed_sequence(rnn_input, batch_first=self.batch_first)
         _, seq_len, _ = rnn_input_unpacked.shape      # output | batch_size, seq_len, input_size = torch.Size([512, 75, 2])
@@ -57,6 +56,16 @@ class LSTM(nn.Module):
         self.I = torch.eye(self.A.shape[0], dtype=self.A.dtype, device=device)
 
         outputs = torch.zeros(h.size(1), seq_len, self.hidden_size, device=device)
+
+        function_name = f"discretisation_{discretisation_mode}"
+        discretisation_function = globals().get(function_name)
+
+        #print("\n\tdiscretisation_mode:", discretisation_mode)
+        #print("\tfunction_name:", function_name)
+        #print("\tdiscretisation_function:", discretisation_function)
+
+        if discretisation_function is None:
+            raise ValueError(f"Unknown discretisation mode: {discretisation_mode}. Available modes: none, FE, BE, TU")
 
         """
         print("\n\nLSTM forward variables:\n---------------------------\n")
@@ -86,11 +95,13 @@ class LSTM(nn.Module):
             x_prev = h[:, :, :self.state_dim]
 
         #-- F.E.    (forward euler)     --- s = (z-1) / tau
-            #x_next = x_prev + tau * torch.matmul(x_prev, self.A) if tau is not None and t!=0 else x_prev
+            #x_next = self.FE(x_prev, self.A, tau, t, self.I)
         #-- B.E.    (backward euler)    --- s = (z-1)/(tau*z)
-            #x_next = torch.matmul(x_prev, torch.inverse(self.I-tau*self.A)) if tau is not None and t!=0 else x_prev
+            #x_next = self.BE(x_prev, self.A, tau, t, self.I)
         #-- TU.     (tustin)            --- s = 2/tau * (z-1)/(z+1)
-            x_next = torch.matmul(x_prev, torch.matmul(self.I+tau/2*self.A, torch.inverse(self.I-tau/2*self.A))) if tau is not None and t!=0 else x_prev
+            #x_next = self.TU(x_prev, self.A, tau, t, self.I)
+
+            x_next = discretisation_function(x_prev, self.A, tau, t, self.I)
             h[:, :, :self.state_dim] = x_next
 
             """
@@ -134,6 +145,22 @@ class LSTM(nn.Module):
 
         return packed_outputs, (h, c)
 
+
+def discretisation_none(x_prev, A, tau, t, I):
+    #print("\tdiscretisation_none")
+    return x_prev
+
+def discretisation_FE(x_prev, A, tau, t, I):
+    #print("\tdiscretisation_FE")
+    return x_prev + tau * torch.matmul(x_prev, A) if tau is not None and t!=0 else x_prev
+
+def discretisation_BE(x_prev, A, tau, t, I):
+    #print("\tdiscretisation_BE")
+    return torch.matmul(x_prev, torch.inverse(I-tau*A)) if tau is not None and t!=0 else x_prev
+
+def discretisation_TU(x_prev, A, tau, t, I):
+    #print("\tdiscretisation_TU")
+    return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A))) if tau is not None and t!=0 else x_prev
 
 
 ###@torch.jit.script

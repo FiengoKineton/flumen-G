@@ -41,14 +41,14 @@ def prep_inputs(x0, y, u, lengths, device):
 #   senza aggiornare i pesi del modello.            #
 # ------------------------------------------------- #
 
-def validate(data, loss_fn, model, device):
+def validate(data, loss_fn, model, device, discretisation_mode):
     vl = 0.
 
     with torch.no_grad():
         for example in data:
             x0, y, u, deltas = prep_inputs(*example, device)
 
-            y_pred = model(x0, u, deltas)
+            y_pred = model(x0, u, deltas, discretisation_mode)  ##########################
             vl += loss_fn(y, y_pred).item()
 
     return model.state_dim * vl / len(data)
@@ -66,7 +66,7 @@ torch.autograd.set_detect_anomaly(True)     # --- ADDED for LSTM_my!
 # ---------------------------------------------------------------- #
 
 
-def train_step(example, loss_fn, model, optimiser, device, optimizer_mode):
+def train_step(example, loss_fn, model, optimiser, device, optimizer_mode, discretisation_mode):
     function_name = f"train_step_{optimizer_mode}"
     train_step_function = globals().get(function_name)
 
@@ -74,12 +74,12 @@ def train_step(example, loss_fn, model, optimiser, device, optimizer_mode):
         raise ValueError(f"Unknown training mode: {optimizer_mode}. Available modes: adam, tbptt, nesterov, newton")
 
     ###print("\n\nGradient Propagation mode: ", function_name, "\n\n")   
-    return train_step_function(example, loss_fn, model, optimiser, device)
+    return train_step_function(example, loss_fn, model, optimiser, device, discretisation_mode)
 
 
 # --------------------------------------------------------------------------- #
 
-def train_step_adam(example, loss_fn, model, optimiser, device):
+def train_step_adam(example, loss_fn, model, optimiser, device, discretisation_mode):
     """
     DEFAULT!
     --------------------------------------------------------------------------------------
@@ -99,16 +99,17 @@ def train_step_adam(example, loss_fn, model, optimiser, device):
 
     optimiser.zero_grad()
 
-    y_pred = model(x0, u, deltas)
+    y_pred = model(x0, u, deltas, discretisation_mode)  ##########################
     loss = model.state_dim * loss_fn(y, y_pred)
 
     loss.backward()
     optimiser.step()
 
-    return loss.item()
+    #print("\ttrain_step_adam")
+    return loss.item(), y_pred  ##########################
 
 
-def train_step_tbptt(example, loss_fn, model, optimiser, device, tbptt_steps=5):
+def train_step_tbptt(example, loss_fn, model, optimiser, device, discretisation_mode, tbptt_steps=5):
     """
     DOES NOT WORK!
     same optimiser as default case!
@@ -146,7 +147,7 @@ def train_step_tbptt(example, loss_fn, model, optimiser, device, tbptt_steps=5):
         print("\tlengths_t.shape:", lengths_t.shape)    # output | torch.Size([128])
         print("\tdeltas_t.shape:", deltas_t.shape)      # output | torch.Size([128, 5, 1])
         u_packed = torch.nn.utils.rnn.pack_padded_sequence(u_t, lengths_t, batch_first=True)
-        y_pred = model(x0, u_packed, deltas_t)
+        y_pred = model(x0, u_packed, deltas_t, discretisation_mode)
 
         loss = model.state_dim * loss_fn(y[:, t:t+tbptt_steps, :], y_pred)
         loss.backward(retain_graph=True)                ###
@@ -156,10 +157,11 @@ def train_step_tbptt(example, loss_fn, model, optimiser, device, tbptt_steps=5):
         loss_total += loss.item()
     
     loss_item = loss_total / (u_unpacked.shape[1] // tbptt_steps)
-    return loss_item
+    #print("\ttrain_step_tbptt")
+    return loss_item, y_pred
 
 
-def train_step_nesterov(example, loss_fn, model, optimiser, device):
+def train_step_nesterov(example, loss_fn, model, optimiser, device, discretisation_mode):
     """
     SEEMS TO WORK FIN£!
     different optimiser then the default case!
@@ -179,16 +181,17 @@ def train_step_nesterov(example, loss_fn, model, optimiser, device):
     ###optimiser_new = optim.SGD(model.parameters(), lr=wandb.config['lr'], momentum=0.9, nesterov=True)
     optimiser.zero_grad()                               ###
 
-    y_pred = model(x0, u, deltas)                       ###
+    y_pred = model(x0, u, deltas, discretisation_mode)  ###
     loss = model.state_dim * loss_fn(y, y_pred)         ###
 
     loss.backward()                                     ###
     optimiser.step()                                    ###     
 
-    return loss.item()                                  ###
+    #print("\ttrain_step_nesterov")
+    return loss.item(), y_pred                          ###
 
 
-def train_step_newton(example, loss_fn, model, optimiser, device):
+def train_step_newton(example, loss_fn, model, optimiser, device, discretisation_mode):
     """
     WORKS BUT TOO SLOW!
     different optimiser then the default case!
@@ -203,18 +206,19 @@ def train_step_newton(example, loss_fn, model, optimiser, device):
     L-BFGS is useful for small-scale problems and second-order optimization,
     but can be computationally expensive in high-dimensional settings.
     """
-    x0, y, u, deltas = prep_inputs(*example, device)    ###
+    x0, y, u, deltas = prep_inputs(*example, device)        ###
     ###optimiser_new = lbfgs.LBFGS(model.parameters())
 
     def closure():
-        optimiser.zero_grad()                           ###
-        y_pred = model(x0, u, deltas)                   ###
-        loss = model.state_dim * loss_fn(y, y_pred)     ###
-        loss.backward()                                 ###
-        return loss
+        optimiser.zero_grad()                               ###
+        y_pred = model(x0, u, deltas, discretisation_mode)  ###
+        loss = model.state_dim * loss_fn(y, y_pred)         ###
+        loss.backward()                                     ###
+        return loss, y_pred
         
-    loss = optimiser.step(closure)
-    return loss.item()                                  ###
+    loss, y_pred = optimiser.step(closure)
+    #print("\ttrain_step_newton")
+    return loss.item(), y_pred                              ###
 
 # --------------------------------------------------------------------------- #
 
