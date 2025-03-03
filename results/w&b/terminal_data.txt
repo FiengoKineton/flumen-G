@@ -933,10 +933,39 @@ Timings: 0.019641876220703125, 0.6930124759674072
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-00_
+012___adam1_TU1(not-finished-4)
 
 
-PC ...
+(base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py --wandb aguiar-kth-royal-institu
+te-of-technology/g7-fiengo-msc-thesis/flow_model-vd
+p_test_data-vdp_test-4edphp4o:v13
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 3243.5403454, '_step': 15, '_timestamp': 1741003738.9093373, '_wandb': {'runtime': 3243}, 'best_epoch': 15, 'best_test': 0.1218434658551973, 'best_train': 0.08432700108519937, 'best_val': 0.1297048150546967, 'epoch': 16, 'lr': 0.001, 'test_loss': 0.1939743110348308, 'time': 3217.72141957283, 'train_loss': 0.09913455803321784, 'val_loss': 0.16365651183185123}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': '.\\data_generation\\vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.017004728317260742, 0.5507521629333496
+0.034453596469526844
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
