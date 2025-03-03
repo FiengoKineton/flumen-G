@@ -188,9 +188,9 @@ def main():
 
     # Evaluate initial loss
     model.eval()
-    train_loss = validate(train_dl, loss, model, device, discretisation_mode)   ##########################
-    val_loss = validate(val_dl, loss, model, device, discretisation_mode)       ##########################
-    test_loss = validate(test_dl, loss, model, device, discretisation_mode)     ##########################
+    train_loss = validate(train_dl, loss, model, device, discretisation_mode)   ######################################################
+    val_loss = validate(val_dl, loss, model, device, discretisation_mode)       ######################################################
+    test_loss = validate(test_dl, loss, model, device, discretisation_mode)     ######################################################
 
     early_stop.step(val_loss)
     print(
@@ -203,7 +203,7 @@ def main():
     for epoch in range(wandb.config['n_epochs']):
         model.train()
         for example in train_dl:
-            loss_value, y_pred = train_step(example, loss, model, optimiser, device, optimiser_mode, discretisation_mode)   ##########################
+            loss_value, y_pred = train_step(example, loss, model, optimiser, device, optimiser_mode, discretisation_mode)   ##########
     # --------------------------------------------------------------------------- #
             performance_data_optimiser.append({
                 "epoch": epoch + 1, 
@@ -217,9 +217,9 @@ def main():
     # --------------------------------------------------------------------------- #
 
         model.eval()
-        train_loss = validate(train_dl, loss, model, device, discretisation_mode)   ##########################
-        val_loss = validate(val_dl, loss, model, device, discretisation_mode)       ##########################
-        test_loss = validate(test_dl, loss, model, device, discretisation_mode)     ##########################
+        train_loss = validate(train_dl, loss, model, device, discretisation_mode)   ##################################################
+        val_loss = validate(val_dl, loss, model, device, discretisation_mode)       ##################################################
+        test_loss = validate(test_dl, loss, model, device, discretisation_mode)     ##################################################
 
         sched.step(val_loss)
         early_stop.step(val_loss)
