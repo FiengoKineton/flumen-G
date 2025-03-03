@@ -34,7 +34,7 @@ hyperparams = {
     'es_delta': 1e-7,
     'sched_patience': 10,
     'sched_factor': 2,
-    'loss': "mse",
+    'loss': "mse",      #add
 }
 
 

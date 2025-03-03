@@ -7,8 +7,11 @@ from flumen.LSTM_my import LSTM
 COMMANDs:
 
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
-python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test
+python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
 python experiments/interactive_test.py --wandb (name of the best model from a general experiment)
+
+
+wandb artifact cache cleanup 1MB
 ________________________________________________________________________________________________________________________
 
 W&B workspace:  https://wandb.ai/aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis?nw=nwuserg7fiengo

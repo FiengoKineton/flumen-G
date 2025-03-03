@@ -64,8 +64,7 @@ class LSTM(nn.Module):
         #print("\tfunction_name:", function_name)
         #print("\tdiscretisation_function:", discretisation_function)
 
-        if discretisation_function is None:
-            raise ValueError(f"Unknown discretisation mode: {discretisation_mode}. Available modes: none, FE, BE, TU")
+        # if discretisation_function is None: raise ValueError(f"Unknown discretisation mode: {discretisation_mode}. Available modes: none, FE, BE, TU")
 
         """
         print("\n\nLSTM forward variables:\n---------------------------\n")
@@ -117,9 +116,16 @@ class LSTM(nn.Module):
             print("\tx_{k+1} (before):", x_next)
             #"""
 
+            """
+            z = [x, h]
+
+            x = f_x(x, h)
+            h = f_{lstm_cell}(h, [rnn_input, x])
+            """
+
             for layer in range(self.num_layers):
                 h_new, c_new = self.lstm_cells[layer](rnn_input_t, h[layer], c[layer])
-                h, c = h.clone(), c.clone()
+                #h, c = h.clone(), c.clone()
                 h[layer], c[layer] = h_new, c_new
 
                 """
@@ -160,10 +166,10 @@ def discretisation_BE(x_prev, A, tau, t, I):
 
 def discretisation_TU(x_prev, A, tau, t, I):
     #print("\tdiscretisation_TU")
-    return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A))) if tau is not None and t!=0 else x_prev
+    return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A))) #if tau is not None and t!=0 else x_prev
 
 
-###@torch.jit.script
+@torch.jit.script
 class LSTMCell(nn.Module):
     def __init__(self, input_size: int, hidden_size: int, bias: bool=True):
         super(LSTMCell, self).__init__()
