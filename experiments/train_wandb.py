@@ -35,6 +35,8 @@ hyperparams = {
     'sched_patience': 10,
     'sched_factor': 2,
     'loss': "mse",      #add
+    'discretisation_mode': "TU",
+    'optimiser_mode': "adam",
 }
 
 
@@ -86,6 +88,7 @@ def main():
         'encoder_depth': wandb.config['encoder_depth'],
         'decoder_size': wandb.config['decoder_size'],
         'decoder_depth': wandb.config['decoder_depth'],
+        'discretisation_mode': wandb.config['discretisation_mode'],
         'use_batch_norm': False,
     }
 
@@ -115,12 +118,12 @@ def main():
     # Define the discretisation based on mode
     # Default is None --- null, FE (forward euler), BE (backward euler), TU (tustim)
 
-    discretisation_mode = "TU"
+    discretisation_mode = wandb.config['discretisation_mode']
 
     # Define the optimizer based on mode
     # Default is Adam --- adam (Adam), tbptt (Adam), nesterov (SGD), newton (LBFGS)
  
-    optimiser_mode = "adam"          
+    optimiser_mode = wandb.config['optimiser_mode']    
 
 
     #print("\n\tdiscretisation_mode:", discretisation_mode)
@@ -188,9 +191,9 @@ def main():
 
     # Evaluate initial loss
     model.eval()
-    train_loss = validate(train_dl, loss, model, device, discretisation_mode)   ######################################################
-    val_loss = validate(val_dl, loss, model, device, discretisation_mode)       ######################################################
-    test_loss = validate(test_dl, loss, model, device, discretisation_mode)     ######################################################
+    train_loss = validate(train_dl, loss, model, device)   
+    val_loss = validate(val_dl, loss, model, device)       
+    test_loss = validate(test_dl, loss, model, device)     
 
     early_stop.step(val_loss)
     print(
@@ -203,7 +206,7 @@ def main():
     for epoch in range(wandb.config['n_epochs']):
         model.train()
         for example in train_dl:
-            loss_value, y_pred = train_step(example, loss, model, optimiser, device, optimiser_mode, discretisation_mode)   ##########
+            loss_value, y_pred = train_step(example, loss, model, optimiser, device, optimiser_mode)   ##########
     # --------------------------------------------------------------------------- #
             performance_data_optimiser.append({
                 "epoch": epoch + 1, 
@@ -217,9 +220,9 @@ def main():
     # --------------------------------------------------------------------------- #
 
         model.eval()
-        train_loss = validate(train_dl, loss, model, device, discretisation_mode)   ##################################################
-        val_loss = validate(val_dl, loss, model, device, discretisation_mode)       ##################################################
-        test_loss = validate(test_dl, loss, model, device, discretisation_mode)     ##################################################
+        train_loss = validate(train_dl, loss, model, device)   
+        val_loss = validate(val_dl, loss, model, device)       
+        test_loss = validate(test_dl, loss, model, device)     
 
         sched.step(val_loss)
         early_stop.step(val_loss)

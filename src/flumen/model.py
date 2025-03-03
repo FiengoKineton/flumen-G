@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from flumen.LSTM_my import LSTM
+import sys
 
 
 """
@@ -40,6 +41,7 @@ class CausalFlowModel(nn.Module):
                  encoder_depth,
                  decoder_size,
                  decoder_depth,
+                 discretisation_mode,
                  use_batch_norm=False):
         super(CausalFlowModel, self).__init__()
 
@@ -69,11 +71,12 @@ class CausalFlowModel(nn.Module):
 
         self.u_rnn = LSTM(
             input_size=control_dim + 1,                     # output | 2
-            hidden_size=control_rnn_size + state_dim,       # output | 10
+            z_size=control_rnn_size + state_dim,            # output | 10
             batch_first=True,
             num_layers=self.control_rnn_depth,              # output | 1
             dropout=0, 
-            state_dim=self.state_dim
+            state_dim=self.state_dim,
+            discretisation_mode=discretisation_mode
         ) if self.mode else torch.nn.LSTM(
             input_size=control_dim + 1,                     # output | 2
             hidden_size=control_rnn_size,                   # output | 8
@@ -101,33 +104,37 @@ class CausalFlowModel(nn.Module):
 
 
 
-    def forward(self, x, rnn_input, deltas, discretisation_mode):
+    def forward(self, x, rnn_input, deltas):
         h0 = self.x_dnn(x) 
-        h0_stack = torch.cat((x, h0), dim=1)       
+        z = torch.cat((x, h0), dim=1)       
 
-        h0 = torch.stack(h0.split(self.control_rnn_size, dim=1)) if not self.mode else h0
-        h0_stack = h0_stack.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
-        c0 = torch.zeros_like(h0_stack) if self.mode else torch.zeros_like(h0)
+        h0 = torch.stack(h0.split(self.control_rnn_size, dim=1)) #if not self.mode else h0
+        z = z.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
+
+        ###c0 = torch.zeros_like(z) if self.mode else torch.zeros_like(h0)
+        c0 = torch.zeros_like(h0)
 
     #-- tau must be chosen considering the frequency of x0 and \phi | tau = 2*w_{BW} (no aliasing)
         ###tau = torch.full((x.shape[0], x.shape[1]), 0.01, device=x.device) if self.mode else None
-        tau = 0.05 if self.mode else None
+        ###tau = 0.05 if self.mode else None
+        tau = deltas
 
         """
         print("\n\nCasualFlowModel variables's shape:\n---------------------------\n")
         print("\tx.shape", x.shape)                         # output | torch.Size([128, 2])
         print("\th0.shape", h0.shape)                       # output | torch.Size([128, 8])
-        print("\th0_stack.shape: (before)", h0_stack.shape) # output | torch.Size([128, 10])
-        print("\th0_stack.shape: (after)", h0_stack.shape)  # output | torch.Size([1, 128, 10])
+        print("\tz.shape: (before)", z.shape)               # output | torch.Size([128, 10])
+        print("\tz.shape: (after)", z.shape)                # output | torch.Size([1, 128, 10])
         print("\tc0.shape: ", c0.shape)                     # output | torch.Size([1, 128, 10])
         ###print("\ttau.shape: ", tau.shape)                   # output | torch.Size([128, 2])
         #"""
 
-        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0_stack, c0), discretisation_mode, tau) if self.mode else self.u_rnn(rnn_input, (h0, c0), discretisation_mode)
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (z, c0), tau) if self.mode else self.u_rnn(rnn_input, (h0, c0))
+        ###rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0), x, tau)
 
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
         h_shift = torch.roll(h, shifts=1, dims=1)   
-        h_temp = h0_stack[-1] if self.mode else h0[-1]
+        h_temp = z[-1] ###if self.mode else h0[-1]
         h_shift[:, 0, :] = h_temp
 
         """
@@ -143,6 +150,18 @@ class CausalFlowModel(nn.Module):
         decoder_input = encoded_controls  
         output = self.u_dnn(decoder_input[range(encoded_controls.shape[0]), h_lens - 1, :])
         output = output[:, :self.state_dim]  
+
+        """
+        print("\tdeltas.shape:", deltas.shape)                      # output | torch.Size([128, 75, 1])
+        print((1-deltas).shape)                                     # output | torch.Size([128, 75, 1])
+        print(((1 - deltas) * h_shift).shape)                       # output | torch.Size([128, 75, 10])
+        print((deltas * h).shape)                                   # output | torch.Size([128, 75, 10])
+        print("\tencoded_controls.shape:", encoded_controls.shape)  # output | torch.Size([128, 75, 10])
+        print("\toutput.shape (before):", output.shape)             # output | torch.Size([128, 2])
+        print("\toutput.shape (after):", output.shape)              # output | torch.Size([128, 2])
+        print("\n\n")
+        sys.exit()
+        #"""
 
         return output
 
