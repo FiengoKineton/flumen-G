@@ -585,7 +585,7 @@ Timings: 0.013382673263549805, 0.7032470703125
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-009___new-LSTM(4) --- good ! / LSTM_08.py
+009___new-LSTM(4) --- good ! ####################################################################################################
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-inkc5cfk:v44
@@ -969,7 +969,7 @@ Timings: 0.017004728317260742, 0.5507521629333496
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-015___new-x-update(1) --- good! [[[alpha method!]]]
+015___new-x-update(1) --- good! [[[alpha method!]]] ##############################################################################
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-2hk04ksl:v27

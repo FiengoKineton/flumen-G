@@ -3,7 +3,10 @@ COMMANDs:
 
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
 python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
+
 python experiments/interactive_test.py --wandb (name of the best model from a general experiment)
+OR
+python experiments/interactive_test.py outputs/vdp_test/vdp_test_(id)
 
 
 wandb artifact cache cleanup 1MB
