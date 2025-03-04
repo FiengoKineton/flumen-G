@@ -114,6 +114,7 @@ def main():
     model.to(device)
 
 
+    """
     # --------------------------------------------------------------------------- #
     # Define the discretisation based on mode
     # Default is None --- null, FE (forward euler), BE (backward euler), TU (tustim)
@@ -123,7 +124,7 @@ def main():
     # Define the optimizer based on mode
     # Default is Adam --- adam (Adam), tbptt (Adam), nesterov (SGD), newton (LBFGS)
  
-    optimiser_mode = wandb.config['optimiser_mode']    
+    optimiser_mode = wandb.config['optimiser_mode']
 
 
     #print("\n\tdiscretisation_mode:", discretisation_mode)
@@ -143,7 +144,6 @@ def main():
 
 
     def get_next_filename(mode, where):
-        """Find the next available filename for storing optimizer data."""
         folder = os.path.join(os.path.dirname(__file__), f"{where}")  # Ensure correct folder path
         os.makedirs(folder, exist_ok=True)  # Ensure the folder exists
 
@@ -164,9 +164,10 @@ def main():
     performance_data_optimiser = []         # List to store results for optimisation
     performance_data_discretisation = []    # List to store results for discretisation
     # --------------------------------------------------------------------------- #
+    #"""
 
 
-    ###optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+    optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
     sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimiser,
         patience=wandb.config['sched_patience'],
@@ -206,8 +207,11 @@ def main():
     for epoch in range(wandb.config['n_epochs']):
         model.train()
         for example in train_dl:
-            loss_value, y_pred = train_step(example, loss, model, optimiser, device, optimiser_mode)   ##########
-    # --------------------------------------------------------------------------- #
+            train_step(example, loss, model, optimiser, device)
+    
+            """
+            loss_value, y_pred = train_step_(example, loss, model, optimiser, device)   
+        # --------------------------------------------------------------------------- #
             performance_data_optimiser.append({
                 "epoch": epoch + 1, 
                 "optimiser": optimiser_mode,
@@ -217,7 +221,8 @@ def main():
                 "epoch": epoch + 1, 
                 "discretisation": discretisation_mode,
                 "y_pred": y_pred})
-    # --------------------------------------------------------------------------- #
+        # --------------------------------------------------------------------------- #
+            #"""
 
         model.eval()
         train_loss = validate(train_dl, loss, model, device)   
@@ -258,6 +263,8 @@ def main():
 
     print(f"Training took {train_time:.2f} seconds.")
 
+    
+    """
     # --------------------------------------------------------------------------- #
     df = pd.DataFrame(performance_data_optimiser)
     df.to_csv(dataset_filename_optimiser, index=False)
@@ -267,7 +274,7 @@ def main():
     df.to_csv(dataset_filename_discretisation, index=False)
     print(f"Saved dataset: {dataset_filename_discretisation}")
     # --------------------------------------------------------------------------- #
-
+    #"""
 
 if __name__ == '__main__':
     print_gpu_info()

@@ -68,7 +68,6 @@ def main():
     xx = np.linspace(0., 1., model.output_dim)
 
     time_horizon = 2 * metadata["data_args"]["time_horizon"]
-    discretisation_mode = "TU"  ######################################################################################################
 
     while True:
         time_integrate = time()
@@ -83,7 +82,7 @@ def main():
             x0, t, u, delta)
 
         with torch.no_grad():
-            y_pred = model(x0_feed, u_feed, deltas_feed, discretisation_mode).numpy()   ##############################################
+            y_pred = model(x0_feed, u_feed, deltas_feed).numpy()
 
         y_pred = np.flip(y_pred, 0)
         time_predict = time() - time_predict

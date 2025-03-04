@@ -1,0 +1,178 @@
+"""
+COMMANDs:
+
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
+python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
+python experiments/interactive_test.py --wandb (name of the best model from a general experiment)
+
+
+wandb artifact cache cleanup 1MB
+________________________________________________________________________________________________________________________
+
+W&B workspace:  https://wandb.ai/aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis?nw=nwuserg7fiengo
+
+Slack general:  https://app.slack.com/client/T080VKDGZMY/C080SPVEXA9
+________________________________________________________________________________________________________________________
+
+GITs:
+
+>> git reset --hard origin/master
+>> git pull origin master
+________________________________________________________________________________________________________________________
+"""
+
+
+
+class CausalFlowModel():
+
+    def __init__():
+        """
+        print("\n\nCausalFlowModel init variables:\n---------------------------\n")
+        print("\tstate_dim: ", state_dim)                   # output | 2
+        print("\tcontrol_dim: ", control_dim)               # output | 1
+        print("\toutput_dim: ", output_dim)                 # output | 2
+        print("\tcontrol_rnn_size: ", control_rnn_size)     # output | 8
+        print("\tcontrol_rnn_depth: ", control_rnn_depth)   # output | 1
+        print("\tencoder_size: ", encoder_size)             # output | 1
+        print("\tencoder_depth: ", encoder_depth)           # output | 2
+        print("\tdecoder_size: ", decoder_size)             # output | 1
+        print("\tdecoder_depth: ", decoder_depth)           # output | 2
+        print("\nmode: ", self.mode)                        # output | True/False
+        #"""
+
+
+    def forward():
+        """
+        print("\n\nCasualFlowModel variables's shape:\n---------------------------\n")
+        print("\tx.shape", x.shape)                         # output | torch.Size([128, 2])
+        print("\th0.shape", h0.shape)                       # output | torch.Size([128, 8])
+        print("\tz.shape: (before)", z.shape)               # output | torch.Size([128, 10])
+        print("\tz.shape: (after)", z.shape)                # output | torch.Size([1, 128, 10])
+        print("\tc0.shape: ", c0.shape)                     # output | torch.Size([1, 128, 10])
+        ###print("\ttau.shape: ", tau.shape)                   # output | torch.Size([128, 2])
+        #"""
+
+        """
+        print("\n")
+        print("\th.shape:", h.shape)                        # output | torch.Size([128, 75, 10])
+        print("\th_lens.shape:", h_lens.shape)              # output | torch.Size([128])
+        print("\th_shift.shape:", h_shift.shape)            # output | torch.Size([128, 75, 10])
+        print("\th_temp.shape:", h_temp.shape)              # output | torch.Size([128, 10])
+        #"""
+
+        """
+        print("\tdeltas.shape:", deltas.shape)                      # output | torch.Size([128, 75, 1])
+        print((1-deltas).shape)                                     # output | torch.Size([128, 75, 1])
+        print(((1 - deltas) * h_shift).shape)                       # output | torch.Size([128, 75, 10])
+        print((deltas * h).shape)                                   # output | torch.Size([128, 75, 10])
+        print("\tencoded_controls.shape:", encoded_controls.shape)  # output | torch.Size([128, 75, 10])
+        print("\toutput.shape (before):", output.shape)             # output | torch.Size([128, 2])
+        print("\toutput.shape (after):", output.shape)              # output | torch.Size([128, 2])
+        print("\n\n")
+        sys.exit()
+        #"""
+
+
+
+class LSTM():
+
+    def __init__():
+        """
+        print("\n\nLSTM init variables:\n---------------------------\n")           
+        print("\tinput_size:", input_size)              # output | 2
+        print("\tz_size:", z_size)                      # output | 10
+        print("\thidden_size:", self.hidden_size)       # output | 8
+        print("\tnum_layers:", num_layers)              # output | 1
+        print("\toutput_size:", output_size)            # output | None
+        print("\tbias:", bias)                          # output | True
+        print("\tbatch_first:", batch_first)            # output | True
+        print("\tdropout:", dropout)                    # output | 0
+        print("\tbidirectional:", bidirectional)        # output | False
+        print("\tstate_dim:", state_dim)                # output | 2
+
+        ###self.fc = nn.Linear(hidden_size, output_size) if output_size is not None else None
+        #"""
+
+
+    def forward():
+        """
+        print("\n\nLSTM forward variables:\n---------------------------\n")
+        ###if discretisation_function is None: raise ValueError(f"Unknown discretisation mode: {discretisation_mode}. Available modes: none, FE, BE, TU")
+
+        # NOTE: the h is the z variable!
+        print("\trnn_input_unpacked.shape:", rnn_input_unpacked.shape)  # output | torch.Size([128, 75, 2])
+        print("\tlengths.shape:", lengths.shape[0])                     # output | 128
+        #print("\batch_size:", batch_size)                               # output | 512
+        print("\tseq_len:", seq_len)                                    # output | 75
+        #print("\tinput_size:", input_size)                              # output | 2
+        print("\n") 
+        print("\tz.shape:", z.shape)                                    # output | torch.Size([1, 128, 10])
+        print("\tc.shape:", c.shape)                                    # output | torch.Size([1, 128, 8])
+        print("\tdevice:", device)                                      # output | cpu
+        print("\n")
+        print("\tA.shape:", self.A.shape)                               # output | torch.Size([2, 2])
+        print("\tx.shape:", z[:, :, :self.state_dim].shape)             # output | torch.Size([1, 128, 2]) 
+        print("\ttau.shape:", tau.shape)                                # output | torch.Size([128, 75, 1])
+        print("\n")
+        print("\toutputs.shape (before):", outputs.shape)               # output | torch.Size([128, 75, 10])
+        print("\n\n")
+        #"""
+
+            """
+            print("\tt:", t)
+            print("\tseq_len:", seq_len)                                # output | 75
+            print("\tnn_input_t.shape:", rnn_input_t.shape)             # output | torch.Size([128, 2])
+            print("\tx_prev.shape:", x_prev.shape)                      # output | torch.Size([1, 128, 2])
+            print("\tx_next.shape:", x_next.shape)                      # output | torch.Size([1, 128, 2])
+            print("\th.shape (before):", h.shape)                       # output | torch.Size([1, 128, 8])
+            print("\tc.shape (before):", c.shape)                       # output | torch.Size([[1, 128, 8])
+            print("\ttau_t.shape:", tau_t.shape)                        # outpuy | toch.Size([128, 1])
+            print("\n")
+            #print("\tx_k:", x_prev)                                     
+            #print("\tx_{k+1} (before):", x_next)
+            #"""
+
+            """
+            z = [x, h]
+
+            x = f_x(x, h)
+            h = f_{lstm_cell}(h, [rnn_input, x])
+            """
+
+                """
+                print("\t\tlayer:", layer)
+                print("\t\tht.shape:", h[layer].shape)                  # output | torch.Size([128, 8])
+                print("\t\tct.shape:", h[layer].shape)                  # output | torch.Size([128, 8])                                
+                print("\t\th.shape (after):", h.shape)                  # output | torch.Size([1, 128, 8])
+                print("\t\tc.shape (after):", c.shape)                  # output | torch.Size([1, 128, 8])
+                print(u_t.shape)                                        # output | torch.Size([128, 4])
+                #"""
+
+            """
+            print("\tx_{k+1} (after):", h[:, :, :self.state_dim])
+            print("\n\n")
+            if t == 1 : sys.exit()
+            print("\n\toutputs.shape (after):", outputs.shape)          # output | torch.Size([128, 75, 10])
+            #"""
+
+
+
+class LSTMCell():
+    def forward():
+        """
+        print("\n\nLSTMCell forward variables:\n---------------------------\n")
+        print("\tW.shape:", self.W.weight.shape)        # output | torch.Size([32, 4])
+        print("\tU.shape:", self.U.weight.shape)        # output | torch.Size([32, 8])
+        print("\n")
+        print("\tu.shape:", u.shape)                    # output | torch.Size([128, 4])
+        print("\th.shape:", h.shape)                    # output | torch.Size([128, 8])
+        print("\tc.shape:", c.shape)                    # output | torch.Size([128, 8])
+        print("\n")
+        print("\ti.shape:", i.shape)                    # output | torch.Size([128, 8])
+        print("\tf.shape:", f.shape)                    # output | torch.Size([128, 8])
+        print("\tg.shape:", g.shape)                    # output | torch.Size([128, 8])
+        print("\to.shape:", o.shape)                    # output | torch.Size([128, 8])
+        print("\n")
+        print("\tc_next.shape:", c_next.shape)          # output | torch.Size([128, 8])
+        print("\th_next.shape:", h_next.shape)          # output | torch.Size([128, 8])
+        #"""

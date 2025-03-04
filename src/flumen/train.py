@@ -65,15 +65,29 @@ def validate(data, loss_fn, model, device):
 torch.autograd.set_detect_anomaly(True)     # --- ADDED for LSTM_my!
 # ---------------------------------------------------------------- #
 
+def train_step(example, loss_fn, model, optimiser, device):
+    x0, y, u, deltas = prep_inputs(*example, device)
 
-def train_step(example, loss_fn, model, optimiser, device, optimizer_mode):
+    optimiser.zero_grad()
+
+    y_pred = model(x0, u, deltas)  
+    loss = model.state_dim * loss_fn(y, y_pred)
+
+    loss.backward()
+    optimiser.step()
+
+    return loss.item()
+
+
+
+def train_step_(example, loss_fn, model, optimiser, device):
+    optimizer_mode = wandb.config['optimiser_mode'] 
     function_name = f"train_step_{optimizer_mode}"
     train_step_function = globals().get(function_name)
 
-    if train_step_function is None:
-        raise ValueError(f"Unknown training mode: {optimizer_mode}. Available modes: adam, tbptt, nesterov, newton")
+    ###if train_step_function is None: raise ValueError(f"Unknown training mode: {optimizer_mode}. Available modes: adam, tbptt, nesterov, newton")
 
-    ###print("\n\nGradient Propagation mode: ", function_name, "\n\n")   
+    print("\n\nGradient Propagation mode: ", function_name, "\n\n")   
     return train_step_function(example, loss_fn, model, optimiser, device)
 
 
@@ -106,7 +120,7 @@ def train_step_adam(example, loss_fn, model, optimiser, device):
     optimiser.step()
 
     #print("\ttrain_step_adam")
-    return loss.item(), y_pred  ##########################
+    return loss.item(), y_pred  
 
 
 def train_step_tbptt(example, loss_fn, model, optimiser, device, tbptt_steps=5):
