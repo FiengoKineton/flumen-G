@@ -72,11 +72,11 @@ class LSTM(nn.Module):
             h = torch.stack(h_new_list, dim=0)
             c = torch.stack(c_new_list, dim=0)
 
-            #alpha = torch.sigmoid(self.alpha_gate(h[-1]))
-            #x_next = (1-alpha) * x_mid + alpha * self.W__h_to_x(h[-1])
+            alpha = torch.sigmoid(self.alpha_gate(h[-1]))
+            x_next = (1-alpha) * x_mid + alpha * self.W__h_to_x(h[-1])
 
-            lambda_factor = torch.clamp(lambda_calc(x_prev, h), min=0.1, max=0.9).mean().item()
-            x_next = lambda_factor * x_mid + (1-lambda_factor) * self.W__h_to_x(h[-1]) 
+            #lambda_factor = torch.clamp(lambda_calc(x_prev, h), min=0.1, max=0.9).mean().item()
+            #x_next = lambda_factor * x_mid + (1-lambda_factor) * self.W__h_to_x(h[-1]) 
 
             z = torch.cat((x_next, h), dim=-1)  
             c_z = torch.cat((c_x, c), dim=-1)

@@ -1,6 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 
 from flumen import CausalFlowModel
 from flumen.utils import pack_model_inputs
@@ -17,14 +18,8 @@ from time import time
 
 def parse_args():
     ap = ArgumentParser()
-    ap.add_argument(
-        'path',
-        type=str,
-        help="Path to .pth file "
-        "(or, if run with --wandb, path to a Weights & Biases artifact)")
-    ap.add_argument('--print_info',
-                    action='store_true',
-                    help="Print training metadata and quit")
+    ap.add_argument('path', type=str, help="Path to .pth file")
+    ap.add_argument('--print_info', action='store_true', help="Print training metadata and quit")
     ap.add_argument('--continuous_state', action='store_true')
     ap.add_argument('--wandb', action='store_true')
 
@@ -32,6 +27,7 @@ def parse_args():
 
 
 def main():
+    plt.ion()  # Enable interactive mode
     args = parse_args()
 
     if args.wandb:
@@ -63,23 +59,25 @@ def main():
     sampler.reset_rngs()
     delta = sampler._delta
 
-    fig, ax = plt.subplots(3, 1, sharex=True)
-    fig.canvas.mpl_connect('close_event', on_close_window)
-    xx = np.linspace(0., 1., model.output_dim)
+    # First Figure: y_true vs y_pred + Input
+    fig1, ax1 = plt.subplots(3, 1, sharex=True)
+    fig1.canvas.mpl_connect('close_event', on_close_window)
 
+    # Second Figure: Delta Plots
+    fig2, ax2 = plt.subplots(2, 1, sharex=True)
+    fig2.canvas.mpl_connect('close_event', on_close_window)
+
+    xx = np.linspace(0., 1., model.output_dim)
     time_horizon = 2 * metadata["data_args"]["time_horizon"]
 
     while True:
         time_integrate = time()
         x0, t, y, u = sampler.get_example(time_horizon=time_horizon,
-                                          n_samples=int(1 +
-                                                        100 * time_horizon))
+                                          n_samples=int(1 + 100 * time_horizon))
         time_integrate = time() - time_integrate
 
         time_predict = time()
-
-        x0_feed, t_feed, u_feed, deltas_feed = pack_model_inputs(
-            x0, t, u, delta)
+        x0_feed, t_feed, u_feed, deltas_feed = pack_model_inputs(x0, t, u, delta)
 
         with torch.no_grad():
             y_pred = model(x0_feed, u_feed, deltas_feed).numpy()
@@ -94,35 +92,67 @@ def main():
         sq_error = np.square(y - y_pred)
         print(model.state_dim * np.mean(sq_error))
 
-        if args.continuous_state:
-            ax[0].pcolormesh(t.squeeze(), xx, y.T)
-            ax[1].pcolormesh(t.squeeze(), xx, y_pred.T)
-        else:
-            for k, ax_ in enumerate(ax[:model.state_dim]):
-                ax_.plot(t, y_pred[:, k], c='orange', label='Model output')
-                ax_.plot(t, y[:, k], 'b--', label='True state')
-                ax_.set_ylabel(f"$x_{k+1}$")
+        # Clear old plots
+        for ax_ in ax1:
+            ax_.clear()
+        for ax_ in ax2:
+            ax_.clear()
 
-        ax[-1].step(np.arange(0., time_horizon, delta), u[:-1], where='post')
-        ax[-1].set_ylabel("$u$")
-        ax[-1].set_xlabel("$t$")
+        # Plot y_true vs y_pred
+        for k, ax_ in enumerate(ax1[:model.state_dim]):
+            ax_.plot(t, y_pred[:, k], c='orange', label='Model output')
+            ax_.plot(t, y[:, k], 'b--', label='True state')
+            ax_.set_ylabel(f"$x_{k+1}$")
+            ax_.legend()
 
-        fig.tight_layout()
-        fig.subplots_adjust(hspace=0)
-        plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
+        # Plot input u
+        ax1[-1].step(np.arange(0., time_horizon, delta), u[:-1], where='post')
+        ax1[-1].set_ylabel("$u$")
+        ax1[-1].set_xlabel("$t$")
 
-        plt.draw()
+        # Plot delta (Error)
+        ax2[0].plot(t, y[:, 0] - y_pred[:, 0], label=r"$\Delta x_1$", color='red')
+        ax2[0].set_ylabel("Delta x1")
+        ax2[0].legend()
+        ax2[0].grid()
+
+        ax2[1].plot(t, y[:, 1] - y_pred[:, 1], label=r"$\Delta x_2$", color='blue')
+        ax2[1].set_ylabel("Delta x2")
+        ax2[1].set_xlabel("$t$")
+        ax2[1].legend()
+        ax2[1].grid()
+
+        # Zoomed-in Insets for Initial Conditions (first 5% of data)
+        for i, ax in enumerate(ax2):
+            inset = inset_axes(ax, width="30%", height="30%", loc="lower right", borderpad=1)
+            inset.plot(t, y[:, i] - y_pred[:, i], color='black')
+
+            # Focus the inset on the first part of the curve
+            inset_xlim = (t[0], t[int(len(t) * 0.05)])  # First 5% of the time range
+            inset_ylim = (np.min(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1,
+                          np.max(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1)
+
+            inset.set_xlim(inset_xlim)
+            inset.set_ylim(inset_ylim)  
+            inset.grid()
+
+            # Connect inset to the main plot
+            mark_inset(ax, inset, loc1=2, loc2=4, fc="none", ec="0.5")
+
+        fig1.tight_layout()
+        fig2.tight_layout()
+
+        plt.show(block=False)  # Non-blocking display
+        plt.pause(0.1)  # Allows UI updates
 
         # Wait for key press
         skip = False
         while not skip:
             skip = plt.waitforbuttonpress()
 
-        for ax_ in ax:
-            ax_.clear()
-
 
 def on_close_window(ev):
+    plt.close('all')  # Close figures before exiting
     sys.exit(0)
 
 

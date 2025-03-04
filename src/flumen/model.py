@@ -84,9 +84,6 @@ class CausalFlowModel(nn.Module):
         output = self.u_dnn(encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :])
         output = output[:, :self.state_dim]  
 
-        print(x[0], output[0])
-        sys.exit()
-
         return output
 
 
