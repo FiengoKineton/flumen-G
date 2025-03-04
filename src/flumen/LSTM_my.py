@@ -67,13 +67,16 @@ class LSTM(nn.Module):
                 h_new_list.append(h_new)        
                 c_new_list.append(c_new)        
 
-            x_mid = self.discretisation_function(x_prev, self.A, tau_t, self.I)     ###x_mid = discretisation_TU_old(x_prev, self.A, 0.05, self.I)
 
+            x_mid = self.discretisation_function(x_prev, self.A, tau_t, self.I)     ###x_mid = discretisation_TU_old(x_prev, self.A, 0.05, self.I)
             h = torch.stack(h_new_list, dim=0)
             c = torch.stack(c_new_list, dim=0)
 
-            alpha = torch.sigmoid(self.alpha_gate(h[-1]))
-            x_next = (1-alpha) * x_mid + alpha * self.W__h_to_x(h[-1])
+            #alpha = torch.sigmoid(self.alpha_gate(h[-1]))
+            #x_next = (1-alpha) * x_mid + alpha * self.W__h_to_x(h[-1])
+
+            lambda_factor = torch.clamp(lambda_calc(x_prev, h), min=0.1, max=0.9).mean().item()
+            x_next = lambda_factor * x_mid + (1-lambda_factor) * self.W__h_to_x(h[-1]) 
 
             z = torch.cat((x_next, h), dim=-1)  
             c_z = torch.cat((c_x, c), dim=-1)
@@ -87,7 +90,9 @@ class LSTM(nn.Module):
 def discretisation_none(x_prev, A, tau, I):     return x_prev
 def discretisation_FE(x_prev, A, tau, I):       return x_prev + tau * torch.matmul(x_prev, A) 
 def discretisation_BE(x_prev, A, tau, I):       return torch.matmul(x_prev, torch.inverse(I-tau*A)) 
-def discretisation_TU_(x_prev, A, tau, I):      return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A))) #if tau is not None and t!=0 else x_prev
+def discretisation_TU_(x_prev, A, tau, I):      return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A)))      #if tau is not None and t!=0 else x_prev
+
+def lambda_calc(x_prev, h):                     return torch.norm(x_prev, dim=-1, keepdim=True).clamp(min=1e-3) / (torch.norm(x_prev, dim=-1, keepdim=True) + torch.norm(h[-1], dim=-1, keepdim=True) + 1e-6).clamp(min=1e-3)
 
 
 def discretisation_TU(x_prev, A, tau, I):

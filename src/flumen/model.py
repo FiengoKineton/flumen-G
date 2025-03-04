@@ -1,4 +1,4 @@
-import torch
+import torch, sys
 from torch import nn
 from flumen.LSTM_my import LSTM
 
@@ -83,6 +83,9 @@ class CausalFlowModel(nn.Module):
         encoded_controls = (1 - deltas) * h_shift + deltas * h  
         output = self.u_dnn(encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :])
         output = output[:, :self.state_dim]  
+
+        print(x[0], output[0])
+        sys.exit()
 
         return output
 
