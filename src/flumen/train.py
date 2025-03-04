@@ -1,7 +1,4 @@
-import torch
-import torch.optim as optim
-import torch.optim.lbfgs as lbfgs
-import wandb
+import torch, wandb
 
 
 # ------------------------------------------------- #

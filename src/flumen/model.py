@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 from flumen.LSTM_my import LSTM
-import sys
 
 
 
@@ -28,7 +27,7 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode = True        # if True then h0_stack, else h0
+        self.mode = True                                    # if True then h0_stack, else h0
 
 
         self.u_rnn = LSTM(
@@ -47,7 +46,7 @@ class CausalFlowModel(nn.Module):
             dropout=0      
         )
 
-    ### ENCODER
+    #-- ENCODER
         x_dnn_osz = control_rnn_size * self.control_rnn_depth
         self.x_dnn = FFNet(in_size=state_dim,               # output | 2
                         out_size=x_dnn_osz,                 # output | 8
@@ -55,7 +54,7 @@ class CausalFlowModel(nn.Module):
                         (encoder_size * x_dnn_osz, ),
                         use_batch_norm=use_batch_norm)
 
-    ### Updated DECODER that takes [x_tilde, h_tilde]
+    #-- Updated DECODER that takes [x_tilde, h_tilde]
         u_dnn_isz = control_rnn_size + state_dim if self.mode else control_rnn_size
         self.u_dnn = FFNet(in_size=u_dnn_isz,               # output | 10
                         out_size=output_dim,                # output | 2
@@ -74,20 +73,15 @@ class CausalFlowModel(nn.Module):
         z = z.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
         c0 = torch.zeros_like(z if self.mode else h0) 
 
-        ###tau = 0.05 if self.mode else None
-        tau = deltas
-
-        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (z, c0), tau) if self.mode else self.u_rnn(rnn_input, (h0, c0))
-
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (z, c0), deltas) if self.mode else self.u_rnn(rnn_input, (h0, c0))
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
+
         h_shift = torch.roll(h, shifts=1, dims=1)   
         h_temp = z[-1] if self.mode else h0[-1]
         h_shift[:, 0, :] = h_temp
 
         encoded_controls = (1 - deltas) * h_shift + deltas * h  
-
-        decoder_input = encoded_controls  
-        output = self.u_dnn(decoder_input[range(encoded_controls.shape[0]), h_lens - 1, :])
+        output = self.u_dnn(encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :])
         output = output[:, :self.state_dim]  
 
         return output

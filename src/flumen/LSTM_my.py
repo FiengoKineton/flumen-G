@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
-import sys
 
 
 class LSTM(nn.Module):
@@ -23,6 +21,7 @@ class LSTM(nn.Module):
 
         self.mhu = 1.5
         self.A = torch.tensor([[self.mhu, -self.mhu], [1/self.mhu, 0]])
+        self.I = torch.eye(self.A.shape[0], dtype=self.A.dtype)         # , device=device)
 
         function_name = f"discretisation_{discretisation_mode}"
         self.discretisation_function = globals().get(function_name)
@@ -32,68 +31,63 @@ class LSTM(nn.Module):
             for layer in range(num_layers)
         ])
 
+        self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)       # gate function to blend h into x
+        self.W__h_to_x = nn.Linear(self.hidden_size, self.state_dim, bias=bias)        # mapping form h to x
+
     
-
-
 
     def forward(self, rnn_input: PackedSequence, hidden_state, tau):
 
-        rnn_input_unpacked, lengths = torch.nn.utils.rnn.pad_packed_sequence(rnn_input, batch_first=self.batch_first)
+        rnn_input_unpacked, lengths = pad_packed_sequence(rnn_input, batch_first=self.batch_first)
         _, seq_len, _ = rnn_input_unpacked.shape      # output | batch_size, seq_len, input_size = torch.Size([512, 75, 2])
         device = rnn_input_unpacked.device
 
         z, c_z = hidden_state
         self.A = self.A.to(device)
-        self.I = torch.eye(self.A.shape[0], dtype=self.A.dtype, device=device)
+        self.I = self.I.to(device)
 
         outputs = torch.zeros(z.size(1), seq_len, self.z_size, device=device)
 
-
-        ###print("\n\nLSTM forward loop:\n---------------------------\n")
         for t in range(seq_len):
             rnn_input_t = rnn_input_unpacked[:, t, :]       
             tau_t = tau[:, t, :] 
 
             x_prev = z[:, :, :self.state_dim]
             c_x = c_z[:, :, :self.state_dim]
-            x_next = self.discretisation_function(x_prev, self.A, tau_t, self.I)
-            ###x_next = discretisation_TU_old(x_prev, self.A, 0.05, self.I)
+
             h = z[:, :, self.state_dim:]
             c = c_z[:, :, self.state_dim:]
 
 
-            h_new_list, c_new_list = [], []     ###################
+            h_new_list, c_new_list = [], []     
             for layer in range(self.num_layers):
                 u_t = torch.cat((x_prev.squeeze(0), rnn_input_t), dim=1)   
-
                 h_new, c_new = self.lstm_cells[layer](u_t, h[layer], c[layer])
-                ###h, c = h.clone(), c.clone()
-                ###h[layer], c[layer] = h_new, c_new
 
-                h_new_list.append(h_new)        ###################
-                c_new_list.append(c_new)        ###################
+                h_new_list.append(h_new)        
+                c_new_list.append(c_new)        
 
+            x_mid = self.discretisation_function(x_prev, self.A, tau_t, self.I)     ###x_mid = discretisation_TU_old(x_prev, self.A, 0.05, self.I)
 
             h = torch.stack(h_new_list, dim=0)
             c = torch.stack(c_new_list, dim=0)
 
-            ###z[:, :, :self.state_dim] = x_next
-            ###z[:, :, self.state_dim:] = h
-            ###c_z[:, :, self.state_dim:] = c
+            alpha = torch.sigmoid(self.alpha_gate(h[-1]))
+            x_next = (1-alpha) * x_mid + alpha * self.W__h_to_x(h[-1])
+
             z = torch.cat((x_next, h), dim=-1)  
             c_z = torch.cat((c_x, c), dim=-1)
 
             outputs[:, t, :] = z[-1]       
 
         packed_outputs = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
-
         return packed_outputs, (z, c_z)
 
 
 def discretisation_none(x_prev, A, tau, I):     return x_prev
 def discretisation_FE(x_prev, A, tau, I):       return x_prev + tau * torch.matmul(x_prev, A) 
 def discretisation_BE(x_prev, A, tau, I):       return torch.matmul(x_prev, torch.inverse(I-tau*A)) 
-def discretisation_TU_old(x_prev, A, tau, I):   return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A))) #if tau is not None and t!=0 else x_prev
+def discretisation_TU_(x_prev, A, tau, I):      return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A))) #if tau is not None and t!=0 else x_prev
 
 
 def discretisation_TU(x_prev, A, tau, I):
@@ -126,6 +120,8 @@ def discretisation_TU(x_prev, A, tau, I):
 
     # Restore the extra sequence dimension: (1, 128, 2)
     return x_next.permute(1, 0, 2)  # Reshape to [1, 128, 2]
+
+
 
 
 class LSTMCell(nn.Module):
