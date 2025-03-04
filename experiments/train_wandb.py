@@ -28,15 +28,16 @@ hyperparams = {
     'decoder_size': 1,
     'decoder_depth': 2,
     'batch_size': 128,
-    'lr': 0.001,
+    'lr': 0.001,                    ### try 0.0005 to increase stability
     'n_epochs': 1000,
-    'es_patience': 10,              ### default 20
+    'es_patience': 20,              ### default 20
     'es_delta': 1e-7,
     'sched_patience': 10,
     'sched_factor': 2,
     'loss': "mse",
     'discretisation_mode': "TU",
     'optimiser_mode': "adam",
+    'x_update_mode': "alpha",
 }
 
 
@@ -89,6 +90,7 @@ def main():
         'decoder_size': wandb.config['decoder_size'],
         'decoder_depth': wandb.config['decoder_depth'],
         'discretisation_mode': wandb.config['discretisation_mode'],
+        'x_update_mode': wandb.config['x_update_mode'],
         'use_batch_norm': False,
     }
 

@@ -1,11 +1,11 @@
-import torch
+import torch, sys
 import torch.nn as nn
 from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 
 
 class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
-                 bias=True, batch_first=True, dropout=0.0, bidirectional=False, state_dim=None, discretisation_mode=None):
+                 bias=True, batch_first=True, dropout=0.0, bidirectional=False, state_dim=None, discretisation_mode=None, x_update_mode=None):
         super(LSTM, self).__init__()
 
         self.input_size = input_size
@@ -25,6 +25,9 @@ class LSTM(nn.Module):
 
         function_name = f"discretisation_{discretisation_mode}"
         self.discretisation_function = globals().get(function_name)
+
+        function_name = f"x_update_mode__{x_update_mode}"
+        self.x_update_function = globals().get(function_name)
 
         self.lstm_cells = nn.ModuleList([
             torch.jit.script(LSTMCell(input_size+state_dim if layer==0 else self.hidden_size, self.hidden_size, bias))
@@ -72,16 +75,13 @@ class LSTM(nn.Module):
             h = torch.stack(h_new_list, dim=0)
             c = torch.stack(c_new_list, dim=0)
 
-            alpha = torch.sigmoid(self.alpha_gate(h[-1]))
-            x_next = (1-alpha) * x_mid + alpha * self.W__h_to_x(h[-1])
-
-            #lambda_factor = torch.clamp(lambda_calc(x_prev, h), min=0.1, max=0.9).mean().item()
-            #x_next = lambda_factor * x_mid + (1-lambda_factor) * self.W__h_to_x(h[-1]) 
+            x_next = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)
 
             z = torch.cat((x_next, h), dim=-1)  
             c_z = torch.cat((c_x, c), dim=-1)
 
             outputs[:, t, :] = z[-1]       
+            ###sys.exit()
 
         packed_outputs = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
         return packed_outputs, (z, c_z)
@@ -91,9 +91,6 @@ def discretisation_none(x_prev, A, tau, I):     return x_prev
 def discretisation_FE(x_prev, A, tau, I):       return x_prev + tau * torch.matmul(x_prev, A) 
 def discretisation_BE(x_prev, A, tau, I):       return torch.matmul(x_prev, torch.inverse(I-tau*A)) 
 def discretisation_TU_(x_prev, A, tau, I):      return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A)))      #if tau is not None and t!=0 else x_prev
-
-def lambda_calc(x_prev, h):                     return torch.norm(x_prev, dim=-1, keepdim=True).clamp(min=1e-3) / (torch.norm(x_prev, dim=-1, keepdim=True) + torch.norm(h[-1], dim=-1, keepdim=True) + 1e-6).clamp(min=1e-3)
-
 
 def discretisation_TU(x_prev, A, tau, I):
     batch_size = tau.shape[0]  # tau is (128, 1)
@@ -125,6 +122,21 @@ def discretisation_TU(x_prev, A, tau, I):
 
     # Restore the extra sequence dimension: (1, 128, 2)
     return x_next.permute(1, 0, 2)  # Reshape to [1, 128, 2]
+
+
+def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):
+    alpha = torch.sigmoid(alpha_gate(h[-1]))
+    return (1-alpha) * x_mid + alpha * W__h_to_x(h[-1])
+
+
+def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):
+    x_norm = torch.norm(x_mid, dim=-1, keepdim=True)
+    h_norm = torch.norm(h[-1], dim=-1, keepdim=True)
+
+    lambda_factor = x_norm.clamp(min=1e-3) / (x_norm + h_norm + 1e-6).clamp(min=1e-3)
+    lambda_factor = torch.clamp(lambda_factor, min=0.1, max=0.9).mean().item()
+
+    return lambda_factor * x_mid + (1-lambda_factor) * W__h_to_x(h[-1]) 
 
 
 

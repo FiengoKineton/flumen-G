@@ -17,6 +17,7 @@ class CausalFlowModel(nn.Module):
                  decoder_size,
                  decoder_depth,
                  discretisation_mode,
+                 x_update_mode,
                  use_batch_norm=False):
         super(CausalFlowModel, self).__init__()
 
@@ -37,7 +38,8 @@ class CausalFlowModel(nn.Module):
             num_layers=self.control_rnn_depth,              # output | 1
             dropout=0, 
             state_dim=self.state_dim,
-            discretisation_mode=discretisation_mode
+            discretisation_mode=discretisation_mode, 
+            x_update_mode=x_update_mode
         ) if self.mode else torch.nn.LSTM(
             input_size=control_dim + 1,                     # output | 2
             hidden_size=control_rnn_size,                   # output | 8
@@ -84,6 +86,7 @@ class CausalFlowModel(nn.Module):
         output = self.u_dnn(encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :])
         output = output[:, :self.state_dim]  
 
+        ###sys.exit()
         return output
 
 
