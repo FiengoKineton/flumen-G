@@ -28,7 +28,7 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode_rnn = "false"                             # if True then h0_stack, else h0
+        self.mode_rnn = "true"                              # if True then h0_stack, else h0
         self.mode_dnn = True                                # if True then old dnn
 
         function_name = f"mode_rnn_{self.mode_rnn}"

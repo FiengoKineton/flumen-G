@@ -259,7 +259,7 @@ class EarlyStopping:
             self.best_model = True
             self.counter = 0
         else:
-            print("\tEarlyStopping counter: ", self.counter, " - must be <", self.patience, "\n")   # --- ADDED!
+            print("----EarlyStopping counter: ", self.counter, " - must be <", self.patience)   # --- ADDED!
             self.counter += 1
 
         if self.counter >= self.patience:
