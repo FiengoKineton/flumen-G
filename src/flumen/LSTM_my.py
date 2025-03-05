@@ -5,7 +5,8 @@ from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 
 class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
-                 bias=True, batch_first=True, dropout=0.0, bidirectional=False, state_dim=None, discretisation_mode=None, x_update_mode=None):
+                 bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
+                 state_dim=None, discretisation_mode=None, x_update_mode=None):
         super(LSTM, self).__init__()
 
         self.input_size = input_size
@@ -21,7 +22,7 @@ class LSTM(nn.Module):
 
         self.mhu = 1.5
         self.A = torch.tensor([[self.mhu, -self.mhu], [1/self.mhu, 0]])
-        self.I = torch.eye(self.A.shape[0], dtype=self.A.dtype)         # , device=device)
+        self.I = torch.eye(self.A.shape[0], dtype=self.A.dtype)
 
         function_name = f"discretisation_{discretisation_mode}"
         self.discretisation_function = globals().get(function_name)
@@ -88,9 +89,56 @@ class LSTM(nn.Module):
 
 
 def discretisation_none(x_prev, A, tau, I):     return x_prev
-def discretisation_FE(x_prev, A, tau, I):       return x_prev + tau * torch.matmul(x_prev, A) 
-def discretisation_BE(x_prev, A, tau, I):       return torch.matmul(x_prev, torch.inverse(I-tau*A)) 
+def discretisation_FE_(x_prev, A, tau, I):      return x_prev + tau * torch.matmul(x_prev, A) 
+def discretisation_BE_(x_prev, A, tau, I):      return torch.matmul(x_prev, torch.inverse(I-tau*A)) 
 def discretisation_TU_(x_prev, A, tau, I):      return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A)))      #if tau is not None and t!=0 else x_prev
+
+
+def discretisation_FE(x_prev, A, tau, I):
+    batch_size = tau.shape[0]  # tau is (batch, 1)
+    state_dim = A.shape[0]  # A is (state_dim, state_dim)
+
+    # Reshape tau for broadcasting
+    tau = tau.view(batch_size, 1, 1)  # Shape: [batch, 1, 1]
+
+    # Expand A and I to match batch size
+    A = A.expand(batch_size, state_dim, state_dim)  # Shape: [batch, state_dim, state_dim]
+    I = I.expand(batch_size, state_dim, state_dim)  # Shape: [batch, state_dim, state_dim]
+
+    # Compute transformation matrix
+    transform_matrix = I + tau * A  # Shape: [batch, state_dim, state_dim]
+
+    # Reshape x_prev for batch matrix multiplication
+    x_prev = x_prev.squeeze(0).unsqueeze(1)  # Convert (1, batch, state_dim) → (batch, 1, state_dim)
+
+    # Apply transformation
+    x_next = torch.bmm(x_prev, transform_matrix)  # Shape: [batch, 1, state_dim]
+
+    # Restore the extra sequence dimension: (1, batch, state_dim)
+    return x_next.permute(1, 0, 2)  # Shape: [1, batch, state_dim]
+
+def discretisation_BE(x_prev, A, tau, I):
+    batch_size = tau.shape[0]  # tau is (batch, 1)
+    state_dim = A.shape[0]  # A is (state_dim, state_dim)
+
+    # Reshape tau for broadcasting
+    tau = tau.view(batch_size, 1, 1)  # Shape: [batch, 1, 1]
+
+    # Expand A and I to match batch size
+    A = A.expand(batch_size, state_dim, state_dim)  # Shape: [batch, state_dim, state_dim]
+    I = I.expand(batch_size, state_dim, state_dim)  # Shape: [batch, state_dim, state_dim]
+
+    # Compute inverse matrix
+    inv_matrix = torch.inverse(I - tau * A)  # Shape: [batch, state_dim, state_dim]
+
+    # Reshape x_prev for batch matrix multiplication
+    x_prev = x_prev.squeeze(0).unsqueeze(1)  # Convert (1, batch, state_dim) → (batch, 1, state_dim)
+
+    # Apply transformation
+    x_next = torch.bmm(x_prev, inv_matrix)  # Shape: [batch, 1, state_dim]
+
+    # Restore the extra sequence dimension: (1, batch, state_dim)
+    return x_next.permute(1, 0, 2)  # Shape: [1, batch, state_dim]
 
 def discretisation_TU(x_prev, A, tau, I):
     batch_size = tau.shape[0]  # tau is (128, 1)

@@ -28,7 +28,11 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode = True                                    # if True then h0_stack, else h0
+        self.mode_rnn = "false"                             # if True then h0_stack, else h0
+        self.mode_dnn = True                                # if True then old dnn
+
+        function_name = f"mode_rnn_{self.mode_rnn}"
+        self.structure_function = getattr(self, function_name, None)
 
 
         self.u_rnn = LSTM(
@@ -40,7 +44,7 @@ class CausalFlowModel(nn.Module):
             state_dim=self.state_dim,
             discretisation_mode=discretisation_mode, 
             x_update_mode=x_update_mode
-        ) if self.mode else torch.nn.LSTM(
+        ) if self.mode_rnn=="true" else torch.nn.LSTM(
             input_size=control_dim + 1,                     # output | 2
             hidden_size=control_rnn_size,                   # output | 8
             batch_first=True,
@@ -50,36 +54,43 @@ class CausalFlowModel(nn.Module):
 
     #-- ENCODER
         x_dnn_osz = control_rnn_size * self.control_rnn_depth
-        self.x_dnn = FFNet(in_size=state_dim,               # output | 2
-                        out_size=x_dnn_osz,                 # output | 8
-                        hidden_size=encoder_depth *         # output | 16
-                        (encoder_size * x_dnn_osz, ),
-                        use_batch_norm=use_batch_norm)
+        self.x_dnn = FFNet(
+            in_size=state_dim,                              # output | 2
+            out_size=x_dnn_osz,                             # output | 8
+            hidden_size=encoder_depth *                     # output | 16
+            (encoder_size * x_dnn_osz, ),
+            use_batch_norm=use_batch_norm
+        ) if self.mode_dnn else FFNet(
+            in_size=state_dim, 
+            out_size=x_dnn_osz, 
+            hidden_size=[state_dim * 2, x_dnn_osz]
+        )
 
     #-- Updated DECODER that takes [x_tilde, h_tilde]
-        u_dnn_isz = control_rnn_size + state_dim if self.mode else control_rnn_size
-        self.u_dnn = FFNet(in_size=u_dnn_isz,               # output | 10
-                        out_size=output_dim,                # output | 2
-                        hidden_size=decoder_depth *         # output | 20
-                        (decoder_size * u_dnn_isz, ),
-                        use_batch_norm=use_batch_norm)
+        u_dnn_isz = control_rnn_size + state_dim if self.mode_rnn=="true" else control_rnn_size
+        self.u_dnn = FFNet(
+            in_size=u_dnn_isz,                              # output | 10
+            out_size=output_dim,                            # output | 2
+            hidden_size=decoder_depth *                     # output | 20
+            (decoder_size * u_dnn_isz, ),
+            use_batch_norm=use_batch_norm
+        ) if self.mode_dnn else FFNet(
+            in_size=u_dnn_isz, 
+            out_size=output_dim, 
+            hidden_size=[u_dnn_isz * 2, output_dim]
+        )
             
 
 
 
     def forward(self, x, rnn_input, deltas):
-        h0 = self.x_dnn(x) 
-        z = torch.cat((x, h0), dim=1)       
+        h0, c0, tau = self.structure_function(x, deltas)
 
-        h0 = torch.stack(h0.split(self.control_rnn_size, dim=1)) if not self.mode else h0
-        z = z.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
-        c0 = torch.zeros_like(z if self.mode else h0) 
-
-        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (z, c0), deltas) if self.mode else self.u_rnn(rnn_input, (h0, c0))
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0), tau)
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
         h_shift = torch.roll(h, shifts=1, dims=1)   
-        h_temp = z[-1] if self.mode else h0[-1]
+        h_temp = h0[-1]
         h_shift[:, 0, :] = h_temp
 
         encoded_controls = (1 - deltas) * h_shift + deltas * h  
@@ -90,6 +101,21 @@ class CausalFlowModel(nn.Module):
         return output
 
 
+    def mode_rnn_true(self, x, deltas):
+        h0 = self.x_dnn(x)
+        z = torch.cat((x, h0), dim=1) 
+        z = z.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
+        c0 = torch.zeros_like(z)
+        tau = deltas
+
+        return z, c0, tau
+
+    def mode_rnn_false(self, x, deltas):
+        h0 = self.x_dnn(x)
+        h0 = torch.stack(h0.split(self.control_rnn_size, dim=1))
+        c0 = torch.zeros_like(h0)
+
+        return h0, c0, None
 
 
 class FFNet(nn.Module):
@@ -98,7 +124,7 @@ class FFNet(nn.Module):
                  in_size,
                  out_size,
                  hidden_size,
-                 activation=nn.Tanh,
+                 activation=nn.Tanh,            # try | nn.ReLU --- not good!
                  use_batch_norm=False):
         super(FFNet, self).__init__()
 
