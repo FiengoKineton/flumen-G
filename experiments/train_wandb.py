@@ -209,7 +209,7 @@ def main():
     for epoch in range(wandb.config['n_epochs']):
         model.train()
         for example in train_dl:        # for i in range 190
-            print("check")
+            ###print("check")
             train_step(example, loss, model, optimiser, device)
     
             """
