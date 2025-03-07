@@ -27,6 +27,9 @@ for DEBBAGGING:
 
 import sys
 sys.exit()
+
+import time
+time.sleep(1)
 ________________________________________________________________________________________________________________________
 """
 
@@ -111,9 +114,9 @@ class LSTM():
         # NOTE: the h is the z variable!
         print("\trnn_input_unpacked.shape:", rnn_input_unpacked.shape)  # output | torch.Size([128, 75, 2])
         print("\tlengths.shape:", lengths.shape[0])                     # output | 128
-        #print("\batch_size:", batch_size)                               # output | 512
+        print("\batch_size:", batch_size)                               # output | 512
         print("\tseq_len:", seq_len)                                    # output | 75
-        #print("\tinput_size:", input_size)                              # output | 2
+        print("\tinput_size:", input_size)                              # output | 2
         print("\n") 
         print("\tz.shape:", z.shape)                                    # output | torch.Size([1, 128, 10])
         print("\tc.shape:", c.shape)                                    # output | torch.Size([1, 128, 8])
@@ -135,7 +138,7 @@ class LSTM():
             print("\tx_prev.shape:", x_prev.shape)                      # output | torch.Size([1, 128, 2])
             print("\tx_next.shape:", x_next.shape)                      # output | torch.Size([1, 128, 2])
             print("\th.shape (before):", h.shape)                       # output | torch.Size([1, 128, 8])
-            print("\tc.shape (before):", c.shape)                       # output | torch.Size([[1, 128, 8])
+            print("\tc.shape (before):", c.shape)                       # output | torch.Size([1, 128, 8])
             print("\ttau_t.shape:", tau_t.shape)                        # outpuy | toch.Size([128, 1])
             print("\n")
             #print("\tx_k:", x_prev)                                     
@@ -164,6 +167,11 @@ class LSTM():
             if t == 1 : sys.exit()
             print("\n\toutputs.shape (after):", outputs.shape)          # output | torch.Size([128, 75, 10])
             #"""
+
+    def discretisation_none(x_prev, A, tau, I):     return x_prev
+    def discretisation_FE_(x_prev, A, tau, I):      return x_prev + tau * torch.matmul(x_prev, A) 
+    def discretisation_BE_(x_prev, A, tau, I):      return torch.matmul(x_prev, torch.inverse(I-tau*A)) 
+    def discretisation_TU_(x_prev, A, tau, I):      return torch.matmul(x_prev, torch.matmul(I+tau/2*A, torch.inverse(I-tau/2*A)))      #if tau is not None and t!=0 else x_prev
 
 
 

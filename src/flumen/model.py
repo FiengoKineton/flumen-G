@@ -28,7 +28,7 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode_rnn = "true"                              # if True then h0_stack, else h0
+        self.mode_rnn = "new"                               # if new then h0_stack, else h0
         self.mode_dnn = True                                # if True then old dnn
 
         function_name = f"mode_rnn_{self.mode_rnn}"
@@ -44,7 +44,7 @@ class CausalFlowModel(nn.Module):
             state_dim=self.state_dim,
             discretisation_mode=discretisation_mode, 
             x_update_mode=x_update_mode
-        ) if self.mode_rnn=="true" else torch.nn.LSTM(
+        ) if self.mode_rnn=="new" else torch.nn.LSTM(
             input_size=control_dim + 1,                     # output | 2
             hidden_size=control_rnn_size,                   # output | 8
             batch_first=True,
@@ -67,7 +67,7 @@ class CausalFlowModel(nn.Module):
         )
 
     #-- Updated DECODER that takes [x_tilde, h_tilde]
-        u_dnn_isz = control_rnn_size + state_dim if self.mode_rnn=="true" else control_rnn_size
+        u_dnn_isz = control_rnn_size + state_dim if self.mode_rnn=="new" else control_rnn_size
         self.u_dnn = FFNet(
             in_size=u_dnn_isz,                              # output | 10
             out_size=output_dim,                            # output | 2
@@ -101,7 +101,7 @@ class CausalFlowModel(nn.Module):
         return output
 
 
-    def mode_rnn_true(self, x, deltas):
+    def mode_rnn_new(self, x, deltas):
         h0 = self.x_dnn(x)
         z = torch.cat((x, h0), dim=1) 
         z = z.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)

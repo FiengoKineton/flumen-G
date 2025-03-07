@@ -22,22 +22,22 @@ import pandas as pd
 
 hyperparams = {
     'control_rnn_size': 8,          ### default 12  | 8 if self.mode_rnn="true" else 10
-    'control_rnn_depth': 1,         ### maybe try 2? (num_layer == control_rnn_depth)
+    'control_rnn_depth': 1,         ### maybe try 2? (num_layer == control_rnn_depth) --- Nope!
     'encoder_size': 1,
     'encoder_depth': 2,
     'decoder_size': 1,
     'decoder_depth': 2,
     'batch_size': 128,
-    'lr': 0.001,                    ### try 0.0005 to increase stability
+    'lr': 0.001,                    ### try 5e-4 to increase stability
     'n_epochs': 1000,
     'es_patience': 20,              ### default 20
     'es_delta': 1e-7,
     'sched_patience': 10,
     'sched_factor': 2,
     'loss': "mse",
-    'discretisation_mode': "TU",
-    'optimiser_mode': "adam",
-    'x_update_mode': "alpha",
+    'discretisation_mode': "TU",    #-- {TU, FE, BE}
+    'optimiser_mode': "adam",       #-- {adam, tbptt, nesterov, newton}
+    'x_update_mode': "alpha",       #-- {alpha, lamda}
 }
 
 
@@ -208,7 +208,8 @@ def main():
 
     for epoch in range(wandb.config['n_epochs']):
         model.train()
-        for example in train_dl:
+        for example in train_dl:        # for i in range 190
+            print("check")
             train_step(example, loss, model, optimiser, device)
     
             """
