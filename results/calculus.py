@@ -2,22 +2,26 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-custom_weights = {
-    "test_loss": 0.6,  # Test loss is the most important.
-    "train_loss": 0.1,  # Train loss is less critical.
-    "val_loss": 0.2,  # Validation loss is still important.
-    "best_epoch": 0.1  # Epoch count has low priority.
-}
-
 
 class CalcValues:
     def __init__(self):
         self.datasets = self.DataSet()
-        ###self.average_results = {name: self.calculate_average_metrics(data) for name, data in self.datasets.items()}
-        ###self.best_runs = {name: self.find_best_run(data) for name, data in self.datasets.items()}
 
-        for name, data in self.datasets.items():
-            self.display_results(name, data)
+        self.metrics = [
+            "_step", 
+            "best_epoch", 
+            "best_test", 
+            "best_train", 
+            "best_val", 
+            "lr", 
+            "test_loss", 
+            "time", 
+            "train_loss", 
+            "val_loss"
+            ]
+
+        for name, data in self.datasets.items():    self.display_results(name, data)
+        self.display_final_comparison()
 
 
 
@@ -29,6 +33,7 @@ class CalcValues:
         ]
 
         x_update_alpha = [
+            {'run': "015", '_runtime': 11637.674524, '_step': 65, '_timestamp': 1741122288.162348, '_wandb': {'runtime': 11637}, 'best_epoch': 56, 'best_test': 0.15566413057228876, 'best_train': 0.03127661450869507, 'best_val': 0.0726061523670242, 'epoch': 66, 'lr': 0.001, 'test_loss': 0.17950638903984947, 'time': 11612.085956335068, 'train_loss': 0.0874257475413658, 'val_loss': 0.16335126840405997},
             {'run': "018(1)", '_runtime': 12845.8606273, '_step': 84, '_timestamp': 1741201116.3583372, '_wandb': {'runtime': 12845}, 'best_epoch': 80, 'best_test': 0.09021028982741491, 'best_train': 0.020383733487318433, 'best_val': 0.055468578689864705, 'epoch': 85, 'lr': 0.001, 'test_loss': 0.11940238163584754, 'time': 12816.142216682434, 'train_loss': 0.02383146670563196, 'val_loss': 0.0593999158591032},
             {'run': "018(2-3)", '_runtime': 29190.6178727, '_step': 156, '_timestamp': 1741217461.1155827, '_wandb': {'runtime': 29190}, 'best_epoch': 137, 'best_test': 0.08476408736573325, 'best_train': 0.01709923068327563, 'best_val': 0.04871034687237134, 'epoch': 157, 'lr': 0.000125, 'test_loss': 0.08193321597008478, 'time': 29160.899462223053, 'train_loss': 0.01672123080838925, 'val_loss': 0.04979510998560323},
             {'run': "019", '_runtime': 23343.4636111, '_step': 142, '_timestamp': 1741280362.9845507, '_wandb': {'runtime': 23343}, 'best_epoch': 123, 'best_test': 0.0533087533558645, 'best_train': 0.02122072688249684, 'best_val': 0.25057389338811237, 'epoch': 143, 'lr': 6.25e-05, 'test_loss': 0.05645283382563364, 'time': 23315.39107489586, 'train_loss': 0.01923207267034779, 'val_loss': 0.25213538606961566},
@@ -62,8 +67,7 @@ class CalcValues:
         df = pd.DataFrame(data_list)
 
         # Select only numerical columns
-        numeric_columns = ["best_epoch", "best_test", "best_train", "best_val", "lr", 
-                           "test_loss", "time", "train_loss", "val_loss"]
+        numeric_columns = self.metrics
         
         # Compute mean values
         df_mean = df[numeric_columns].mean().to_frame(name="Average").reset_index()
@@ -89,14 +93,23 @@ class CalcValues:
         if not data_list:
             return None
 
-        weights = {
+        weights_1 = {
             "test_loss": 0.5,
             "train_loss": 0.2,
             "val_loss": 0.2,
             "best_epoch": 0.1  
         }
 
+        weights_2 = {
+            "test_loss": 0.6,  # Test loss is the most important.
+            "train_loss": 0.1,  # Train loss is less critical.
+            "val_loss": 0.2,  # Validation loss is still important.
+            "best_epoch": 0.1  # Epoch count has low priority.
+        }
+
+
         # Function to compute a score for each run
+        weights = weights_1
         def score(run):
             return (
                 run["test_loss"] * weights["test_loss"] +
@@ -145,8 +158,7 @@ class CalcValues:
 
         df = pd.DataFrame(data_list)
 
-        numeric_columns = ["best_epoch", "best_test", "best_train", "best_val", "lr", 
-                        "test_loss", "time", "train_loss", "val_loss"]
+        numeric_columns = self.metrics
 
         df_mean = df[numeric_columns].mean().to_frame(name="Average").reset_index()
         df_mean.rename(columns={"index": "Metric"}, inplace=True)
@@ -214,6 +226,124 @@ class CalcValues:
                 cell.set_text_props(color="blue", fontweight="bold")  # Make first column blue
 
         plt.title(f"Average Metrics for {dataset_name}", fontsize=12, fontweight="bold")
+        plt.show()
+
+
+    def display_final_comparison__(self):
+        """Displays a final table comparing the best models across all datasets."""
+        if not self.datasets:
+            print("No datasets available.")
+            return
+
+        numeric_columns = self.metrics
+
+        # Find best model for each dataset
+        best_models = {name: self.find_best_run(data) for name, data in self.datasets.items()}
+
+        # Extract numeric values for each dataset
+        comparison_data = {dataset: [best_models[dataset].get(metric, "N/A") for metric in numeric_columns]
+                        for dataset in self.datasets}
+
+        # Convert to DataFrame (rows = metrics, columns = datasets)
+        comparison_df = pd.DataFrame(comparison_data, index=numeric_columns)
+
+        run_names = {dataset: best_models[dataset].get("run", "N/A") for dataset in self.datasets}
+        comparison_df = pd.concat([pd.DataFrame(run_names, index=["Run Name"]), comparison_df])
+
+        # Format numbers correctly (rounding to 6 decimals)
+        for col in comparison_df.columns:
+            comparison_df[col] = comparison_df[col].apply(lambda x: f"{x:.6f}".rstrip('0').rstrip('.') if isinstance(x, (int, float)) else x)
+
+        # Plot Table
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.axis("tight")
+        ax.axis("off")
+
+        table = ax.table(cellText=comparison_df.values,
+                        colLabels=comparison_df.columns,
+                        rowLabels=comparison_df.index,
+                        cellLoc="center", loc="center")
+
+        # Apply styling
+        for (i, j), cell in table.get_celld().items():
+            if i == 0:  # Header row (datasets)
+                cell.set_text_props(color="red", fontweight="bold")
+            elif j == -1:  # First column (metrics)
+                cell.set_text_props(color="blue", fontweight="bold")
+
+        plt.title("Comparison of Best Models Across Datasets", fontsize=12, fontweight="bold")
+        plt.show()
+
+
+    def display_final_comparison(self):
+        """Displays a final table comparing the best models across all datasets, highlighting min values in green."""
+        if not self.datasets:
+            print("No datasets available.")
+            return
+
+        numeric_columns = self.metrics
+
+        # Find best model for each dataset
+        best_models = {name: self.find_best_run(data) for name, data in self.datasets.items()}
+
+        # Extract numeric values for each dataset
+        comparison_data = {dataset: [best_models[dataset].get(metric, "N/A") for metric in numeric_columns]
+                        for dataset in self.datasets}
+
+        # Convert to DataFrame (rows = metrics, columns = datasets)
+        comparison_df = pd.DataFrame(comparison_data, index=numeric_columns)
+
+        # Add "Run Name" row at the top (Do NOT include it in min search)
+        run_names = {dataset: best_models[dataset].get("run", "N/A") for dataset in self.datasets}
+        run_name_df = pd.DataFrame(run_names, index=["Run Name"])
+        final_df = pd.concat([run_name_df, comparison_df])
+
+        # Convert all numeric values back to floats for proper min calculations
+        for col in final_df.columns:
+            final_df[col] = final_df[col].apply(lambda x: float(x) if isinstance(x, (int, float, str)) and str(x).replace('.', '', 1).isdigit() else x)
+
+        # Format numbers correctly (rounding to 6 decimals)
+        for col in final_df.columns:
+            final_df[col] = final_df[col].apply(lambda x: f"{x:.6f}".rstrip('0').rstrip('.') if isinstance(x, (int, float)) else x)
+
+        # Plot Table
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.axis("tight")
+        ax.axis("off")
+
+        table = ax.table(cellText=final_df.values,
+                        colLabels=final_df.columns,
+                        rowLabels=final_df.index,
+                        cellLoc="center", loc="center")
+
+        # Apply styling
+        for (i, j), cell in table.get_celld().items():
+            if i == 0:  # Header row (datasets)
+                cell.set_text_props(color="black", fontweight="bold")
+            elif j == -1:  # First column (metric names)
+                cell.set_text_props(color="black", fontweight="bold")
+
+        # Identify min values and color them green (Ignore "Run Name" row)
+        for i in range(1, len(final_df)):  # Start from 1 to skip "Run Name"
+            numeric_values = {}
+            for j, col in enumerate(final_df.columns):
+                try:
+                    num_value = float(final_df.iloc[i, j])  # Convert to float
+                    numeric_values[j] = num_value  # Store valid numeric values
+                except ValueError:
+                    continue  # Ignore non-numeric values
+
+            if numeric_values:  # Ensure there's at least one valid number
+                min_value = min(numeric_values.values())  # Find the min value
+                max_value = max(numeric_values.values())
+
+                for j, value in numeric_values.items():
+                    if value == min_value:
+                        table[i+1, j].set_text_props(color="green", fontweight="bold")  # Highlight in green
+                    if value == max_value: 
+                        table[i+1, j].set_text_props(color="red", fontweight="bold")
+
+        plt.title("Comparison of Best Models Across Datasets", fontsize=12, fontweight="bold")
         plt.show()
 
 
