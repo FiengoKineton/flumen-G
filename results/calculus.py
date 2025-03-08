@@ -21,7 +21,8 @@ class CalcValues:
             ]
 
         for name, data in self.datasets.items():    self.display_results(name, data)
-        self.display_final_comparison()
+        self.display_final_comparison__best()
+        self.display_final_comparison__mean()
 
 
 
@@ -229,53 +230,7 @@ class CalcValues:
         plt.show()
 
 
-    def display_final_comparison__(self):
-        """Displays a final table comparing the best models across all datasets."""
-        if not self.datasets:
-            print("No datasets available.")
-            return
-
-        numeric_columns = self.metrics
-
-        # Find best model for each dataset
-        best_models = {name: self.find_best_run(data) for name, data in self.datasets.items()}
-
-        # Extract numeric values for each dataset
-        comparison_data = {dataset: [best_models[dataset].get(metric, "N/A") for metric in numeric_columns]
-                        for dataset in self.datasets}
-
-        # Convert to DataFrame (rows = metrics, columns = datasets)
-        comparison_df = pd.DataFrame(comparison_data, index=numeric_columns)
-
-        run_names = {dataset: best_models[dataset].get("run", "N/A") for dataset in self.datasets}
-        comparison_df = pd.concat([pd.DataFrame(run_names, index=["Run Name"]), comparison_df])
-
-        # Format numbers correctly (rounding to 6 decimals)
-        for col in comparison_df.columns:
-            comparison_df[col] = comparison_df[col].apply(lambda x: f"{x:.6f}".rstrip('0').rstrip('.') if isinstance(x, (int, float)) else x)
-
-        # Plot Table
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.axis("tight")
-        ax.axis("off")
-
-        table = ax.table(cellText=comparison_df.values,
-                        colLabels=comparison_df.columns,
-                        rowLabels=comparison_df.index,
-                        cellLoc="center", loc="center")
-
-        # Apply styling
-        for (i, j), cell in table.get_celld().items():
-            if i == 0:  # Header row (datasets)
-                cell.set_text_props(color="red", fontweight="bold")
-            elif j == -1:  # First column (metrics)
-                cell.set_text_props(color="blue", fontweight="bold")
-
-        plt.title("Comparison of Best Models Across Datasets", fontsize=12, fontweight="bold")
-        plt.show()
-
-
-    def display_final_comparison(self):
+    def display_final_comparison__best(self):
         """Displays a final table comparing the best models across all datasets, highlighting min values in green."""
         if not self.datasets:
             print("No datasets available.")
@@ -346,6 +301,65 @@ class CalcValues:
         plt.title("Comparison of Best Models Across Datasets", fontsize=12, fontweight="bold")
         plt.show()
 
+
+    
+    def display_final_comparison__mean(self):
+            if not self.datasets:
+                print("No datasets available.")
+                return
+
+            numeric_columns = self.metrics
+            avg_models = {name: self.calculate_average_metrics__new(data) for name, data in self.datasets.items()}
+            comparison_data = {dataset: [avg_models[dataset].get(metric, "N/A") for metric in numeric_columns] for dataset in self.datasets}
+            comparison_df = pd.DataFrame(comparison_data, index=numeric_columns)
+
+            for col in comparison_df.columns:
+                comparison_df[col] = pd.to_numeric(comparison_df[col], errors='coerce')
+            
+            final_df = comparison_df.map(lambda x: f"{x:.6f}".rstrip('0').rstrip('.') if pd.notna(x) else "N/A")
+
+            fig, ax = plt.subplots(figsize=(12, 6))
+            ax.axis("tight")
+            ax.axis("off")
+            table = ax.table(cellText=final_df.values,
+                            colLabels=final_df.columns,
+                            rowLabels=final_df.index,
+                            cellLoc="center", loc="center")
+
+            for (i, j), cell in table.get_celld().items():
+                if i == 0:
+                    cell.set_text_props(color="black", fontweight="bold")
+                elif j == -1:
+                    cell.set_text_props(color="black", fontweight="bold")
+
+            for i in range(len(final_df)):
+                numeric_values = {}
+                for j, col in enumerate(final_df.columns):
+                    try:
+                        num_value = float(final_df.iloc[i, j])
+                        numeric_values[j] = num_value
+                    except ValueError:
+                        continue
+
+                if numeric_values:
+                    min_value = min(numeric_values.values())
+                    max_value = max(numeric_values.values())
+
+                    for j, value in numeric_values.items():
+                        if value == min_value:
+                            table[i+1, j].set_text_props(color="green", fontweight="bold")
+                        if value == max_value:
+                            table[i+1, j].set_text_props(color="red", fontweight="bold")
+
+            plt.title("Comparison of Average Models Across Datasets", fontsize=12, fontweight="bold")
+            plt.show()
+
+    def calculate_average_metrics__new(self, data_list):
+        if not data_list:
+            return None
+        df = pd.DataFrame(data_list)
+        numeric_columns = [col for col in self.metrics if col in df.columns]
+        return df[numeric_columns].mean().to_dict()
 
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
 

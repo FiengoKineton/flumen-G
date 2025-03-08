@@ -37,7 +37,7 @@ hyperparams = {
     'loss': "mse",
     'discretisation_mode': "TU",    #-- {TU, FE, BE}
     'optimiser_mode': "adam",       #-- {adam, tbptt, nesterov, newton}
-    'x_update_mode': "alpha",       #-- {alpha, lamda}
+    'x_update_mode': "beta",        #-- {alpha, beta, lamda}
 }
 
 
