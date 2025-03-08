@@ -13,11 +13,13 @@ custom_weights = {
 class CalcValues:
     def __init__(self):
         self.datasets = self.DataSet()
-        self.average_results = {name: self.calculate_average_metrics(data) for name, data in self.datasets.items()}
-        self.best_runs = {name: self.find_best_run(data) for name, data in self.datasets.items()}
+        ###self.average_results = {name: self.calculate_average_metrics(data) for name, data in self.datasets.items()}
+        ###self.best_runs = {name: self.find_best_run(data) for name, data in self.datasets.items()}
 
         for name, data in self.datasets.items():
             self.display_results(name, data)
+
+
 
     def DataSet(self):
         default_code_same_dim = [
@@ -47,6 +49,9 @@ class CalcValues:
             "x_update_alpha_opt": x_update_alpha_opt        
             }
 
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
+
     def calculate_average_metrics(self, data_list):
         """
         Computes and returns a dataframe with the average values for each metric.
@@ -66,6 +71,8 @@ class CalcValues:
 
         return df_mean
 
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
 
     def find_best_run(self, data_list):
         mode = "sort"
@@ -128,39 +135,88 @@ class CalcValues:
         return (run["test_loss"] * 0.6 + run["val_loss"] * 0.3 + run["train_loss"] * 0.1) * (1 + run["best_epoch"] / 100)
 
 
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
+
     def display_results(self, dataset_name, data_list):
-        # Compute averages
+        if not data_list:
+            print("No data available")
+            return
+
         df = pd.DataFrame(data_list)
+
         numeric_columns = ["best_epoch", "best_test", "best_train", "best_val", "lr", 
-                            "test_loss", "time", "train_loss", "val_loss"]
+                        "test_loss", "time", "train_loss", "val_loss"]
+
         df_mean = df[numeric_columns].mean().to_frame(name="Average").reset_index()
         df_mean.rename(columns={"index": "Metric"}, inplace=True)
 
-        # Find the best run based on a trade-off of training time and loss values
-        best_run = self.find_best_run(data_list)
-        
-        # Convert best run into a DataFrame
-        best_run_df = pd.DataFrame(best_run, index=["Best Run"]).T
-        best_run_df.reset_index(inplace=True)
-        best_run_df.rename(columns={"index": "Metric", "Best Run": "Best Value"}, inplace=True)
+        # Find best runs
+        best_run___sort = self.find_best_run___sort(data_list)
+        best_run___fun = self.find_best_run___fun(data_list)
 
-        # Create a Run Name row
-        run_name_row = pd.DataFrame({"Metric": ["Run Name"], "Average": [""], "Best Value": [best_run['run']]})
+        if best_run___sort is None or best_run___fun is None:
+            print("Error: No best run found.")
+            return
 
-        # Merge average and best run values into one table
-        merged_df = pd.merge(df_mean, best_run_df, on="Metric", how="left")
+        # Convert best runs to DataFrame (Ensure to keep only relevant columns)
+        best_run1_df = pd.DataFrame.from_dict(best_run___sort, orient='index', columns=["Best Run (sort)"]).reset_index()
+        best_run1_df.rename(columns={"index": "Metric"}, inplace=True)
 
-        # Insert the Run Name row at the top
+        best_run2_df = pd.DataFrame.from_dict(best_run___fun, orient='index', columns=["Best Run (fun)"]).reset_index()
+        best_run2_df.rename(columns={"index": "Metric"}, inplace=True)
+
+        # Remove unwanted columns (e.g., '_runtime', '_wandb')
+        best_run1_df = best_run1_df[best_run1_df["Metric"].isin(numeric_columns)]
+        best_run2_df = best_run2_df[best_run2_df["Metric"].isin(numeric_columns)]
+
+        # Merge data while keeping a single "Metric" column
+        merged_df = pd.merge(df_mean, best_run1_df, on="Metric", how="left")
+        merged_df = pd.merge(merged_df, best_run2_df, on="Metric", how="left")
+
+        # Add Run Name Row
+        run_name_row = pd.DataFrame({"Metric": ["Run Name"], 
+                                    "Average": [""], 
+                                    "Best Run (sort)": [best_run___sort.get('run', 'N/A')], 
+                                    "Best Run (fun)": [best_run___fun.get('run', 'N/A')]})
+
+        # Concatenate final dataframe
         merged_df = pd.concat([run_name_row, merged_df], ignore_index=True)
 
+        # Format numbers to 6 decimal places but remove unnecessary trailing zeros
+        def format_number(x):
+            if isinstance(x, (int, float)):
+                return f"{x:.6f}".rstrip('0').rstrip('.')  # Removes trailing zeros
+            return x  # Keep non-numeric values as they are
+
+        merged_df.iloc[:, 1:] = merged_df.iloc[:, 1:].applymap(format_number)
+
+        # Check column count before plotting
+        if merged_df.shape[1] != 4:
+            print("Error: Merged DataFrame does not have 4 columns. Found:", merged_df.shape[1])
+            print(merged_df.head())
+            return
+
         # Plot Table
-        fig, ax = plt.subplots(figsize=(6, 3))
+        fig, ax = plt.subplots(figsize=(8, 5))  # Make figure slightly larger
         ax.axis("tight")
         ax.axis("off")
-        table = ax.table(cellText=merged_df.values, colLabels=["Metric", "Average", "Best Run"], 
+
+        table = ax.table(cellText=merged_df.values, 
+                        colLabels=["Metric", "Average", "Best Run (sort)", "Best Run (fun)"], 
                         cellLoc="center", loc="center")
 
-        plt.title(f"Average Metrics for {dataset_name}", fontsize=10, fontweight="bold")
+        # Apply styling
+        for (i, key), cell in table.get_celld().items():
+            if i == 0:  # Header row
+                cell.set_text_props(color="red", fontweight="bold")  # Make headers red
+            elif key == 0:  # First column
+                cell.set_text_props(color="blue", fontweight="bold")  # Make first column blue
+
+        plt.title(f"Average Metrics for {dataset_name}", fontsize=12, fontweight="bold")
         plt.show()
+
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
 
 CalcValues()
