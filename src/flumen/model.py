@@ -28,7 +28,7 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode_rnn = "old"                               # if new then h0_stack, else h0
+        self.mode_rnn = "new"                               # if new then h0_stack, else h0
         self.mode_dnn = True                                # if True then old dnn
 
         function_name = f"mode_rnn_{self.mode_rnn}"
@@ -84,9 +84,10 @@ class CausalFlowModel(nn.Module):
 
 
     def forward(self, x, rnn_input, deltas):
-        h0, c0, tau = self.structure_function(x, deltas)
+        ###h0, c0, tau = self.structure_function(x, deltas)
+        ###rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0), tau)
 
-        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0))#, tau)
+        h0, rnn_out_seq_packed = self.structure_function(x, deltas, rnn_input)
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
         h_shift = torch.roll(h, shifts=1, dims=1)   
@@ -101,21 +102,25 @@ class CausalFlowModel(nn.Module):
         return output
 
 
-    def mode_rnn_new(self, x, deltas):
+    def mode_rnn_new(self, x, deltas, rnn_input):
         h0 = self.x_dnn(x)
         z = torch.cat((x, h0), dim=1) 
         z = z.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
         c0 = torch.zeros_like(z)
-        tau = deltas
 
-        return z, c0, tau
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (z, c0), deltas)
 
-    def mode_rnn_old(self, x, deltas):
+        return z, rnn_out_seq_packed
+
+
+    def mode_rnn_old(self, x, deltas, rnn_input):
         h0 = self.x_dnn(x)
         h0 = torch.stack(h0.split(self.control_rnn_size, dim=1))
         c0 = torch.zeros_like(h0)
 
-        return h0, c0, None
+        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0))
+
+        return h0, rnn_out_seq_packed
 
 
 class FFNet(nn.Module):
