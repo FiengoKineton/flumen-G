@@ -49,10 +49,16 @@ class CalcValues:
             {'run': "025", '_runtime': 6466.9516759, '_step': 47, '_timestamp': 1741404462.7291248, '_wandb': {'runtime': 6466}, 'best_epoch': 28, 'best_test': 0.2853936068122349, 'best_train': 0.11861003164655318, 'best_val': 0.1437250425418218, 'epoch': 48, 'lr': 0.0005, 'test_loss': 0.3043967697118956, 'time': 6438.592477083206, 'train_loss': 0.05953135157112407, 'val_loss': 0.1697242379425064}
         ]
 
+        x_update_beta = [
+            {'run': "026(1)", '_runtime': 8943.1548878, '_step': 56, '_timestamp': 1741480930.8972335, '_wandb': {'runtime': 9085}, 'best_epoch': 57, 'best_test': 0.09263929032853672, 'best_train': 0.03767314413316035, 'best_val': 0.16285020195775562, 'epoch': 57, 'lr': 0.0005, 'test_loss': 0.09263929032853672, 'time': 8914.816588163376, 'train_loss': 0.03767314413316035, 'val_loss': 0.16285020195775562},
+            {'run': "027(2)", '_runtime': 14979.936391781, '_step': 124, '_timestamp': 1741489422.5467255, '_wandb': {'runtime': 14979}, 'best_epoch': 105, 'best_test': 0.1153069618379786, 'best_train': 0.01781458006531158, 'best_val': 0.0347165379318453, 'epoch': 125, 'lr': 0.000125, 'test_loss': 0.11321590101671596, 'time': 14932.54727458954, 'train_loss': 0.017040841759394403, 'val_loss': 0.03776116819963569}
+        ]
+
         return{
             "default_code_same_dim": default_code_same_dim,
             "x_update_alpha": x_update_alpha,
-            "x_update_alpha_opt": x_update_alpha_opt        
+            "x_update_alpha_opt": x_update_alpha_opt,
+            "x_update_beta": x_update_beta      
             }
 
 
