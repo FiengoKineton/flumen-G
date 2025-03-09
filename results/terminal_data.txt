@@ -1577,6 +1577,148 @@ Timings: 0.01771712303161621, 0.657949686050415
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
+028___x-update-beta(not finished)
+
+
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-oxgco2m7:v18
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 8943.1548878, '_step': 56, '_timestamp': 1741480930.8972335, '_wandb': {'runtime': 9085}, 'best_epoch': 57, 'best_test': 0.09263929032853672, 'best_train': 0.03767314413316035, 'best_val': 0.16285020195775562, 'epoch': 57, 'lr': 0.0005, 'test_loss': 0.09263929032853672, 'time': 8914.816588163376, 'train_loss': 0.03767314413316035, 'val_loss': 0.16285020195775562}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'beta'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',   
+ 'data_settings': {'control_delta': 0.2,      
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.031121015548706055, 1.1794500350952148
+0.008528622014361489
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+029___x-update-beta
+
+
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-pzceh6ke:v28
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 14979.936391781, '_step': 124, '_timestamp': 1741489422.5467255, '_wandb': {'runtime': 14979}, 'best_epoch': 105, 'best_test': 0.1153069618379786, 'best_train': 0.01781458006531158, 'best_val': 0.0347165379318453, 'epoch': 125, 'lr': 0.000125, 'test_loss': 0.11321590101671596, 'time': 14932.54727458954, 'train_loss': 0.017040841759394403, 'val_loss': 0.03776116819963569}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'beta'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.013536691665649414, 0.7889626026153564
+0.012872173349280619
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+030___x-update-beta
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+031___x-update-beta
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+00_
+
+
+PC ...
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
 00_
 
 

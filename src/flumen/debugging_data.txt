@@ -194,3 +194,91 @@ class LSTMCell():
         print("\tc_next.shape:", c_next.shape)          # output | torch.Size([128, 8])
         print("\th_next.shape:", h_next.shape)          # output | torch.Size([128, 8])
         #"""
+
+
+
+
+train_wandb.py
+
+def main():
+    """
+    # --------------------------------------------------------------------------- #
+    # Define the discretisation based on mode
+    # Default is None --- null, FE (forward euler), BE (backward euler), TU (tustim)
+
+    discretisation_mode = wandb.config['discretisation_mode']
+
+    # Define the optimizer based on mode
+    # Default is Adam --- adam (Adam), tbptt (Adam), nesterov (SGD), newton (LBFGS)
+ 
+    optimiser_mode = wandb.config['optimiser_mode']
+
+
+    #print("\n\tdiscretisation_mode:", discretisation_mode)
+    #print("\toptimiser_mode:", optimiser_mode)
+
+    if optimiser_mode == "adam":
+        optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+    elif optimiser_mode == "tbptt":
+        optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+    elif optimiser_mode == "nesterov":
+        optimiser = torch.optim.SGD(model.parameters(), lr=wandb.config['lr'], momentum=0.9, nesterov=True)
+    elif optimiser_mode == "newton":
+        optimiser = torch.optim.LBFGS(model.parameters())
+    else:
+        optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+        raise ValueError(f"Unknown optimizer mode: {optimiser_mode}. Choose from: adam, sgd_nesterov, lbfgs.")
+
+
+    def get_next_filename(mode, where):
+        folder = os.path.join(os.path.dirname(__file__), f"{where}")  # Ensure correct folder path
+        os.makedirs(folder, exist_ok=True)  # Ensure the folder exists
+
+        # Check existing files with this optimizer name
+        existing_files = [f for f in os.listdir(folder) if f.startswith(f"{mode}_") and f.endswith(".csv")]
+        numbers = [int(f.split("_")[-1].split(".")[0]) for f in existing_files if f.split("_")[-1].split(".")[0].isdigit()]
+        
+        next_num = max(numbers, default=0) + 1  # Increment the highest found number
+        return os.path.join(folder, f"{mode}_{next_num}.csv")
+
+    dataset_filename_optimiser = get_next_filename(optimiser_mode, "GD_comparison")  
+    print(f"\nSaving training data to: {dataset_filename_optimiser}")    
+    
+    dataset_filename_discretisation = get_next_filename(discretisation_mode, "DT_comparison")  
+    print(f"\nSaving training data to: {dataset_filename_discretisation}")
+    print("\n\n")
+
+    performance_data_optimiser = []         # List to store results for optimisation
+    performance_data_discretisation = []    # List to store results for discretisation
+    # --------------------------------------------------------------------------- #
+
+    ...
+
+            """
+            loss_value, y_pred = train_step(example, loss, model, optimiser, device)   
+        # --------------------------------------------------------------------------- #
+            performance_data_optimiser.append({
+                "epoch": epoch + 1, 
+                "optimiser": optimiser_mode,
+                "train_loss": loss_value})
+            
+            performance_data_discretisation.append({
+                "epoch": epoch + 1, 
+                "discretisation": discretisation_mode,
+                "y_pred": y_pred})
+        # --------------------------------------------------------------------------- #
+            #"""
+    
+    ...
+
+    """
+    # --------------------------------------------------------------------------- #
+    df = pd.DataFrame(performance_data_optimiser)
+    df.to_csv(dataset_filename_optimiser, index=False)
+    print(f"Saved dataset: {dataset_filename_optimiser}")    
+    
+    df = pd.DataFrame(performance_data_discretisation)
+    df.to_csv(dataset_filename_discretisation, index=False)
+    print(f"Saved dataset: {dataset_filename_discretisation}")
+    # --------------------------------------------------------------------------- #
+    #"""
