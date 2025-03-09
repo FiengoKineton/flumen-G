@@ -22,7 +22,7 @@ import pandas as pd
 
 hyperparams = {
     'control_rnn_size': 8,          ### default 12  | 8 if self.mode_rnn="true" else 10
-    'control_rnn_depth': 1,         ### maybe try 2? (num_layer == control_rnn_depth) --- Nope!
+    'control_rnn_depth': 2,         ### maybe try 2? (num_layer == control_rnn_depth) --- Nope!
     'encoder_size': 1,
     'encoder_depth': 2,
     'decoder_size': 1,

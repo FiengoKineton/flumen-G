@@ -68,7 +68,7 @@ def train_step(example, loss_fn, model, optimiser, device):
     optimiser.zero_grad()
 
     y_pred = model(x0, u, deltas)  
-    loss = model.state_dim * loss_fn(y, y_pred)
+    loss = model.state_dim * loss_fn(y, y_pred)       
 
     loss.backward()
     ###torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)        ### added for lamda mode

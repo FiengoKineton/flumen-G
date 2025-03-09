@@ -30,6 +30,8 @@ def main():
     plt.ion()  # Enable interactive mode
     args = parse_args()
 
+    num_times = 2           # default 2
+
     if args.wandb:
         import wandb
         api = wandb.Api()
@@ -68,7 +70,7 @@ def main():
     fig2.canvas.mpl_connect('close_event', on_close_window)
 
     xx = np.linspace(0., 1., model.output_dim)
-    time_horizon = 2 * metadata["data_args"]["time_horizon"]
+    time_horizon = num_times * metadata["data_args"]["time_horizon"]
 
     # Store insets and connection lines
     prev_insets = []
