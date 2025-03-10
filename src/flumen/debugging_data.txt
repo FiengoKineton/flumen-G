@@ -7,6 +7,8 @@ python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test
 python experiments/interactive_test.py --wandb (name of the best model from a general experiment)
 OR
 python experiments/interactive_test.py outputs/vdp_test/vdp_test_(id)
+OR
+python experiments/interactive_test.py artifacts\flow_model-vdp_test_data-vdp_test-(id)
 
 
 wandb artifact cache cleanup 1MB

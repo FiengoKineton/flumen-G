@@ -8,7 +8,7 @@ from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
-                 state_dim=None, discretisation_mode=None, x_update_mode=None, dyn_matrix=None):
+                 state_dim=None, discretisation_mode=None, x_update_mode=None, mhu=1.0, dyn_factor=0.2):
         super(LSTM, self).__init__()
 
         self.input_size = input_size
@@ -22,7 +22,7 @@ class LSTM(nn.Module):
         self.bidirectional = bidirectional
         self.state_dim = state_dim
 
-        self.A = dyn_matrix
+        self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
         self.I = torch.eye(self.A.shape[0], dtype=self.A.dtype)
 
         self.discretisation_function = globals().get(f"discretisation_{discretisation_mode}")

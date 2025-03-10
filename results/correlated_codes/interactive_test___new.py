@@ -35,7 +35,7 @@ def main():
     if args.wandb:
         import wandb
         api = wandb.Api()
-        model_artifact = api.artifact(args.path)        
+        model_artifact = api.artifact(args.path)
         model_path = Path(model_artifact.download())
 
         model_run = model_artifact.logged_by()
@@ -47,9 +47,6 @@ def main():
         state_dict = torch.load(f, weights_only=True)
     with open(model_path / "metadata.yaml", 'r') as f:
         metadata: dict = yaml.load(f, Loader=yaml.FullLoader)
-    
-    if "dyn_matrix" in metadata["args"] and not isinstance(metadata["args"]["dyn_matrix"], torch.Tensor):
-        metadata["args"]["dyn_matrix"] = torch.tensor(metadata["args"]["dyn_matrix"])
 
     pprint(metadata)
 

@@ -1,10 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import argparse
 
 
 class CalcValues:
-    def __init__(self):
+    def __init__(self, display=False, plot=False):
         self.datasets = self.DataSet()
 
         self.metrics = [
@@ -20,13 +20,23 @@ class CalcValues:
             "val_loss"
             ]
 
-        #for name, data in self.datasets.items():    self.display_results(name, data)
-        #self.display_final_comparison__best()
-        #self.display_final_comparison__mean()
+        if display:
+            for name, data in self.datasets.items():    self.display_results(name, data)
+            self.display_final_comparison__best()
+            self.display_final_comparison__mean()
 
-        for param in ["test_loss", "train_loss", "val_loss"]: self.plot_metric_across_datasets(self.datasets, param)
+        if plot:
+            for param in ["val_loss", "test_loss", "train_loss", "time"]: 
+                self.plot_metric_across_datasets(self.datasets, param)
 
 
+    @staticmethod
+    def parse_arguments():
+        parser = argparse.ArgumentParser(description="Run results analysis with optional display and plotting.")
+        parser.add_argument("--display", action="store_true", help="Display results and comparisons.")
+        parser.add_argument("--plot", action="store_true", help="Plot selected metrics across datasets.")
+        args = parser.parse_args()
+        return args
 
     def DataSet(self):
         default_code_same_dim = [
@@ -82,12 +92,18 @@ class CalcValues:
             , {'run': "033", '_runtime': 11596.988310016, '_step': 89, '_timestamp': 1741556368.7455869, '_wandb': {'runtime': 11596}, 'best_epoch': 70, 'best_test': 0.025469546516736347, 'best_train': 0.020823853031273872, 'best_val': 0.05242124152561975, 'epoch': 90, 'lr': 0.00025, 'test_loss': 0.028552606967943057, 'time': 11577.355808258057, 'train_loss': 0.017268735077724886, 'val_loss': 0.05523285769399197}
         ]
 
+        improving = [
+            {'run': "034", '_runtime': 21600.8713907, '_step': 125, '_timestamp': 1741641582.1955037, '_wandb': {'runtime': 21600}, 'best_epoch': 106, 'best_test': 0.1035991437910568, 'best_train': 0.01831837007332416, 'best_val': 0.02983867224778921, 'epoch': 126, 'lr': 0.000125, 'test_loss': 0.10504141532712512, 'time': 21569.769416570663, 'train_loss': 0.0167576711299637, 'val_loss': 0.03204075362355936}
+            , {'run': "035", '_runtime': 17827.271294305, '_step': 130, '_timestamp': 1741641105.369735, '_wandb': {'runtime': 17827}, 'best_epoch': 111, 'best_test': 0.0369229315233136, 'best_train': 0.01782039366169739, 'best_val': 0.047414959925744266, 'epoch': 131, 'lr': 0.000125, 'test_loss': 0.03637387721784531, 'time': 17803.01145029068, 'train_loss': 0.01787952652999333, 'val_loss': 0.05475342119970019}
+        ]
+
         return{
             "default_code_same_dim": default_code_same_dim,
             #"new_LSTM": new_LSTM,
             #"x_update_alpha": x_update_alpha,
             "x_update_alpha_opt": x_update_alpha_opt,
-            "x_update_beta": x_update_beta
+            "x_update_beta": x_update_beta, 
+            "improving": improving
             }
 
 
@@ -426,8 +442,15 @@ class CalcValues:
             x_values = df_sorted["_step"] if "_step" in df_sorted else df_sorted["epoch"]
             y_values = df_sorted[metric]
 
+            # Find minimum value and its corresponding x_value
+            min_y = y_values.min()
+            min_x = x_values.loc[y_values.idxmin()]
+
             # Plot each dataset's metric trajectory
             plt.plot(x_values, y_values, marker='o', linestyle='-', label=dataset_name)
+            plt.scatter(min_x, min_y, color='red', s=100, zorder=3)
+            plt.text(min_x, min_y, f"{min_y:.4f}", fontsize=10, ha='right', va='bottom', color='red')
+
 
         plt.xlabel("Training Steps (or Epochs)")
         plt.ylabel(metric.replace("_", " ").capitalize())  # Formatting metric name for display
@@ -436,6 +459,9 @@ class CalcValues:
         plt.grid(True)
         plt.show()
 
+
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
 
-CalcValues()
+if __name__ == "__main__":
+    args = CalcValues.parse_arguments()
+    CalcValues(display=args.display, plot=args.plot)

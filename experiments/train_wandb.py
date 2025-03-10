@@ -81,7 +81,6 @@ def main():
 
     mhu = data["settings"]["dynamics"]["args"]["damping"]
     dyn_factor = data["settings"]["control_delta"]
-    A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
 
     model_args = {
         'state_dim': train_data.state_dim,
@@ -95,7 +94,8 @@ def main():
         'decoder_depth': wandb.config['decoder_depth'],
         'discretisation_mode': wandb.config['discretisation_mode'],
         'x_update_mode': wandb.config['x_update_mode'],
-        'dyn_matrix': A,
+        'mhu': mhu,
+        'dyn_factor': dyn_factor,
         'use_batch_norm': False,
     }
 
