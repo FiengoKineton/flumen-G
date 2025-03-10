@@ -20,9 +20,11 @@ class CalcValues:
             "val_loss"
             ]
 
-        for name, data in self.datasets.items():    self.display_results(name, data)
-        self.display_final_comparison__best()
-        self.display_final_comparison__mean()
+        #for name, data in self.datasets.items():    self.display_results(name, data)
+        #self.display_final_comparison__best()
+        #self.display_final_comparison__mean()
+
+        for param in ["test_loss", "train_loss", "val_loss"]: self.plot_metric_across_datasets(self.datasets, param)
 
 
 
@@ -76,12 +78,14 @@ class CalcValues:
             , {'run': "030(n.s.)", '_runtime': 9795.948917055, '_step': 77, '_timestamp': 1741501099.559984, '_wandb': {'runtime': 9795}, 'best_epoch': 58, 'best_test': 0.12283636759670954, 'best_train': 0.025061399976491296, 'best_val': 0.06987644891653742, 'epoch': 78, 'lr': 0.0005, 'test_loss': 0.11164449415509664, 'time': 9755.34075474739, 'train_loss': 0.027246853849165652, 'val_loss': 0.08021583975780577}
             , {'run': "030", '_runtime': 9795.948917055, '_step': 77, '_timestamp': 1741501099.559984, '_wandb': {'runtime': 9795}, 'best_epoch': 58, 'best_test': 0.12283636759670954, 'best_train': 0.025061399976491296, 'best_val': 0.06987644891653742, 'epoch': 78, 'lr': 0.0005, 'test_loss': 0.11164449415509664, 'time': 9755.34075474739, 'train_loss': 0.027246853849165652, 'val_loss': 0.08021583975780577}
             , {'run': "031", '_runtime': 14129.219967, '_step': 85, '_timestamp': 1741515333.7657564, '_wandb': {'runtime': 14129}, 'best_epoch': 66, 'best_test': 0.06133903092926457, 'best_train': 0.0189332693283047, 'best_val': 0.11545243593198912, 'epoch': 86, 'lr': 0.000125, 'test_loss': 0.053553428796548695, 'time': 14094.317236423492, 'train_loss': 0.01907580905155372, 'val_loss': 0.11624801980834158}
+            , {'run': "032", '_runtime': 8547.257474084, '_step': 71, '_timestamp': 1741519391.8302178, '_wandb': {'runtime': 8547}, 'best_epoch': 52, 'best_test': 0.11412586821686654, 'best_train': 0.03626639311196943, 'best_val': 0.07681829204398488, 'epoch': 72, 'lr': 0.00025, 'test_loss': 0.16247747891715594, 'time': 8527.486145973206, 'train_loss': 0.0253108320807023, 'val_loss': 0.10421322646831709}
+            , {'run': "033", '_runtime': 11596.988310016, '_step': 89, '_timestamp': 1741556368.7455869, '_wandb': {'runtime': 11596}, 'best_epoch': 70, 'best_test': 0.025469546516736347, 'best_train': 0.020823853031273872, 'best_val': 0.05242124152561975, 'epoch': 90, 'lr': 0.00025, 'test_loss': 0.028552606967943057, 'time': 11577.355808258057, 'train_loss': 0.017268735077724886, 'val_loss': 0.05523285769399197}
         ]
 
         return{
             "default_code_same_dim": default_code_same_dim,
-            "new_LSTM": new_LSTM,
-            "x_update_alpha": x_update_alpha,
+            #"new_LSTM": new_LSTM,
+            #"x_update_alpha": x_update_alpha,
             "x_update_alpha_opt": x_update_alpha_opt,
             "x_update_beta": x_update_beta
             }
@@ -393,6 +397,44 @@ class CalcValues:
         df = pd.DataFrame(data_list)
         numeric_columns = [col for col in self.metrics if col in df.columns]
         return df[numeric_columns].mean().to_dict()
+
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
+
+    def plot_metric_across_datasets(self, datasets, metric):
+        """
+        Plots the specified metric for each dataset.
+        
+        :param datasets: Dictionary of datasets, where each dataset contains a list of runs.
+        :param metric: The metric to plot (default: "val_loss").
+        """
+        plt.figure(figsize=(10, 6))
+
+        for dataset_name, data_list in datasets.items():
+            if not data_list:
+                continue
+
+            # Convert data to DataFrame
+            df = pd.DataFrame(data_list)
+
+            if metric not in df.columns:
+                print(f"Metric '{metric}' not found in dataset '{dataset_name}'. Skipping.")
+                continue
+
+            # Extract _step values (or epoch, if step is missing) and the chosen metric
+            df_sorted = df.sort_values(by="_step")
+            x_values = df_sorted["_step"] if "_step" in df_sorted else df_sorted["epoch"]
+            y_values = df_sorted[metric]
+
+            # Plot each dataset's metric trajectory
+            plt.plot(x_values, y_values, marker='o', linestyle='-', label=dataset_name)
+
+        plt.xlabel("Training Steps (or Epochs)")
+        plt.ylabel(metric.replace("_", " ").capitalize())  # Formatting metric name for display
+        plt.title(f"Comparison of {metric} Across Datasets")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
 

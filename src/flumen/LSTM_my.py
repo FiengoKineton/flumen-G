@@ -1,4 +1,4 @@
-import torch
+import torch, sys
 import torch.nn as nn
 from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 
@@ -8,7 +8,7 @@ from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
-                 state_dim=None, discretisation_mode=None, x_update_mode=None):
+                 state_dim=None, discretisation_mode=None, x_update_mode=None, dyn_matrix=None):
         super(LSTM, self).__init__()
 
         self.input_size = input_size
@@ -22,15 +22,14 @@ class LSTM(nn.Module):
         self.bidirectional = bidirectional
         self.state_dim = state_dim
 
-        self.mhu = 1.5
-        self.A = torch.tensor([[self.mhu, -self.mhu], [1/self.mhu, 0]])
+        self.A = dyn_matrix
         self.I = torch.eye(self.A.shape[0], dtype=self.A.dtype)
 
         self.discretisation_function = globals().get(f"discretisation_{discretisation_mode}")
         self.x_update_function = globals().get(f"x_update_mode__{x_update_mode}")
 
         self.lstm_cells = nn.ModuleList([
-            LSTMCell(input_size + state_dim if layer == 0 else self.hidden_size, self.hidden_size, bias)        # torch.jit.script()
+            LSTMCell(input_size + state_dim if layer == 0 else self.hidden_size, self.hidden_size, bias)        # torch.jit.script()    
             for layer in range(num_layers)
         ])
 
@@ -55,12 +54,11 @@ class LSTM(nn.Module):
             x_prev, c_x = z[:, :, :self.state_dim], c_z[:, :, :self.state_dim]
             h, c = z[:, :, self.state_dim:], c_z[:, :, self.state_dim:]
 
-            u_t = torch.cat((x_prev.squeeze(0), rnn_input_t), dim=1)
+            # Generalized fix: Ensure proper tensor shape for single and multi-layer cases
+            x_in = x_prev.squeeze(0) if x_prev.dim() == 2 else x_prev[-1]  # Take last layer if multi-layer
+            u_t = torch.cat((x_in, rnn_input_t), dim=1)
 
-            #"""
-        ### NEW
             h_list, c_list = [], []
-            
             for layer, cell in enumerate(self.lstm_cells):
                 h_new, c_new = cell(u_t, h[layer], c[layer])
                 h_list.append(h_new)
@@ -72,20 +70,6 @@ class LSTM(nn.Module):
 
             z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)            # same as the old one
             outputs[:, t, :].copy_(z[-1])  # In-place assignment
-            #"""
-
-            """
-        ### OLD
-            h, c = zip(*[cell(u_t, h[layer], c[layer]) for layer, cell in enumerate(self.lstm_cells)])
-
-            x_mid = self.discretisation_function(x_prev, self.A, tau_t, self.I)
-            h, c = torch.stack(h, dim=0), torch.stack(c, dim=0)
-
-            x_next = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)
-
-            z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)
-            outputs[:, t, :] = z[-1]  # Assign values directly
-            #"""
 
         return torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False), (z, c_z)
 

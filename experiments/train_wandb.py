@@ -21,8 +21,8 @@ import pandas as pd
 
 
 hyperparams = {
-    'control_rnn_size': 8,          ### default 12  | 8 if self.mode_rnn="true" else 10
-    'control_rnn_depth': 2,         ### maybe try 2? (num_layer == control_rnn_depth) --- Nope!
+    'control_rnn_size': 8,          ### default 12 | try 20 | 8 if self.mode_rnn="true" else 10
+    'control_rnn_depth': 1,         ### maybe try 2? (num_layer == control_rnn_depth) --- Nope!
     'encoder_size': 1,
     'encoder_depth': 2,
     'decoder_size': 1,
@@ -37,7 +37,7 @@ hyperparams = {
     'loss': "mse",
     'discretisation_mode': "TU",    #-- {TU, FE, BE}
     'optimiser_mode': "adam",       #-- {adam, tbptt, nesterov, newton}
-    'x_update_mode': "beta",        #-- {alpha, beta, lamda}
+    'x_update_mode': "beta",       #-- {alpha, beta, lamda}
 }
 
 
@@ -79,6 +79,10 @@ def main():
     val_data = TrajectoryDataset(data["val"])
     test_data = TrajectoryDataset(data["test"])
 
+    mhu = data["settings"]["dynamics"]["args"]["damping"]
+    dyn_factor = data["settings"]["control_delta"]
+    A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
+
     model_args = {
         'state_dim': train_data.state_dim,
         'control_dim': train_data.control_dim,
@@ -91,6 +95,7 @@ def main():
         'decoder_depth': wandb.config['decoder_depth'],
         'discretisation_mode': wandb.config['discretisation_mode'],
         'x_update_mode': wandb.config['x_update_mode'],
+        'dyn_matrix': A,
         'use_batch_norm': False,
     }
 
