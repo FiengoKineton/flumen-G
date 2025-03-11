@@ -17,6 +17,7 @@ import wandb
 # --------------------------------------------------------------------------- #
 import os
 import pandas as pd
+import pprint
 # --------------------------------------------------------------------------- #
 
 
@@ -41,6 +42,31 @@ hyperparams = {
 }
 
 
+sweep_config = {
+    'method': 'random',  # Can be 'grid', 'random', or 'bayes'
+    'metric': {'name': 'val_loss', 'goal': 'minimize'},
+    'parameters': {
+        'control_rnn_size': {'values': [8, 12, 20]}, 
+        'control_rnn_depth': {'values': [1]}, 
+        'encoder_size': {'values': [1, 2]},  
+        'encoder_depth': {'values': [1, 2]},  
+        'decoder_size': {'values': [1, 2]},  
+        'decoder_depth': {'values': [1, 2]},  
+        'batch_size': {'values': [64, 128, 256]},
+        'lr': {'values': [0.001, 0.0005, 0.0001, 0.002]},
+        'n_epochs': {'values': [500, 1000]},
+        'es_patience': {'values': [10, 20]}, 
+        'es_delta': {'values': [1e-7]}, 
+        'sched_patience': {'values': [10]},
+        'sched_factor': {'values': [2]},
+        'loss': {'values': ["mse", "l1"]},  
+        'optimiser_mode': {'values': ["adam", "nesterov", "newton"]},
+        'discretisation_mode': {'values': ["TU", "FE"]},
+        'x_update_mode': {'values': ["alpha", "beta"]},
+    }
+}
+
+
 def get_loss(which):
     if which == "mse":
         return torch.nn.MSELoss()
@@ -50,7 +76,10 @@ def get_loss(which):
         raise ValueError(f"Unknown loss {which}.")
 
 
-def main():
+def main(sweep):
+    sweep = sweep
+
+
     ap = ArgumentParser()
 
     ap.add_argument('load_path', type=str, help="Path to trajectory dataset")
@@ -70,7 +99,17 @@ def main():
     sys_args = ap.parse_args()
     data_path = Path(sys_args.load_path)
 
-    run = wandb.init(entity='aguiar-kth-royal-institute-of-technology', project='g7-fiengo-msc-thesis', name=sys_args.name, config=hyperparams)
+    if sweep:
+        run = wandb.init(entity='aguiar-kth-royal-institute-of-technology', 
+                        project='g7-fiengo-msc-thesis', 
+                        name=sys_args.name)                                
+                        ###, config=hyperparams)
+        config = wandb.config
+    else:
+        run = wandb.init(entity='aguiar-kth-royal-institute-of-technology', 
+                        project='g7-fiengo-msc-thesis', 
+                        name=sys_args.name,                             
+                        config=hyperparams)   
 
     with data_path.open('rb') as f:
         data = pickle.load(f)
@@ -82,18 +121,58 @@ def main():
     mhu = data["settings"]["dynamics"]["args"]["damping"]
     dyn_factor = data["settings"]["control_delta"]
 
+
+    # normally wandb.config["param_name"], config.param_name when sweep
+    if sweep:
+        __control_rnn_size = config.control_rnn_size
+        __control_rnn_depth = config.control_rnn_depth
+        __encoder_size = config.encoder_size
+        __encoder_depth = config.encoder_depth
+        __decoder_size = config.decoder_size
+        __decoder_depth = config.decoder_depth
+        __batch_size = config.batch_size
+        __lr = config.lr
+        __n_epochs = config.n_epochs
+        __es_patience = config.es_patience
+        __es_delta = config.es_delta
+        __sched_patience = config.sched_patience
+        __sched_factor = config.sched_factor
+        __loss = config.loss
+        __discretisation_mode = config.discretisation_mode
+        __optimiser_mode = config.optimiser_mode
+        __x_update_mode = config.x_update_mode
+    else:
+        __control_rnn_size = wandb.config["control_rnn_size"]
+        __control_rnn_depth = wandb.config["control_rnn_depth"]
+        __encoder_size = wandb.config["encoder_size"]
+        __encoder_depth = wandb.config["encoder_depth"]
+        __decoder_size = wandb.config["decoder_size"]
+        __decoder_depth = wandb.config["decoder_depth"]
+        __batch_size = wandb.config["batch_size"]
+        __lr = wandb.config["lr"]
+        __n_epochs = wandb.config["n_epochs"]
+        __es_patience = wandb.config["es_patience"]
+        __es_delta = wandb.config["es_delta"]
+        __sched_patience = wandb.config["sched_patience"]
+        __sched_factor = wandb.config["sched_factor"]
+        __loss = wandb.config["loss"]
+        __discretisation_mode = wandb.config["discretisation_mode"]
+        __optimiser_mode = wandb.config["optimiser_mode"]
+        __x_update_mode = wandb.config["x_update_mode"]
+
+
     model_args = {
         'state_dim': train_data.state_dim,
         'control_dim': train_data.control_dim,
         'output_dim': train_data.output_dim,
-        'control_rnn_size': wandb.config['control_rnn_size'],
-        'control_rnn_depth': wandb.config['control_rnn_depth'],
-        'encoder_size': wandb.config['encoder_size'],
-        'encoder_depth': wandb.config['encoder_depth'],
-        'decoder_size': wandb.config['decoder_size'],
-        'decoder_depth': wandb.config['decoder_depth'],
-        'discretisation_mode': wandb.config['discretisation_mode'],
-        'x_update_mode': wandb.config['x_update_mode'],
+        'control_rnn_size': __control_rnn_size,
+        'control_rnn_depth': __control_rnn_depth,
+        'encoder_size': __encoder_size,
+        'encoder_depth': __encoder_depth,
+        'decoder_size': __decoder_size,
+        'decoder_depth': __decoder_depth,
+        'discretisation_mode': __discretisation_mode,
+        'x_update_mode': __x_update_mode,
         'mhu': mhu,
         'dyn_factor': dyn_factor,
         'use_batch_norm': False,
@@ -123,36 +202,41 @@ def main():
 
     #"""
     # --------------------------------------------------------------------------- #
-    optimiser_mode = wandb.config['optimiser_mode']
+    optimiser_mode = __optimiser_mode  # wandb.config['optimiser_mode']
 
     if optimiser_mode == "adam":
-        optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+        optimiser = torch.optim.Adam(model.parameters(), lr=__lr)
     elif optimiser_mode == "tbptt":
-        optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+        optimiser = torch.optim.Adam(model.parameters(), lr=__lr)
     elif optimiser_mode == "nesterov":
-        optimiser = torch.optim.SGD(model.parameters(), lr=wandb.config['lr'], momentum=0.9, nesterov=True)
+        optimiser = torch.optim.SGD(model.parameters(), lr=__lr, momentum=0.9, nesterov=True)
     elif optimiser_mode == "newton":
         optimiser = torch.optim.LBFGS(model.parameters())
     else:
-        optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
+        optimiser = torch.optim.Adam(model.parameters(), lr=__lr)
         raise ValueError(f"Unknown optimizer mode: {optimiser_mode}. Choose from: adam, sgd_nesterov, lbfgs.")
     # --------------------------------------------------------------------------- #
     #"""
 
+    wandb.log({
+        'batch_size': config.batch_size,
+        'lr': config.lr,
+        'n_epochs': config.n_epochs
+    })
 
     ###optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])
     sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimiser,
-        patience=wandb.config['sched_patience'],
+        patience=__sched_patience,
         cooldown=0,
-        factor=1. / wandb.config['sched_factor'])
+        factor=1. / __sched_factor)
 
-    loss = get_loss(wandb.config["loss"]).to(device)
+    loss = get_loss(__loss).to(device)
 
-    early_stop = EarlyStopping(es_patience=wandb.config['es_patience'],
-                               es_delta=wandb.config['es_delta'])
+    early_stop = EarlyStopping(es_patience=__es_patience,
+                               es_delta=__es_delta)
 
-    bs = wandb.config['batch_size']
+    bs = __batch_size
     train_dl = DataLoader(train_data, batch_size=bs, shuffle=True)
     val_dl = DataLoader(val_data, batch_size=bs, shuffle=True)
     test_dl = DataLoader(test_data, batch_size=bs, shuffle=True)
@@ -177,7 +261,7 @@ def main():
 
     start = time.time()
 
-    for epoch in range(wandb.config['n_epochs']):
+    for epoch in range(__n_epochs):
         model.train()
         for example in train_dl:        # for i in range 190
             ###print("check")
@@ -204,7 +288,13 @@ def main():
 
         if early_stop.best_model:
             torch.save(model.state_dict(), model_save_dir / "state_dict.pth")
-            run.log_model(model_save_dir.as_posix(), name=model_name)
+
+            if sweep: 
+                artifact = wandb.Artifact("model_checkpoint", type="model")
+                artifact.add_file(str(model_save_dir / "state_dict.pth"))
+                wandb.log_artifact(artifact)                
+            else: 
+                run.log_model(model_save_dir.as_posix(), name=model_name)
 
             run.summary["best_train"] = train_loss
             run.summary["best_val"] = val_loss
@@ -235,6 +325,21 @@ def main():
     # --------------------------------------------------------------------------- #
     #"""
 
+
+def train_sweep():
+    with wandb.init(entity='aguiar-kth-royal-institute-of-technology', 
+                     project='g7-fiengo-msc-thesis'):
+        main(sweep=True)
+
 if __name__ == '__main__':
     print_gpu_info()
-    main()
+
+    sweep = True
+
+    if sweep: 
+        sweep_id = wandb.sweep(sweep_config, 
+                            entity='aguiar-kth-royal-institute-of-technology', 
+                            project='g7-fiengo-msc-thesis')
+        wandb.agent(sweep_id, train_sweep, count=10)
+
+    else: main(sweep)
