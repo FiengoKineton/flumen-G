@@ -1871,17 +1871,79 @@ Timings: 0.014618396759033203, 0.9455106258392334
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-00_
+036___improving-alpha
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-040riohi:v40
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 20161.1053874, '_step': 126, '_timestamp': 1741669341.200771, '_wandb': {'runtime': 20161}, 'best_epoch': 107, 'best_test': 0.15756188126073944, 'best_train': 0.025609337325607027, 'best_val': 0.227717852545163, 'epoch': 127, 'lr': 0.00025, 'test_loss': 0.13595869276849998, 'time': 20122.635061740875, 'train_loss': 0.024088118387947954, 'val_loss': 0.22873365618879832}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'discretisation_mode': 'TU',
+          'dyn_factor': 0.2,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'mhu': 1.0,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'alpha'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,   
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},       
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.021219968795776367, 0.848480224609375
+0.047089060654373224
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-00_
+037___improving-beta
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-gtf3bxu5:v49
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 23429.738305802, '_step': 183, '_timestamp': 1741672659.4781094, '_wandb': {'runtime': 23429}, 'best_epoch': 164, 'best_test': 0.05146576198084014, 'best_train': 0.01903745942507629, 'best_val': 0.02815484595558946, 'epoch': 184, 'lr': 0.000125, 'test_loss': 0.0547664255968162, 'time': 23409.78754425049, 'train_loss': 0.018740728216630125, 'val_loss': 0.028786422803051888}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'discretisation_mode': 'TU',
+          'dyn_factor': 0.2,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'mhu': 1.0,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'beta'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,   
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},       
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.04308748245239258, 1.0234084129333496
+0.038073509005365415
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 

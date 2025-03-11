@@ -93,8 +93,10 @@ class CalcValues:
         ]
 
         improving = [
-            {'run': "034", '_runtime': 21600.8713907, '_step': 125, '_timestamp': 1741641582.1955037, '_wandb': {'runtime': 21600}, 'best_epoch': 106, 'best_test': 0.1035991437910568, 'best_train': 0.01831837007332416, 'best_val': 0.02983867224778921, 'epoch': 126, 'lr': 0.000125, 'test_loss': 0.10504141532712512, 'time': 21569.769416570663, 'train_loss': 0.0167576711299637, 'val_loss': 0.03204075362355936}
-            , {'run': "035", '_runtime': 17827.271294305, '_step': 130, '_timestamp': 1741641105.369735, '_wandb': {'runtime': 17827}, 'best_epoch': 111, 'best_test': 0.0369229315233136, 'best_train': 0.01782039366169739, 'best_val': 0.047414959925744266, 'epoch': 131, 'lr': 0.000125, 'test_loss': 0.03637387721784531, 'time': 17803.01145029068, 'train_loss': 0.01787952652999333, 'val_loss': 0.05475342119970019}
+            {'run': "034(b)", '_runtime': 21600.8713907, '_step': 125, '_timestamp': 1741641582.1955037, '_wandb': {'runtime': 21600}, 'best_epoch': 106, 'best_test': 0.1035991437910568, 'best_train': 0.01831837007332416, 'best_val': 0.02983867224778921, 'epoch': 126, 'lr': 0.000125, 'test_loss': 0.10504141532712512, 'time': 21569.769416570663, 'train_loss': 0.0167576711299637, 'val_loss': 0.03204075362355936}
+            , {'run': "035(a)", '_runtime': 17827.271294305, '_step': 130, '_timestamp': 1741641105.369735, '_wandb': {'runtime': 17827}, 'best_epoch': 111, 'best_test': 0.0369229315233136, 'best_train': 0.01782039366169739, 'best_val': 0.047414959925744266, 'epoch': 131, 'lr': 0.000125, 'test_loss': 0.03637387721784531, 'time': 17803.01145029068, 'train_loss': 0.01787952652999333, 'val_loss': 0.05475342119970019}
+            , {'run': "035(a)", '_runtime': 20161.1053874, '_step': 126, '_timestamp': 1741669341.200771, '_wandb': {'runtime': 20161}, 'best_epoch': 107, 'best_test': 0.15756188126073944, 'best_train': 0.025609337325607027, 'best_val': 0.227717852545163, 'epoch': 127, 'lr': 0.00025, 'test_loss': 0.13595869276849998, 'time': 20122.635061740875, 'train_loss': 0.024088118387947954, 'val_loss': 0.22873365618879832}
+            , {'run': "037(b)", '_runtime': 23429.738305802, '_step': 183, '_timestamp': 1741672659.4781094, '_wandb': {'runtime': 23429}, 'best_epoch': 164, 'best_test': 0.05146576198084014, 'best_train': 0.01903745942507629, 'best_val': 0.02815484595558946, 'epoch': 184, 'lr': 0.000125, 'test_loss': 0.0547664255968162, 'time': 23409.78754425049, 'train_loss': 0.018740728216630125, 'val_loss': 0.028786422803051888}
         ]
 
         return{
@@ -146,11 +148,11 @@ class CalcValues:
             return None
 
         weights_1 = {
-            "test_loss": 0.3,
+            "test_loss": 0.2,
             "train_loss": 0.2,
-            "val_loss": 0.2,
+            "val_loss": 0.4,
             "best_epoch": 0.1,
-            "time": 0.2
+            "time": 0.1
         }
 
         weights_2 = {
@@ -191,7 +193,7 @@ class CalcValues:
         # Default sorting (same as before)
         if tradeoff_function is None:
             tradeoff_function__1 = lambda x: (x["test_loss"], x["train_loss"], x["val_loss"], x["best_epoch"])
-            tradeoff_function__2 = lambda run: (run["test_loss"] * 0.6 + run["val_loss"] * 0.3 + run["train_loss"] * 0.1) * (1 + run["best_epoch"] / 100)
+            tradeoff_function__2 = lambda run: (run["val_loss"] * 0.6 + run["test_loss"] * 0.3 + run["train_loss"] * 0.1) * (1 + run["best_epoch"] / 100)
 
         # Find the best run based on the custom function
         best_run = min(data_list, key=tradeoff_function__2)
@@ -445,11 +447,13 @@ class CalcValues:
             # Find minimum value and its corresponding x_value
             min_y = y_values.min()
             min_x = x_values.loc[y_values.idxmin()]
+            min_run = df_sorted.loc[y_values.idxmin(), "run"]
 
             # Plot each dataset's metric trajectory
             plt.plot(x_values, y_values, marker='o', linestyle='-', label=dataset_name)
             plt.scatter(min_x, min_y, color='red', s=100, zorder=3)
             plt.text(min_x, min_y, f"{min_y:.4f}", fontsize=10, ha='right', va='bottom', color='red')
+            plt.text(min_x, min_y, f"{min_run}", fontsize=10, ha='left', va='bottom', color='blue')
 
 
         plt.xlabel("Training Steps (or Epochs)")
