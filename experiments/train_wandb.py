@@ -56,7 +56,7 @@ sweep_config = {
         'lr': {'values': [0.001, 0.0005, 0.0001, 0.002]},
         'n_epochs': {'values': [500, 1000]},
         'es_patience': {'values': [10, 20]}, 
-        'es_delta': {'values': [1e-7]}, 
+        'es_delta': {'values': [1e-7, 1e-5]}, 
         'sched_patience': {'values': [10]},
         'sched_factor': {'values': [2]},
         'loss': {'values': ["mse", "l1"]},  

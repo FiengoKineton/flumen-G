@@ -1,0 +1,33 @@
+args:
+  control_dim: 
+  control_rnn_depth: 
+  control_rnn_size: 
+  decoder_depth: 
+  decoder_size: 
+  encoder_depth: 
+  encoder_size: 2
+  output_dim: 
+  state_dim: 
+  use_batch_norm: false
+data_args:
+  data_split:
+  - 20
+  - 20
+  n_samples: 200
+  n_trajectories: 200
+  noise_seed: null
+  noise_std: 0.0
+  output_name: vdp_test_data
+  settings: .\data_generation\vdp.yaml
+  time_horizon: 10.0
+data_path: C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl
+data_settings:
+  control_delta: 0.2
+  dynamics:
+    args:
+      damping: 1.0
+    name: VanDerPol
+  sequence_generator:
+    args:
+      period: 5
+    name: GaussianSqWave
