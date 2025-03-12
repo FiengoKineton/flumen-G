@@ -21,7 +21,7 @@ import pprint
 # --------------------------------------------------------------------------- #
 
 
-hyperparams = {
+hyperparams_init = {
     'control_rnn_size': 8,          ### default 12 | try 20 | 8 if self.mode_rnn="true" else 10
     'control_rnn_depth': 1,         ### maybe try 2? (num_layer == control_rnn_depth) --- Nope!
     'encoder_size': 1,
@@ -41,6 +41,47 @@ hyperparams = {
     'x_update_mode': "alpha",       #-- {alpha, beta, lamda}
 }
 
+# name run: tamplate
+hyperparams_template = {
+    'control_rnn_size': 0,         
+    'control_rnn_depth': 1,         
+    'encoder_size': 0,
+    'encoder_depth': 0,
+    'decoder_size': 0,
+    'decoder_depth': 0,
+    'batch_size': 0,
+    'lr': 0.00,                    
+    'n_epochs': 0,
+    'es_patience': 0,             
+    'es_delta': 1e-0,
+    'sched_patience': 0,
+    'sched_factor': 2,
+    'loss': "",
+    'discretisation_mode': "",    
+    'optimiser_mode': "",       
+    'x_update_mode': "",       
+}
+
+# name run: radiant-sweep-4
+hyperparams = {
+    'control_rnn_size': 20,         
+    'control_rnn_depth': 1,         
+    'encoder_size': 1,
+    'encoder_depth': 1,
+    'decoder_size': 2,
+    'decoder_depth': 2,
+    'batch_size': 128,
+    'lr': 0.0005,                    
+    'n_epochs': 500,
+    'es_patience': 20,             
+    'es_delta': 1e-7,
+    'sched_patience': 10,
+    'sched_factor': 2,
+    'loss': "mse",
+    'discretisation_mode': "FE",    
+    'optimiser_mode': "adam",       
+    'x_update_mode': "alpha",       
+}
 
 sweep_config = {
     'method': 'random',  # Can be 'grid', 'random', or 'bayes'
@@ -334,7 +375,7 @@ def train_sweep():
 if __name__ == '__main__':
     print_gpu_info()
 
-    sweep = True
+    sweep = False
 
     if sweep: 
         sweep_id = wandb.sweep(sweep_config, 

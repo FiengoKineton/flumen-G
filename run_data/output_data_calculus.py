@@ -99,13 +99,26 @@ class CalcValues:
             , {'run': "037(b)", '_runtime': 23429.738305802, '_step': 183, '_timestamp': 1741672659.4781094, '_wandb': {'runtime': 23429}, 'best_epoch': 164, 'best_test': 0.05146576198084014, 'best_train': 0.01903745942507629, 'best_val': 0.02815484595558946, 'epoch': 184, 'lr': 0.000125, 'test_loss': 0.0547664255968162, 'time': 23409.78754425049, 'train_loss': 0.018740728216630125, 'val_loss': 0.028786422803051888}
         ]
 
+        sweep = [
+            {'run': "swift-sweep-1", '_runtime': 18845.1666517, '_step': 173, '_timestamp': 1741729763.481567, '_wandb': {'runtime': 18845}, 'batch_size': 256, 'best_epoch': 153, 'best_test': 0.1481804974609986, 'best_train': 0.014840607933307949, 'best_val': 0.02342821948695928, 'epoch': 173, 'lr': 0.000125, 'n_epochs': 500, 'test_loss': 0.15058815176598728, 'time': 18822.825367212296, 'train_loss': 0.013035300756363492, 'val_loss': 0.02358409221051261}
+            ,{'run': "floral-sweep-3", '_runtime': 29706.1014717, '_step': 177, '_timestamp': 1741759500.771211, '_wandb': {'runtime': 29706}, 'batch_size': 256, 'best_epoch': 167, 'best_test': 0.29612932493910193, 'best_train': 0.19118200509171737, 'best_val': 0.19001176580786705, 'epoch': 177, 'lr': 0.0005, 'n_epochs': 500, 'test_loss': 0.44739476684480906, 'time': 29688.96263360977, 'train_loss': 0.3677213778621272, 'val_loss': 0.38294084928929806}
+            ,{'run': "glamorous-sweep-1", '_runtime': 12708.964212641, '_step': 91, '_timestamp': 1741747415.9264305, '_wandb': {'runtime': 12708}, 'batch_size': 128, 'best_epoch': 71, 'best_test': 0.07949973113598331, 'best_train': 0.0155695670791877, 'best_val': 0.05276760600862049, 'epoch': 91, 'lr': 0.00025, 'n_epochs': 1000, 'test_loss': 0.08527710055193258, 'time': 12689.04225039482, 'train_loss': 0.0128133891731816, 'val_loss': 0.07545831897074268}
+            ,{'run': "charmed-sweep-2", '_runtime': 8683.298607489, '_step': 32, '_timestamp': 1741756105.3313603, '_wandb': {'runtime': 8683}, 'batch_size': 64, 'best_epoch': 22, 'best_test': 0.08491663201638157, 'best_train': 0.019425083574312753, 'best_val': 0.06633073543863637, 'epoch': 32, 'lr': 0.001, 'n_epochs': 500, 'test_loss': 0.09113348185247372, 'time': 8653.249694108963, 'train_loss': 0.025678014014637596, 'val_loss': 0.0816020660457157}
+            ,{'run': "fluent-sweep-3", '_runtime': 9001.820236002, '_step': 62, '_timestamp': 1741765112.1062276, '_wandb': {'runtime': 9001}, 'batch_size': 128, 'best_epoch': 52, 'best_test': 0.08140742784691235, 'best_train': 0.023643729350869617, 'best_val': 0.07006013795496925, 'epoch': 62, 'lr': 0.0005, 'n_epochs': 1000, 'test_loss': 0.1155524601538976, 'time': 8980.800916910172, 'train_loss': 0.03282010080736308, 'val_loss': 0.10186874286995994}            
+            ,{'run': "radiant-sweep-4", '_runtime': 23897.1032826, '_step': 88, '_timestamp': 1741783404.1021, '_wandb': {'runtime': 23897}, 'batch_size': 128, 'best_epoch': 69, 'best_test': 0.11909919634224876, 'best_train': 0.012003492137722713, 'best_val': 0.019937452165380357, 'epoch': 88, 'lr': 0.000125, 'n_epochs': 500, 'test_loss': 0.12107125542584866, 'time': 23859.6831073761, 'train_loss': 0.011088666082335212, 'val_loss': 0.02143756610651811}           
+            ,{'run': "faithful-sweep-4", '_runtime': 4399.594476623, '_step': 30, '_timestamp': 1741769523.377036, '_wandb': {'runtime': 4399}, 'batch_size': 128, 'best_epoch': 10, 'best_test': 0.12021032513843642, 'best_train': 0.03149817268999796, 'best_val': 0.08299240676893128, 'epoch': 30, 'lr': 0.001, 'n_epochs': 1000, 'test_loss': 0.10709275855194957, 'time': 4381.372041940689, 'train_loss': 0.013504245855584346, 'val_loss': 0.0952433996966907}            
+            ,{'run': "lively-sweep-5", '_runtime': 9514.573641236, '_step': 35, '_timestamp': 1741779042.769012, '_wandb': {'runtime': 9514}, 'batch_size': 64, 'best_epoch': 15, 'best_test': 0.17331557913077256, 'best_train': 0.030269269110135912, 'best_val': 0.15547048885907447, 'epoch': 35, 'lr': 0.001, 'n_epochs': 500, 'test_loss': 0.13399746554297587, 'time': 9484.192527770996, 'train_loss': 0.011309588657795829, 'val_loss': 0.2246868521389034}           
+            ,{'run': "sleek-sweep-6", '_runtime': 4464.873752629, '_step': 51, '_timestamp': 1741783515.3837569, '_wandb': {'runtime': 4464}, 'batch_size': 256, 'best_epoch': 50, 'best_test': 0.3749983357265592, 'best_train': 0.2596939421013782, 'best_val': 0.4621657971292734, 'epoch': 51, 'lr': 0.0001, 'n_epochs': 500, 'test_loss': 0.3714748676866293, 'time': 4450.12158370018, 'train_loss': 0.25333702642666667, 'val_loss': 0.4650606904178858}          
+        ]
+
         return{
             "default_code_same_dim": default_code_same_dim,
             #"new_LSTM": new_LSTM,
             #"x_update_alpha": x_update_alpha,
-            "x_update_alpha_opt": x_update_alpha_opt,
-            "x_update_beta": x_update_beta, 
-            "improving": improving
+            #"x_update_alpha_opt": x_update_alpha_opt,
+            #"x_update_beta": x_update_beta, 
+            #"improving": improving,
+            "swwep": sweep
             }
 
 
