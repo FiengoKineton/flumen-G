@@ -41,48 +41,6 @@ hyperparams_init = {
     'x_update_mode': "alpha",       #-- {alpha, beta, lamda}
 }
 
-# name run: tamplate
-hyperparams_template = {
-    'control_rnn_size': 0,         
-    'control_rnn_depth': 1,         
-    'encoder_size': 0,
-    'encoder_depth': 0,
-    'decoder_size': 0,
-    'decoder_depth': 0,
-    'batch_size': 0,
-    'lr': 0.00,                    
-    'n_epochs': 0,
-    'es_patience': 0,             
-    'es_delta': 1e-0,
-    'sched_patience': 0,
-    'sched_factor': 2,
-    'loss': "",
-    'discretisation_mode': "",    
-    'optimiser_mode': "",       
-    'x_update_mode': "",       
-}
-
-# name run: radiant-sweep-4
-hyperparams = {
-    'control_rnn_size': 20,         
-    'control_rnn_depth': 1,         
-    'encoder_size': 1,
-    'encoder_depth': 1,
-    'decoder_size': 2,
-    'decoder_depth': 2,
-    'batch_size': 128,
-    'lr': 0.0005,                    
-    'n_epochs': 500,
-    'es_patience': 20,             
-    'es_delta': 1e-7,
-    'sched_patience': 10,
-    'sched_factor': 2,
-    'loss': "mse",
-    'discretisation_mode': "FE",    
-    'optimiser_mode': "adam",       
-    'x_update_mode': "alpha",       
-}
-
 sweep_config = {
     'method': 'random',  # Can be 'grid', 'random', or 'bayes'
     'metric': {'name': 'val_loss', 'goal': 'minimize'},
@@ -106,6 +64,50 @@ sweep_config = {
         'x_update_mode': {'values': ["alpha", "beta"]},
     }
 }
+
+
+hyperparams_set_1 = {
+    "control_rnn_size": 20,         
+    "control_rnn_depth": 1,         
+    "encoder_size": 1,   
+    "encoder_depth": 2,  
+    "decoder_size": 2,  
+    "decoder_depth": 2,  
+    "batch_size": 128,  
+    "lr": 0.0005,                    
+    "n_epochs": 500,  
+    "es_patience": 20,              
+    "es_delta": 1e-07,
+    "sched_patience": 10,
+    "sched_factor": 2,
+    "loss": "mse",
+    "discretisation_mode": "FE",    
+    "optimiser_mode": "adam",       
+    "x_update_mode": "alpha"       
+}
+
+hyperparams_set_2 = {
+    "control_rnn_size": 8,         
+    "control_rnn_depth": 1,         
+    "encoder_size": 2,   
+    "encoder_depth": 1,  
+    "decoder_size": 2,  
+    "decoder_depth": 1,  
+    "batch_size": 64,  
+    "lr": 0.00075,                    
+    "n_epochs": 600,  
+    "es_patience": 10,              
+    "es_delta": 1e-07,
+    "sched_patience": 10,
+    "sched_factor": 2,
+    "loss": "mse",
+    "discretisation_mode": "FE",    
+    "optimiser_mode": "adam",       
+    "x_update_mode": "alpha"       
+}
+
+
+hyperparams = hyperparams_set_1
 
 
 def get_loss(which):
@@ -260,9 +262,9 @@ def main(sweep):
     #"""
 
     wandb.log({
-        'batch_size': config.batch_size,
-        'lr': config.lr,
-        'n_epochs': config.n_epochs
+        'batch_size': __batch_size,
+        'lr': __lr,
+        'n_epochs': __n_epochs
     })
 
     ###optimiser = torch.optim.Adam(model.parameters(), lr=wandb.config['lr'])

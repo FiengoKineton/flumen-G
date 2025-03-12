@@ -109,7 +109,10 @@ class CalcValues:
             ,{'run': "faithful-sweep-4", '_runtime': 4399.594476623, '_step': 30, '_timestamp': 1741769523.377036, '_wandb': {'runtime': 4399}, 'batch_size': 128, 'best_epoch': 10, 'best_test': 0.12021032513843642, 'best_train': 0.03149817268999796, 'best_val': 0.08299240676893128, 'epoch': 30, 'lr': 0.001, 'n_epochs': 1000, 'test_loss': 0.10709275855194957, 'time': 4381.372041940689, 'train_loss': 0.013504245855584346, 'val_loss': 0.0952433996966907}            
             ,{'run': "lively-sweep-5", '_runtime': 9514.573641236, '_step': 35, '_timestamp': 1741779042.769012, '_wandb': {'runtime': 9514}, 'batch_size': 64, 'best_epoch': 15, 'best_test': 0.17331557913077256, 'best_train': 0.030269269110135912, 'best_val': 0.15547048885907447, 'epoch': 35, 'lr': 0.001, 'n_epochs': 500, 'test_loss': 0.13399746554297587, 'time': 9484.192527770996, 'train_loss': 0.011309588657795829, 'val_loss': 0.2246868521389034}           
             ,{'run': "sleek-sweep-6", '_runtime': 4464.873752629, '_step': 51, '_timestamp': 1741783515.3837569, '_wandb': {'runtime': 4464}, 'batch_size': 256, 'best_epoch': 50, 'best_test': 0.3749983357265592, 'best_train': 0.2596939421013782, 'best_val': 0.4621657971292734, 'epoch': 51, 'lr': 0.0001, 'n_epochs': 500, 'test_loss': 0.3714748676866293, 'time': 4450.12158370018, 'train_loss': 0.25333702642666667, 'val_loss': 0.4650606904178858}          
+            ,{'run': "stellar-sweep-6", '_runtime': 8325.8550323, '_step': 73, '_timestamp': 1741792001.879764, '_wandb': {'runtime': 8325}, 'batch_size': 256, 'best_epoch': 63, 'best_test': 0.3030208139680326, 'best_train': 0.17432295476135454, 'best_val': 0.19699118053540587, 'epoch': 73, 'lr': 0.002, 'n_epochs': 500, 'test_loss': 0.3361325887963176, 'time': 8306.17468380928, 'train_loss': 0.17055228681940782, 'val_loss': 0.22658801125362515}
+            ,{'run': "gallant-sweep-9", '_runtime': 12043.8551942, '_step': 109, '_timestamp': 1741804125.6145654, '_wandb': {'runtime': 12043}, 'batch_size': 256, 'best_epoch': 109, 'best_test': 0.38882978167384863, 'best_train': 0.306771037296245, 'best_val': 0.369750595651567, 'epoch': 109, 'lr': 0.0001, 'n_epochs': 1000, 'test_loss': 0.38882978167384863, 'time': 12019.04819726944, 'train_loss': 0.306771037296245, 'val_loss': 0.369750595651567}
         ]
+
 
         return{
             "default_code_same_dim": default_code_same_dim,
@@ -118,7 +121,7 @@ class CalcValues:
             #"x_update_alpha_opt": x_update_alpha_opt,
             #"x_update_beta": x_update_beta, 
             #"improving": improving,
-            "swwep": sweep
+            "sweep": sweep
             }
 
 
