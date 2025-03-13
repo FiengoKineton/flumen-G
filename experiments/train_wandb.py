@@ -35,10 +35,16 @@ sets = {
 }
 name = sets['opt_balanced_1']
 hyperparams = hp_manager.get_hyperparams(name)
-print("\n", name, ": ", hyperparams, "\n\n")
+
+SWEEP = True
 
 
-SWEEP = False
+if SWEEP:
+    print("SWEEP: ", SWEEP, "\n\n")
+else:
+    print("SWEEP: ", SWEEP, "\n")
+    pprint.pprint(hyperparams)
+    print("\n\n")
 # --------------------------------------------------------------------------- #
 
 
