@@ -562,7 +562,7 @@ class Hyperparams:
 # --------------------------------------------------------------- #
 
 
-"""
+#"""
 hp = Hyperparams()
 hp._opt_best()           # using the top 10 best runs
 hp._opt_bayes()          # using bayesian optimization

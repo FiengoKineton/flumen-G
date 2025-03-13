@@ -2227,7 +2227,7 @@ Timings: 0.022310733795166016, 0.8055686950683594
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-64k6gpp0:v14
 wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
 wandb:   2 of 2 files downloaded.  
-{'_runtime': 10283.149606, '_step': 63, '_timestamp': 1741896721.4711328, '_wandb': {'runtime': 10283}, 'batch_size': 128, 'best_epoch': 37, 'best_test': 0.05453523044430074, 'best_train': 0.02867371845675051, 'best_val': 0.0871459778457407, 'epoch': 63, 'lr': 0.0005, 'n_epochs': 1000, 'test_loss': 0.06100253536114617, 'time': 10253.871320724487, 'train_loss': 0.014355128877377384, 'val_loss': 0.11501465660948602}
+{'_runtime': 11935.6086048, '_step': 72, '_timestamp': 1741898373.9301524, '_wandb': {'runtime': 11935}, 'batch_size': 128, 'best_epoch': 37, 'best_test': 0.05453523044430074, 'best_train': 0.02867371845675051, 'best_val': 0.0871459778457407, 'epoch': 72, 'lr': 0.00025, 'n_epochs': 1000, 'test_loss': 0.05989702445055757, 'time': 11906.330340385435, 'train_loss': 0.01179708170620774, 'val_loss': 0.11624310623913532}
 {'args': {'control_dim': 1,
           'control_rnn_depth': 1,
           'control_rnn_size': 14,
@@ -2255,8 +2255,8 @@ wandb:   2 of 2 files downloaded.
                    'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
                    'sequence_generator': {'args': {'period': 5},
                                           'name': 'GaussianSqWave'}}}
-Timings: 0.024663925170898438, 1.1435904502868652
-0.006384406624486033
+Timings: 0.01501321792602539, 0.7881793975830078
+0.018308526860497804
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 

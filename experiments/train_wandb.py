@@ -36,7 +36,7 @@ sets = {
 name = sets['opt_balanced_1']
 hyperparams = hp_manager.get_hyperparams(name)
 
-SWEEP = True
+SWEEP = False
 
 
 if SWEEP:

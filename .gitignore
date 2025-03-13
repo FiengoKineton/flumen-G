@@ -165,7 +165,7 @@ outputs/
 .png
 *.eps
 *.pdf
-*.csv
+.csv
 .DS_Store
 
 wandb/
