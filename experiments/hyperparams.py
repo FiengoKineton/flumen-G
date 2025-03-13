@@ -7,6 +7,19 @@ from skopt.utils import use_named_args
 from sklearn.preprocessing import MinMaxScaler
 
 
+K = 15
+PRIOR_SETS = ["hyperparams___set_1", 
+              "hyperparams___set_2", 
+              "hyperparams___radiant_sweep_4", 
+              "hyperparams___swift_sweep_1",
+              "hyperparams___opt_best_1",
+              "hyperparams___opt_best_2",
+              "hyperparams___opt_bayes_1",
+              "hyperparams___opt_bayes_2",
+              ]
+
+
+
 class Hyperparams:
     def __init__(self):
         self.hyperparams_sets = {
@@ -76,11 +89,12 @@ class Hyperparams:
             'hyperparams___swift_sweep_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 2, 'sched_factor': 2, 'decoder_depth': 1, 'encoder_depth': 1, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 12, 'control_rnn_depth': 1, 'discretisation_mode': 'TU'},
         
             # from _try_opt:
-            'hyperparams___opt_best_1':  {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU'},
-
+            'hyperparams___opt_best_1': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU'},
+            'hyperparams___opt_best_2': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU'},
 
             # from try_opt:
             'hyperparams___opt_bayes_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE'},
+            'hyperparams___opt_bayes_2': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE'},
         }
     
     
@@ -88,10 +102,69 @@ class Hyperparams:
         return self.hyperparams_sets.get(name, f"Hyperparameter set '{name}' not found.")
 
 
-# ---------------- OPTIMAL ----------------------------------------------- #
+# ---------------- OPTIMAL Problem | top best runs ----------------------------------------------- #
 
-    def _try_opt(self):
+    def _opt_best(self):
+        """
+        Identifies the optimal hyperparameter set based on the top-performing runs.
+
+        ## **Mathematical Formulation of the Optimization Problem**
+        
+        This function finds the optimal hyperparameters by selecting the **most frequently occurring** values 
+        from the top \( k \) runs with the lowest validation loss. Formally, we define:
+
+        \[
+        Theta_{text{opt}} = arg\max_{theta \in Theta_k} \sum_{i=1}^{k} \mathbb{I}(theta_i = theta)
+        \]
+
+        where:
+
+        - \( Theta_{text{opt}} \) is the set of optimized hyperparameters.
+        - \( Theta_k \) is the set of hyperparameters from the top \( k \) runs with the lowest validation loss.
+        - \( \mathbb{I}(\cdot) \) is an indicator function that counts occurrences of each hyperparameter.
+
+        ## **Process Overview**
+        
+        1. **Extract Performance Metrics**: Load experiment results from `wandb_get_runs.csv`, focusing on:
+        - \( L_{text{val}}(theta) \) (Validation loss)
+        - \( L_{text{train}}(theta) \) (Training loss)
+        - \( L_{text{test}}(theta) \) (Test loss)
+
+        2. **Select Top \( k \) Runs**: Identify the \( k \) runs with the smallest validation loss:
+
+        \[
+        Theta_k = \operatorname{argmin}_{Theta} L_{text{val}}(theta), \quad k=10
+        \]
+
+        3. **Extract Hyperparameters**: Store the hyperparameter configurations for these top runs.
+
+        4. **Compute Mode per Parameter**: For each hyperparameter \( theta_j \), find the most frequently 
+        occurring value \( theta_j^* \) across the best runs:
+
+        \[
+        theta_j^* = arg\max_{theta_j} \sum_{i=1}^{k} \mathbb{I}(theta_{i,j} = theta_j)
+        \]
+
+        This ensures that the selected hyperparameters are robust and frequently associated 
+        with low validation loss.
+
+        ## **Why This Approach?**
+        
+        - It is computationally efficient as it avoids retraining models.
+        - It leverages empirical performance data to determine robust hyperparameters.
+        - It provides a **stable and reliable** starting point for further tuning (e.g., via Bayesian Optimization).
+
+        ## **Implementation Details**
+        
+        - Loads past experiment results from CSV.
+        - Extracts loss metrics and hyperparameter configurations.
+        - Selects the top \( k=10 \) best-performing configurations.
+        - Aggregates the most common hyperparameter values from the best runs.
+        - Returns a dictionary of optimized hyperparameters.
+        """
+
         file_path = "run_data/wandb_get_runs.csv"
+        k = K
 
         try:
             # Load the CSV file
@@ -109,7 +182,7 @@ class Hyperparams:
             df['hyperparameters'] = df['config'].apply(ast.literal_eval)
 
             # Select the top 10 best runs based on val_loss
-            best_runs = df.nsmallest(10, 'val_loss')
+            best_runs = df.nsmallest(k, 'val_loss')
 
             # Aggregate the best hyperparameters
             hyperparam_counts = {}
@@ -122,18 +195,18 @@ class Hyperparams:
             # Select the most common values for each hyperparameter
             optimized_hyperparams = {param: max(set(values), key=values.count) for param, values in hyperparam_counts.items()}
 
-            print("\nOptimized Hyperparameters:\n", optimized_hyperparams)
+            print("\n_opt_best | Optimized Hyperparameters:\n", optimized_hyperparams)
 
             return optimized_hyperparams
         
         except Exception as e:
-            print(f"Error while optimizing hyperparameters: {e}")
+            print(f"\n\n_opt_best | Error while optimizing hyperparameters: {e}")
             return {}
 
 
-# --------------------------------------------------------------- #
+# ---------------- OPTIMAL Problem | basyes search ----------------------------------------------- #
 
-    def try_opt(self):
+    def _opt_bayes(self):
         """
         Optimizes hyperparameters using Bayesian Optimization.
 
@@ -221,7 +294,7 @@ class Hyperparams:
             df = df[df['hyperparameters'].notna()]
 
             # Select the top N best runs based on val_loss
-            top_n = 15
+            top_n = K
             best_runs = df.nsmallest(top_n, 'val_loss')
 
             # Extract valid hyperparameter values dynamically from best runs
@@ -233,8 +306,7 @@ class Hyperparams:
                     param_values[key].add(value)
 
             # Ensure predefined sets are included
-            prior_sets = ["hyperparams___set_1", "hyperparams___set_2", 
-                        "hyperparams___radiant_sweep_4", "hyperparams___swift_sweep_1"]
+            prior_sets = PRIOR_SETS
 
             for set_name in prior_sets:
                 if set_name in self.hyperparams_sets:
@@ -310,7 +382,7 @@ class Hyperparams:
             Y_init = np.array(Y_init, dtype=np.float64)
 
             
-            # Check for invalid values in Y_init
+            """# Check for invalid values in Y_init
             print(f"NaN in Y_init: {np.isnan(Y_init).sum()}")       # output: 0
             print(f"Inf in Y_init: {np.isinf(Y_init).sum()}")       # output: 0
             print(f"Max value in Y_init: {np.max(Y_init)}")         # output: 0.055643573344226864
@@ -318,64 +390,59 @@ class Hyperparams:
 
 
             print("\nX_init before optimization:", X_init)
-            print("\nY_init before optimization:", Y_init)
+            print("\nY_init before optimization:", Y_init)"""
 
 
             @use_named_args(space)
             def objective(**params):
-                # Convert expected integer values to int (to match stored hyperparameter sets)
+                # Convert expected integer values to int
                 int_keys = ["n_epochs", "batch_size", "es_patience", "decoder_size", "encoder_size", 
                             "decoder_depth", "encoder_depth", "control_rnn_size", "control_rnn_depth"]
                 
                 for key in int_keys:
                     if key in params:
-                        params[key] = int(round(params[key]))  # Ensure they are exact integers
+                        params[key] = int(round(params[key]))
 
                 # Ensure 'x_update_mode' exists
-                if "x_update_mode" not in params:
-                    print("Warning: 'x_update_mode' missing in params! Assigning default.")
-                    params["x_update_mode"] = "alpha"  # Default value
+                params.setdefault("x_update_mode", "alpha")
 
-                # Find the matching row in the dataset
-                matching_row = df[df['hyperparameters'].apply(lambda x: all(x.get(k) == v for k, v in params.items()))]
+                # Find the closest match instead of exact match
+                closest_match = df.iloc[(df["hyperparameters"].apply(lambda x: sum([x.get(k) == v for k, v in params.items()]))).idxmax()]
 
-                # Debug: Print what is found
-                ###print("\n--- Objective Function Debug ---")
-                ###print("Params being tested:", params)
-                ###print("Matching row found:", not matching_row.empty)
-
-                if not matching_row.empty:
-                    result = matching_row["val_loss"].values[0]
-                    ###print("Returning val_loss:", result)
-                    return result
-
-                ###print("No match found, returning 10.0 (safe fallback).")
-                return 10.0  # Large but finite fallback
+                if closest_match is not None:
+                    return closest_match["val_loss"]
+                
+                return np.median(Y_init)  # Return median instead of arbitrary 10.0
 
 
             # Perform Bayesian Optimization
             res = gp_minimize(
                 func=objective,
                 dimensions=space,
-                n_calls=25,
+                n_calls=50,  # Increase for better convergence
+                n_random_starts=10,  # More exploration before exploitation
                 x0=X_init,
                 y0=Y_init,
+                acq_func="PI",  # Probability of Improvement (more stable than EI)
                 random_state=42,
-                n_jobs=-1
+                n_jobs=-1,
+                n_restarts_optimizer=10  # Helps with local minima
             )
+
             
             best_params = dict(zip([dim.name for dim in space], res.x))
-            print("\nOptimized Hyperparameters:\n", best_params)
+            print("\n_opt_bayes | Optimized Hyperparameters:\n", best_params)
 
             return best_params
 
         except Exception as e:
-            print(f"\n\nError while optimizing hyperparameters: {e}")
+            print(f"\n\n_opt_bayes | Error while optimizing hyperparameters: {e}")
             return {}
+
 
 # --------------------------------------------------------------- #
 
 
-###hp = Hyperparams()
-###hp._try_opt()       # using the top 10 best runs
-###hp.try_opt()        # using bayesian optimization
+hp = Hyperparams()
+hp._opt_best()           # using the top 10 best runs
+hp._opt_bayes()          # using bayesian optimization

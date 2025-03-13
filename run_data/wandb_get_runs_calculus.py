@@ -49,7 +49,7 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
 file_path = "run_data/wandb_get_runs.csv"  # Use the correct relative path
 n = 5
 starting_point = 15
-end_point = 58
+end_point = 60
 id_ranges = [(starting_point, end_point)]  # Define ID ranges as [(start1, end1), (start2, end2), ...]
 
 """best = False
@@ -60,9 +60,9 @@ filter_top_n_by_metric(file_path, n, id_ranges, 'train_loss', best)"""
 
 best = True
 print("\n---------------------------------------\nOrder by min:\n---------------------------------------")
-filter_top_n_by_metric(file_path, n, id_ranges, 'val_loss', best)
-filter_top_n_by_metric(file_path, n, id_ranges, 'test_loss', best)
-filter_top_n_by_metric(file_path, n, id_ranges, 'train_loss', best)
+name = ['val_loss'] #, 'test_loss', 'train_loss']
+for name in name:   filter_top_n_by_metric(file_path, n, id_ranges, name, best)
+
 
 
 

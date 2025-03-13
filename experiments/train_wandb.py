@@ -31,7 +31,7 @@ sets = {
     'opt_bayes_1': 'hyperparams___opt_bayes_1',
 }
 hyperparams = hp_manager.get_hyperparams(sets['opt_best_1'])
-print(hyperparams, "\n\n")
+print("\n", sets['opt_best_1'], ": ", hyperparams, "\n\n")
 
 
 SWEEP = False
