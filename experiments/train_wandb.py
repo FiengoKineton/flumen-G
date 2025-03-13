@@ -28,9 +28,10 @@ sets = {
     'radiant_sweep_4': 'hyperparams___radiant_sweep_4',
     'swift_sweep_1': 'hyperparams___swift_sweep_1',
     'opt_best_1': 'hyperparams___opt_best_1', 
+    'opt_best_2': 'hyperparams___opt_best_2',
     'opt_bayes_1': 'hyperparams___opt_bayes_1',
 }
-hyperparams = hp_manager.get_hyperparams(sets['opt_best_1'])
+hyperparams = hp_manager.get_hyperparams(sets['opt_best_2'])
 print("\n", sets['opt_best_1'], ": ", hyperparams, "\n\n")
 
 
