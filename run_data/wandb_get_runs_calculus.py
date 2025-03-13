@@ -49,7 +49,7 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
 file_path = "run_data/wandb_get_runs.csv"  # Use the correct relative path
 n = 5
 starting_point = 15
-end_point = 60
+end_point = 61
 id_ranges = [(starting_point, end_point)]  # Define ID ranges as [(start1, end1), (start2, end2), ...]
 
 """best = False
@@ -83,4 +83,36 @@ radiant-sweep-4 for val_loss
 
     , radiant-sweep-4
 ]
+
+
+---------------------------------------
+Order by min:
+---------------------------------------
+
+
+Top 5 results by val_loss:
+                             val_loss  test_loss  train_loss   
+            radiant-sweep-4  0.021572   0.119962    0.011482 46
+              swift-sweep-1  0.023584   0.150588    0.013035 40
+026___default-code-same-dim  0.026048   0.026321    0.014672 28
+       037___improving-beta  0.028786   0.054766    0.018741 39
+       034___improving-beta  0.032041   0.105041    0.016758 36
+
+
+Top 5 results by test_loss:
+                             val_loss  test_loss  train_loss   
+026___default-code-same-dim  0.026048   0.026321    0.014672 28
+027___default-code-same-dim  0.064821   0.027229    0.014251 29
+        033___x-update-beta  0.055233   0.028553    0.017269 35
+017___default-code-same-dim  0.032123   0.034723    0.015891 19
+      035___improving-alpha  0.054753   0.036374    0.017880 37
+
+
+Top 5 results by train_loss:
+                             val_loss  test_loss  train_loss   
+    038___hyperparams-set-1  0.164580   0.040000    0.009215 55
+041___hyperparams-radiant-4  0.111757   0.047922    0.009571 58
+             lively-sweep-5  0.224687   0.133997    0.011310 48
+            radiant-sweep-4  0.021572   0.119962    0.011482 46
+          glamorous-sweep-1  0.075458   0.085277    0.012813 43
 """

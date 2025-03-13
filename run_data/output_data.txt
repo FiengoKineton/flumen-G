@@ -2106,7 +2106,39 @@ Timings: 0.05693769454956055, 1.7554936408996582
 042___hyperparams___opt_best_1
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-yodr2mrv:v38
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 18601.3108741, '_step': 87, '_timestamp': 1741882667.967213, '_wandb': {'runtime': 18601}, 'batch_size': 128, 'best_epoch': 67, 'best_test': 0.06634693616439426, 'best_train': 0.031640093990419275, 'best_val': 0.09006652643992788, 'epoch': 87, 'lr': 0.0005, 'n_epochs': 1000, 'test_loss': 0.05605158446327088, 'time': 18531.320506334305, 'train_loss': 0.020195376044188543, 'val_loss': 0.09410358344515164}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'discretisation_mode': 'TU',
+          'dyn_factor': 0.2,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'mhu': 1.0,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'beta'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.016526222229003906, 0.8239026069641113
+0.004253248453199196
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -2153,7 +2185,39 @@ Timings: 0.07372212409973145, 1.864884376525879
 044___hyperparams___opt_best_2
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-e1efyflb:v36
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 6459.454143329, '_step': 93, '_timestamp': 1741882446.3778567, '_wandb': {'runtime': 6459}, 'batch_size': 256, 'best_epoch': 73, 'best_test': 0.0933970334008336, 'best_train': 0.046414570353533094, 'best_val': 0.10525911825243384, 'epoch': 93, 'lr': 0.0005, 'n_epochs': 1000, 'test_loss': 0.100127711892128, 'time': 6442.120647192001, 'train_loss': 0.03298328363973843, 'val_loss': 0.2127576768398285}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 8,
+          'decoder_depth': 2,
+          'decoder_size': 1,
+          'discretisation_mode': 'TU',
+          'dyn_factor': 0.2,
+          'encoder_depth': 2,
+          'encoder_size': 1,
+          'mhu': 1.0,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'alpha'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.022310733795166016, 0.8055686950683594
+0.037362636827926704
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -30,9 +30,12 @@ sets = {
     'opt_best_1': 'hyperparams___opt_best_1', 
     'opt_best_2': 'hyperparams___opt_best_2',
     'opt_bayes_1': 'hyperparams___opt_bayes_1',
+    'opt_balanced_1': 'hyperparams___opt_balanced_1',
+    'opt_balanced_2': 'hyperparams___opt_balanced_2',
 }
-hyperparams = hp_manager.get_hyperparams(sets['opt_best_2'])
-print("\n", sets['opt_best_1'], ": ", hyperparams, "\n\n")
+name = sets['opt_balanced_2']
+hyperparams = hp_manager.get_hyperparams(name)
+print("\n", name, ": ", hyperparams, "\n\n")
 
 
 SWEEP = False

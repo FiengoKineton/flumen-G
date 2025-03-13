@@ -5,9 +5,13 @@ from skopt import gp_minimize
 from skopt.space import Categorical, Integer, Real
 from skopt.utils import use_named_args
 from sklearn.preprocessing import MinMaxScaler
+from collections import defaultdict
+from statistics import median
 
 
-K = 15
+top_n = 15
+file_path = "run_data/wandb_get_runs.csv"
+
 PRIOR_SETS = ["hyperparams___set_1", 
               "hyperparams___set_2", 
               "hyperparams___radiant_sweep_4", 
@@ -16,6 +20,13 @@ PRIOR_SETS = ["hyperparams___set_1",
               "hyperparams___opt_best_2",
               "hyperparams___opt_bayes_1",
               ]
+
+weights = {
+    "test_loss": 0.2,
+    "train_loss": 0.2,
+    "val_loss": 0.5,
+    "time": 0.1
+}
 
 
 
@@ -93,6 +104,10 @@ class Hyperparams:
 
             # from _opt_bayes:
             'hyperparams___opt_bayes_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE'},
+        
+            # from _opt_balanced:
+            'hyperparams___opt_balanced_1': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 35, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 15, 'control_rnn_size': 14, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU'},
+            'hyperparams___opt_balanced_2': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU'},
         }
     
     
@@ -161,9 +176,6 @@ class Hyperparams:
         - Returns a dictionary of optimized hyperparameters.
         """
 
-        file_path = "run_data/wandb_get_runs.csv"
-        k = K
-
         try:
             # Load the CSV file
             df = pd.read_csv(file_path)
@@ -180,7 +192,7 @@ class Hyperparams:
             df['hyperparameters'] = df['config'].apply(ast.literal_eval)
 
             # Select the top 10 best runs based on val_loss
-            best_runs = df.nsmallest(k, 'val_loss')
+            best_runs = df.nsmallest(top_n, 'val_loss')
 
             # Aggregate the best hyperparameters
             hyperparam_counts = {}
@@ -201,6 +213,85 @@ class Hyperparams:
             print(f"\n\n_opt_best | Error while optimizing hyperparameters: {e}")
             return {}
 
+
+# ---------------- OPTIMAL Problem | balanced runs ----------------------------------------------- #
+
+    def _opt_balanced(self):
+        """
+        Identifies the optimal hyperparameter set using a weighted scoring method instead of selecting the most frequent parameters.
+        
+        ## **How It Works**
+        1. **Extract Performance Metrics**: Load experiment results from CSV.
+        2. **Compute Weighted Score**: Assign a score to each run based on multiple performance metrics.
+        3. **Select the Best Runs**: Identify the `top_n` best runs based on the lowest weighted score.
+        4. **Choose Hyperparameters by Weighted Balance**: 
+        - For **numeric parameters**, compute the median value from the best runs.
+        - For **categorical parameters**, select the most common value from the best runs.
+
+        **Params:**
+        - `file_path`: Path to the CSV file containing hyperparameter runs.
+        - `weights`: Dictionary defining the importance of different loss metrics.
+
+        **Returns:**
+        - Dictionary containing the balanced selection of hyperparameters.
+        """
+
+        try:
+            # Load the CSV file
+            df = pd.read_csv(file_path)
+
+            # Convert summary column from string to dictionary
+            df['summary'] = df['summary'].apply(ast.literal_eval)
+
+            # Extract relevant loss metrics
+            df['val_loss'] = df['summary'].apply(lambda x: x.get('val_loss', float('inf')))
+            df['test_loss'] = df['summary'].apply(lambda x: x.get('test_loss', float('inf')))
+            df['train_loss'] = df['summary'].apply(lambda x: x.get('train_loss', float('inf')))
+            df['best_epoch'] = df['summary'].apply(lambda x: x.get('best_epoch', float('inf')))
+            df['time'] = df['summary'].apply(lambda x: x.get('time', float('inf')))
+
+            # Extract hyperparameters
+            df['hyperparameters'] = df['config'].apply(ast.literal_eval)
+
+            # Ensure valid numeric values
+            df.replace([np.inf, -np.inf], np.nan, inplace=True)
+            df.dropna(subset=['val_loss', 'test_loss', 'train_loss', 'best_epoch', 'time'], inplace=True)
+
+            # Define scoring function
+            def score(run):
+                return (
+                    run["test_loss"] * weights["test_loss"] +
+                    run["train_loss"] * weights["train_loss"] +
+                    run["val_loss"] * weights["val_loss"] +
+                    run["time"] * weights["time"]
+                )
+
+            # Compute scores for each run
+            df["score"] = df.apply(score, axis=1)
+
+            # Select top N best runs based on lowest score
+            best_runs = df.nsmallest(top_n, "score")
+
+            # Extract valid hyperparameter values dynamically
+            param_values = defaultdict(list)
+            for _, row in best_runs.iterrows():
+                for key, value in row['hyperparameters'].items():
+                    param_values[key].append(value)
+
+            # Compute balanced hyperparameter selection
+            optimized_hyperparams = {}
+            for param, values in param_values.items():
+                if all(isinstance(v, (int, float)) for v in values):  # Numeric parameters
+                    optimized_hyperparams[param] = median(values)  # Use median to avoid outliers
+                else:  # Categorical parameters
+                    optimized_hyperparams[param] = max(set(values), key=values.count)  # Most common
+
+            print("\n_opt_balanced | Optimized Hyperparameters:\n", optimized_hyperparams)
+            return optimized_hyperparams
+
+        except Exception as e:
+            print(f"\n\n_opt_balanced | Error while optimizing hyperparameters: {e}")
+            return {}
 
 # ---------------- OPTIMAL Problem | basyes search ----------------------------------------------- #
 
@@ -272,9 +363,6 @@ class Hyperparams:
         It ensures compatibility with `gp_minimize`, preventing missing or invalid hyperparameter values.
         """
 
-
-        file_path = "run_data/wandb_get_runs.csv"
-
         try:
             # Load past results
             df = pd.read_csv(file_path)
@@ -292,7 +380,6 @@ class Hyperparams:
             df = df[df['hyperparameters'].notna()]
 
             # Select the top N best runs based on val_loss
-            top_n = K
             best_runs = df.nsmallest(top_n, 'val_loss')
 
             # Extract valid hyperparameter values dynamically from best runs
@@ -303,6 +390,9 @@ class Hyperparams:
                         param_values[key] = set()
                     param_values[key].add(value)
 
+            """
+            # No need of these bc already in the csv file
+            
             # Ensure predefined sets are included
             prior_sets = PRIOR_SETS
 
@@ -312,6 +402,7 @@ class Hyperparams:
                         if key not in param_values:
                             param_values[key] = set()
                         param_values[key].add(value)
+            #"""
 
             # Ensure 'x_update_mode' exists
             if "x_update_mode" not in param_values:
@@ -380,16 +471,37 @@ class Hyperparams:
             Y_init = np.array(Y_init, dtype=np.float64)
 
             
-            """# Check for invalid values in Y_init
+            #"""
+            # Check for invalid values in Y_init
             print(f"NaN in Y_init: {np.isnan(Y_init).sum()}")       # output: 0
             print(f"Inf in Y_init: {np.isinf(Y_init).sum()}")       # output: 0
             print(f"Max value in Y_init: {np.max(Y_init)}")         # output: 0.055643573344226864
             print(f"Min value in Y_init: {np.min(Y_init)}")         # output: 0.021571947232125296
 
 
-            print("\nX_init before optimization:", X_init)
-            print("\nY_init before optimization:", Y_init)"""
+            ###print("\nX_init before optimization:", X_init)
+            ###print("\nY_init before optimization:", Y_init)
+            #"""
 
+            ###print("\nY_init before optimization (before):", Y_init)
+
+            # Replace infinite values with a reasonable default (e.g., median of finite values)
+            if np.any(np.isinf(Y_init)):
+                print(f"Warning: Replacing {np.sum(np.isinf(Y_init))} infinity values in Y_init.")
+                Y_init = np.where(np.isinf(Y_init), np.median(Y_init[np.isfinite(Y_init)]), Y_init)
+
+            # Clip extremely large values (adjust threshold if needed)
+            max_safe_value = 1e3  # Prevents outliers
+            if np.any(Y_init > max_safe_value):
+                print(f"Warning: Clipping {np.sum(Y_init > max_safe_value)} overly large values in Y_init.")
+                Y_init = np.clip(Y_init, None, max_safe_value)
+
+            # Ensure Y_init is never empty
+            if len(Y_init) == 0:
+                print("Warning: Y_init is empty! Assigning fallback values.")
+                Y_init = np.array([0.1])  # Fallback default
+
+            ###print("\nY_init before optimization (after):", Y_init)
 
             @use_named_args(space)
             def objective(**params):
@@ -441,6 +553,9 @@ class Hyperparams:
 # --------------------------------------------------------------- #
 
 
-"""hp = Hyperparams()
+"""
+hp = Hyperparams()
 hp._opt_best()           # using the top 10 best runs
-hp._opt_bayes()          # using bayesian optimization"""
+hp._opt_bayes()          # using bayesian optimization
+hp._opt_balanced()       # using a weighted scoring method
+#"""
