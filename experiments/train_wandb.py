@@ -33,7 +33,7 @@ sets = {
     'opt_balanced_1': 'hyperparams___opt_balanced_1',
     'opt_balanced_2': 'hyperparams___opt_balanced_2',
 }
-name = sets['opt_balanced_2']
+name = sets['opt_balanced_1']
 hyperparams = hp_manager.get_hyperparams(name)
 print("\n", name, ": ", hyperparams, "\n\n")
 
