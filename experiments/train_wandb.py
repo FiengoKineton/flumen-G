@@ -22,7 +22,16 @@ import pprint
 
 from hyperparams import Hyperparams  
 hp_manager = Hyperparams()
-hyperparams = hp_manager.get_hyperparams('hyperparams___radiant_sweep_4')
+sets = {
+    'set_1': 'hyperparams___set_1', 
+    'set_2': 'hyperparams___set_2',
+    'radiant_sweep_4': 'hyperparams___radiant_sweep_4',
+    'swift_sweep_1': 'hyperparams___swift_sweep_1',
+    'opt_best_1': 'hyperparams___opt_best_1', 
+    'opt_bayes_1': 'hyperparams___opt_bayes_1',
+}
+hyperparams = hp_manager.get_hyperparams(sets['opt_best_1'])
+print(hyperparams, "\n\n")
 
 
 SWEEP = False
@@ -47,7 +56,7 @@ sweep_config = {
         'sched_patience': {'values': [10]},
         'sched_factor': {'values': [2]},
         'loss': {'values': ["mse", "l1"]},  
-        'optimiser_mode': {'values': ["adam", "nesterov", "newton"]},
+        'optimiser_mode': {'values': ["adam"]},             # , "nesterov", "newton"]},
         'discretisation_mode': {'values': ["TU", "FE"]},
         'x_update_mode': {'values': ["alpha", "beta"]},
     }
