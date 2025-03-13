@@ -22,7 +22,7 @@ import pprint
 
 from hyperparams import Hyperparams  
 hp_manager = Hyperparams()
-hyperparams = hp_manager.get_hyperparams('hyperparams___swift_sweep_1')
+hyperparams = hp_manager.get_hyperparams('hyperparams___radiant_sweep_4')
 
 
 SWEEP = False

@@ -113,6 +113,11 @@ class CalcValues:
             ,{'run': "gallant-sweep-9", '_runtime': 12043.8551942, '_step': 109, '_timestamp': 1741804125.6145654, '_wandb': {'runtime': 12043}, 'batch_size': 256, 'best_epoch': 109, 'best_test': 0.38882978167384863, 'best_train': 0.306771037296245, 'best_val': 0.369750595651567, 'epoch': 109, 'lr': 0.0001, 'n_epochs': 1000, 'test_loss': 0.38882978167384863, 'time': 12019.04819726944, 'train_loss': 0.306771037296245, 'val_loss': 0.369750595651567}
         ]
 
+        hyperparams = [
+            {'run': "038___hyperparams-set-1", '_runtime': 18812.5908758, '_step': 113, '_timestamp': 1741824679.444635, '_wandb': {'runtime': 18985}, 'batch_size': 128, 'best_epoch': 98, 'best_test': 0.032758295240383296, 'best_train': 0.018323482102936224, 'best_val': 0.1541849288734652, 'epoch': 113, 'lr': 0.000125, 'n_epochs': 500, 'test_loss': 0.03999957615243537, 'time': 18786.76917457581, 'train_loss': 0.009215078745332976, 'val_loss': 0.1645800969785168}
+            , {'run': "039___hyperparams-set-2", '_runtime': 13081.172081066, '_step': 64, '_timestamp': 1741819893.582723, '_wandb': {'runtime': 13081}, 'batch_size': 64, 'best_epoch': 54, 'best_test': 0.426040991845112, 'best_train': 0.0412505230784851, 'best_val': 0.0775034295927201, 'epoch': 64, 'lr': 0.00075, 'n_epochs': 600, 'test_loss': 0.3696995698329475, 'time': 13057.94013261795, 'train_loss': 0.022297281211128443, 'val_loss': 0.0940718236157582}
+        ]
+
 
         return{
             "default_code_same_dim": default_code_same_dim,
@@ -121,7 +126,8 @@ class CalcValues:
             #"x_update_alpha_opt": x_update_alpha_opt,
             #"x_update_beta": x_update_beta, 
             #"improving": improving,
-            "sweep": sweep
+            "sweep": sweep, 
+            "hyperparams": hyperparams
             }
 
 
