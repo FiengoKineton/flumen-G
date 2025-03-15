@@ -49,7 +49,7 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
 file_path = "run_data/wandb_get_runs.csv"  # Use the correct relative path
 n = 5
 starting_point = 15
-end_point = 63
+end_point = 67
 id_ranges = [(starting_point, end_point)]  # Define ID ranges as [(start1, end1), (start2, end2), ...]
 
 """best = False
