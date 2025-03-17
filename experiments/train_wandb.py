@@ -18,6 +18,7 @@ import wandb
 import os
 import pandas as pd
 import pprint
+import torch_optimizer as optim
 
 
 from hyperparams import Hyperparams  
@@ -25,6 +26,7 @@ hp_manager = Hyperparams()
 sets = {
     'set_1': 'hyperparams___set_1', 
     'set_2': 'hyperparams___set_2',
+    'set_3': 'hyperparams___set_3',
     'radiant_sweep_4': 'hyperparams___radiant_sweep_4',
     'swift_sweep_1': 'hyperparams___swift_sweep_1',
     'opt_best_1': 'hyperparams___opt_best_1', 
@@ -33,7 +35,7 @@ sets = {
     'opt_balanced_1': 'hyperparams___opt_balanced_1',
     'opt_balanced_2': 'hyperparams___opt_balanced_2',
 }
-name = sets['opt_balanced_1']
+name = sets['set_3']
 hyperparams = hp_manager.get_hyperparams(name)
 
 SWEEP = False
@@ -66,7 +68,7 @@ sweep_config = {
         'sched_patience': {'values': [10]},
         'sched_factor': {'values': [2]},
         'loss': {'values': ["mse", "l1"]},  
-        'optimiser_mode': {'values': ["adam"]},             # , "nesterov", "newton"]},
+        'optimiser_mode': {'values': ["adam", "lamb"]},         # , "nesterov", "newton"]},
         'discretisation_mode': {'values': ["TU", "FE"]},
         'x_update_mode': {'values': ["alpha", "beta"]},
     }
@@ -80,6 +82,8 @@ def get_loss(which):
         return torch.nn.MSELoss()
     elif which == "l1":
         return torch.nn.L1Loss()
+    elif which == "huber": 
+        return torch.nn.HuberLoss()        
     else:
         raise ValueError(f"Unknown loss {which}.")
 
@@ -217,6 +221,8 @@ def main(sweep):
         optimiser = torch.optim.SGD(model.parameters(), lr=__lr, momentum=0.9, nesterov=True)
     elif optimiser_mode == "newton":
         optimiser = torch.optim.LBFGS(model.parameters())
+    elif optimiser_mode == "lamb":      
+        optimiser = optim.Lamb(model.parameters(), lr=__lr)
     else:
         optimiser = torch.optim.Adam(model.parameters(), lr=__lr)
         raise ValueError(f"Unknown optimizer mode: {optimiser_mode}. Choose from: adam, sgd_nesterov, lbfgs.")

@@ -94,6 +94,25 @@ class Hyperparams:
                 "x_update_mode": "alpha"       
             },
 
+            'hyperparams___set_3': {
+                "control_rnn_size": 20,         
+                "control_rnn_depth": 1,         
+                "encoder_size": 2,   
+                "encoder_depth": 2,  
+                "decoder_size": 2,  
+                "decoder_depth": 2,  
+                "batch_size": 256,  
+                "lr": 0.0005,                    
+                "n_epochs": 600,  
+                "es_patience": 20,              
+                "es_delta": 1e-07,
+                "sched_patience": 10,
+                "sched_factor": 2,
+                "loss": "huber",
+                "discretisation_mode": "TU",    
+                "optimiser_mode": "lamb",     
+                "x_update_mode": "alpha"    # or beta      
+            },
 
             'hyperparams___radiant_sweep_4': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE'},
             'hyperparams___swift_sweep_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 2, 'sched_factor': 2, 'decoder_depth': 1, 'encoder_depth': 1, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 12, 'control_rnn_depth': 1, 'discretisation_mode': 'TU'},
@@ -301,6 +320,7 @@ class Hyperparams:
         except Exception as e:
             print(f"\n\n_opt_balanced | Error while optimizing hyperparameters: {e}")
             return {}
+
 
 # ---------------- OPTIMAL Problem | basyes search ----------------------------------------------- #
 

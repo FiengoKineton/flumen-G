@@ -18,6 +18,7 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
     df['val_loss'] = df['summary'].apply(lambda x: x.get('val_loss', float('inf')))
     df['test_loss'] = df['summary'].apply(lambda x: x.get('test_loss', float('inf')))
     df['train_loss'] = df['summary'].apply(lambda x: x.get('train_loss', float('inf')))
+    df['time'] = df['summary'].apply(lambda x: x.get('time', float('inf')))
     
     # Extract ID number and filter based on given ID ranges
     df.reset_index(inplace=True)
@@ -36,8 +37,8 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
     df = df.nsmallest(n, metric) if best else df.nlargest(n, metric)
     
     # Format output
-    df_output = df[['name', 'val_loss', 'test_loss', 'train_loss', 'ID_number']]
-    df_output.columns = ['', 'val_loss', 'test_loss', 'train_loss', '']
+    df_output = df[['name', 'val_loss', 'test_loss', 'train_loss', 'time', 'ID_number']]
+    df_output.columns = ['', 'val_loss', 'test_loss', 'train_loss', 'time', '']
     
     # Print table
     print(f"\n\nTop {n} results by {metric}:")
@@ -46,11 +47,16 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
     return df_output
 
 # Example usage
-file_path = "run_data/wandb_get_runs.csv"  # Use the correct relative path
-n = 5
-starting_point = 15
-end_point = 67
-id_ranges = [(starting_point, end_point)]  # Define ID ranges as [(start1, end1), (start2, end2), ...]
+file_path_1 = "run_data/wandb_get_runs.csv"  # Use the correct relative path
+file_path_2 = "run_data/temp.csv"  # Use the correct relative path
+
+file_path = file_path_1
+df = pd.read_csv(file_path)
+
+n = 5 if file_path == file_path_1 else 2
+starting_point = 15 
+end_point = df.shape[0] - 1
+id_ranges = [(starting_point, end_point)] if file_path == file_path_1 else [(1, 8)]
 
 """best = False
 print("\nOrder by max:")
@@ -60,7 +66,7 @@ filter_top_n_by_metric(file_path, n, id_ranges, 'train_loss', best)"""
 
 best = True
 print("\n---------------------------------------\nOrder by min:\n---------------------------------------")
-name = ['val_loss'] #, 'test_loss', 'train_loss']
+name = ['val_loss'] #, 'test_loss', 'train_loss', 'time']
 for name in name:   filter_top_n_by_metric(file_path, n, id_ranges, name, best)
 
 
@@ -85,34 +91,90 @@ radiant-sweep-4 for val_loss
 ]
 
 
+
+############### file_path_1 ###################################################################
+
 ---------------------------------------
 Order by min:
 ---------------------------------------
 
 
 Top 5 results by val_loss:
-                             val_loss  test_loss  train_loss   
-            radiant-sweep-4  0.021572   0.119962    0.011482 46
-              swift-sweep-1  0.023584   0.150588    0.013035 40
-026___default-code-same-dim  0.026048   0.026321    0.014672 28
-       037___improving-beta  0.028786   0.054766    0.018741 39
-       034___improving-beta  0.032041   0.105041    0.016758 36
+                             val_loss  test_loss  train_loss         time   
+            radiant-sweep-4  0.021572   0.119962    0.011482 24096.859587 46
+              swift-sweep-1  0.023584   0.150588    0.013035 18822.825367 40
+026___default-code-same-dim  0.026048   0.026321    0.014672  7328.914924 28
+       037___improving-beta  0.028786   0.054766    0.018741 23409.787544 39
+       034___improving-beta  0.032041   0.105041    0.016758 21569.769417 36
 
 
 Top 5 results by test_loss:
-                             val_loss  test_loss  train_loss   
-026___default-code-same-dim  0.026048   0.026321    0.014672 28
-027___default-code-same-dim  0.064821   0.027229    0.014251 29
-        033___x-update-beta  0.055233   0.028553    0.017269 35
-017___default-code-same-dim  0.032123   0.034723    0.015891 19
-      035___improving-alpha  0.054753   0.036374    0.017880 37
+                             val_loss  test_loss  train_loss         time   
+026___default-code-same-dim  0.026048   0.026321    0.014672  7328.914924 28
+027___default-code-same-dim  0.064821   0.027229    0.014251  8272.850373 29
+        033___x-update-beta  0.055233   0.028553    0.017269 11577.355808 35
+017___default-code-same-dim  0.032123   0.034723    0.015891  7528.629385 19
+      035___improving-alpha  0.054753   0.036374    0.017880 17803.011450 37
 
 
 Top 5 results by train_loss:
-                             val_loss  test_loss  train_loss   
-    038___hyperparams-set-1  0.164580   0.040000    0.009215 55
-041___hyperparams-radiant-4  0.111757   0.047922    0.009571 58
-             lively-sweep-5  0.224687   0.133997    0.011310 48
-            radiant-sweep-4  0.021572   0.119962    0.011482 46
-          glamorous-sweep-1  0.075458   0.085277    0.012813 43
+                             val_loss  test_loss  train_loss         time   
+             hearty-sweep-2  0.096895   0.319395    0.007751 25397.204516 65
+    038___hyperparams-set-1  0.164580   0.040000    0.009215 18786.769175 55
+041___hyperparams-radiant-4  0.111757   0.047922    0.009571 23089.858831 58
+              stoic-sweep-3  0.104003   0.254928    0.011001 20042.328552 66
+             lively-sweep-5  0.224687   0.133997    0.011310  9484.192528 48
+
+
+Top 5 results by time:
+                                val_loss  test_loss  train_loss        time   
+           012___adam1_TU1_nf4  0.163657   0.193974    0.099135 3217.721420 15
+              faithful-sweep-4  0.095243   0.107093    0.013504 4381.372042 47
+             014___super-wrong  3.968048   3.987160    4.052914 4679.883023 16
+          025___x-update-alpha  0.169724   0.304397    0.059531 6438.592477 27
+044___hyperparams___opt_best_2  0.212758   0.100128    0.032983 6442.120647 61
+
+
+
+
+############### file_path_2 ###################################################################
+
+
+46, radiant-sweep-4,                
+40, swift-sweep-1,                 
+28, 026___default-code-same-dim,    
+35, 033___x-update-beta,            
+65, hearty-sweep-2,                 
+55, 038___hyperparams-set-1,       
+47, faithful-sweep-4,  
+
+
+
+---------------------------------------
+Order by min:
+---------------------------------------
+
+
+Top 2 results by val_loss:
+                 val_loss  test_loss  train_loss         time  
+radiant-sweep-4  0.021572   0.119962    0.011482 24096.859587 1
+  swift-sweep-1  0.023584   0.150588    0.013035 18822.825367 2
+
+
+Top 2 results by test_loss:
+                             val_loss  test_loss  train_loss         time  
+026___default-code-same-dim  0.026048   0.026321    0.014672  7328.914924 3
+        033___x-update-beta  0.055233   0.028553    0.017269 11577.355808 4
+
+
+Top 2 results by train_loss:
+                         val_loss  test_loss  train_loss         time  
+         hearty-sweep-2  0.096895   0.319395    0.007751 25397.204516 5
+038___hyperparams-set-1  0.164580   0.040000    0.009215 18786.769175 6
+
+
+Top 2 results by time:
+                             val_loss  test_loss  train_loss        time  
+           faithful-sweep-4  0.095243   0.107093    0.013504 4381.372042 7
+026___default-code-same-dim  0.026048   0.026321    0.014672 7328.914924 3
 """

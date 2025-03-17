@@ -4,8 +4,8 @@ import argparse
 
 
 class CalcValues:
-    def __init__(self, display=False, plot=False):
-        self.datasets = self.DataSet()
+    def __init__(self, display=False, plot=False, all=False):
+        self.datasets = self.DataSet(all)
 
         self.metrics = [
             "_step", 
@@ -35,10 +35,11 @@ class CalcValues:
         parser = argparse.ArgumentParser(description="Run results analysis with optional display and plotting.")
         parser.add_argument("--display", action="store_true", help="Display results and comparisons.")
         parser.add_argument("--plot", action="store_true", help="Plot selected metrics across datasets.")
+        parser.add_argument("--all", action="store_true", help="Select all metrics across datasets.")
         args = parser.parse_args()
         return args
 
-    def DataSet(self):
+    def DataSet(self, all):
         default_code_same_dim = [
             {'run': "017", '_runtime': 7546.45702, '_step': 117, '_timestamp': 1741182593.7156532, '_wandb': {'runtime': 7546}, 'best_epoch': 98, 'best_test': 0.03409814938075013, 'best_train': 0.018149984931504284, 'best_val': 0.028380416333675385, 'epoch': 118, 'lr': 0.000125, 'test_loss': 0.03472252781428988, 'time': 7528.629385232925, 'train_loss': 0.015891212812334143, 'val_loss': 0.03212327557423758}
             , {'run': "026", '_runtime': 7346.7665658, '_step': 106, '_timestamp': 1741430459.320042, '_wandb': {'runtime': 7346}, 'best_epoch': 87, 'best_test': 0.025843684265892657, 'best_train': 0.014283652101993245, 'best_val': 0.02398856176388642, 'epoch': 107, 'lr': 0.000125, 'test_loss': 0.026321270325708957, 'time': 7328.914924144745, 'train_loss': 0.014671892942811446, 'val_loss': 0.026048427477242456}
@@ -130,17 +131,22 @@ class CalcValues:
             , {'run': "046", '_runtime': 7944.6774927, '_step': 65, '_timestamp': 1741894454.9260068, '_wandb': {'runtime': 7944}, 'batch_size': 128, 'best_epoch': 45, 'best_test': 0.057132279145575705, 'best_train': 0.03496928833346203, 'best_val': 0.1002613367542388, 'epoch': 65, 'lr': 0.0005, 'n_epochs': 1000, 'test_loss': 0.05603789833803025, 'time': 7925.196460485458, 'train_loss': 0.026033652389530468, 'val_loss': 0.12433141328039624}
         ]
 
-
-        return{
+        output = {
             "default_code_same_dim": default_code_same_dim,
-            #"new_LSTM": new_LSTM,
-            #"x_update_alpha": x_update_alpha,
-            #"x_update_alpha_opt": x_update_alpha_opt,
-            #"x_update_beta": x_update_beta, 
-            #"improving": improving,
+            "new_LSTM": new_LSTM,
+            "x_update_alpha": x_update_alpha,
+            "x_update_alpha_opt": x_update_alpha_opt,
+            "x_update_beta": x_update_beta, 
+            "improving": improving,
+            "sweep": sweep, 
+            "hyperparams": hyperparams
+            } if all else {
+            "default_code_same_dim": default_code_same_dim,
             "sweep": sweep, 
             "hyperparams": hyperparams
             }
+
+        return output
 
 
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
