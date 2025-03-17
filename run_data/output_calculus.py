@@ -508,4 +508,4 @@ class CalcValues:
 
 if __name__ == "__main__":
     args = CalcValues.parse_arguments()
-    CalcValues(display=args.display, plot=args.plot)
+    CalcValues(display=args.display, plot=args.plot, all=args.all)

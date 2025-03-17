@@ -131,6 +131,40 @@ def discretisation_TU(x_prev, A, tau, I):
     return torch.bmm(x_prev, transform_matrix).permute(1, 0, 2)
 
 
+def discretisation_RK4(x_prev, A, tau, I):
+    """
+    Runge-Kutta 4th order (RK4) discretisation.
+    Uses the classical RK4 method to approximate x_next.
+    """
+    batch_size = tau.shape[0]
+    tau = tau.view(batch_size, 1, 1)
+
+    x_prev = x_prev.squeeze(0).unsqueeze(1)
+
+    k1 = torch.bmm(x_prev, A)
+    k2 = torch.bmm(x_prev + 0.5 * tau * k1, A)
+    k3 = torch.bmm(x_prev + 0.5 * tau * k2, A)
+    k4 = torch.bmm(x_prev + tau * k3, A)
+
+    x_next = x_prev + (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+
+    return x_next.permute(1, 0, 2)
+
+
+def discretisation_exact(x_prev, A, tau, I):
+    """
+    Exact discretisation: x_next = exp(tau * A) * x_prev
+    Uses the matrix exponential function from PyTorch.
+    """
+    batch_size = tau.shape[0]
+    tau = tau.view(batch_size, 1, 1)
+
+    exp_matrix = torch.matrix_exp(tau * A)
+
+    x_prev = x_prev.squeeze(0).unsqueeze(1)
+    return torch.bmm(x_prev, exp_matrix).permute(1, 0, 2)
+
+
 # ------------------------- x_update_mode ------------------------- #
 
 def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):

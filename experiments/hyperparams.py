@@ -101,17 +101,17 @@ class Hyperparams:
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 256,  
-                "lr": 0.0005,                    
+                "batch_size": 128,  
+                "lr": 0.001,                    
                 "n_epochs": 600,  
                 "es_patience": 20,              
                 "es_delta": 1e-07,
                 "sched_patience": 10,
                 "sched_factor": 2,
-                "loss": "huber",
+                "loss": "huber",                # or mse
                 "discretisation_mode": "TU",    
-                "optimiser_mode": "lamb",     
-                "x_update_mode": "alpha"    # or beta      
+                "optimiser_mode": "lamb",       # or adam
+                "x_update_mode": "alpha"        # or beta      
             },
 
             'hyperparams___radiant_sweep_4': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE'},
@@ -129,14 +129,12 @@ class Hyperparams:
             # from _opt_balanced:
             'hyperparams___opt_balanced_1': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 35, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 15, 'control_rnn_size': 14, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU'},
             'hyperparams___opt_balanced_2': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU'},
-            'hyperparams___opt_balanced_3': {},
+            'hyperparams___opt_balanced_3': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE'},
+            'hyperparams___opt_balanced_4': {},
 
 
             '': {},
         }
-
-        df = pd.read_csv(file_path)
-        print(df.shape[0])
     
     
     def get_hyperparams(self, name):
@@ -500,7 +498,7 @@ class Hyperparams:
             Y_init = np.array(Y_init, dtype=np.float64)
 
             
-            #"""
+            """
             # Check for invalid values in Y_init
             print(f"NaN in Y_init: {np.isnan(Y_init).sum()}")       # output: 0
             print(f"Inf in Y_init: {np.isinf(Y_init).sum()}")       # output: 0
@@ -508,8 +506,8 @@ class Hyperparams:
             print(f"Min value in Y_init: {np.min(Y_init)}")         # output: 0.021571947232125296
 
 
-            ###print("\nX_init before optimization:", X_init)
-            ###print("\nY_init before optimization:", Y_init)
+            print("\nX_init before optimization:", X_init)
+            print("\nY_init before optimization:", Y_init)
             #"""
 
             ###print("\nY_init before optimization (before):", Y_init)
@@ -530,7 +528,20 @@ class Hyperparams:
                 print("Warning: Y_init is empty! Assigning fallback values.")
                 Y_init = np.array([0.1])  # Fallback default
 
-            ###print("\nY_init before optimization (after):", Y_init)
+            """
+            print("\nY_init before optimization (after):", Y_init)
+            print("Final Y_init:", Y_init)
+            print("Contains NaN:", np.any(np.isnan(Y_init)))
+            print("Contains Inf:", np.any(np.isinf(Y_init)))
+            print("Max Y_init:", np.max(Y_init))
+            print("Min Y_init:", np.min(Y_init))
+            print("Y_init dtype:", Y_init.dtype)
+
+            print("Expected X_init shape:", (len(Y_init), len(space)))
+            print("Actual X_init shape:", np.array(X_init).shape)
+            #"""
+
+
 
             @use_named_args(space)
             def objective(**params):
@@ -548,12 +559,21 @@ class Hyperparams:
                 # Find the closest match instead of exact match
                 closest_match = df.iloc[(df["hyperparameters"].apply(lambda x: sum([x.get(k) == v for k, v in params.items()]))).idxmax()]
 
-                if closest_match is not None:
+                """if closest_match is not None:
                     return closest_match["val_loss"]
                 
-                return np.median(Y_init)  # Return median instead of arbitrary 10.0
+                return np.median(Y_init)  # Return median instead of arbitrary 10.0"""
 
+                val_loss = closest_match["val_loss"]
 
+                # Check if val_loss is invalid
+                if not np.isfinite(val_loss):
+                    print(f"Invalid objective return: {val_loss} for params: {params}")
+                    return 1.0  # Assign default valid value
+
+                return val_loss
+
+            
             # Perform Bayesian Optimization
             res = gp_minimize(
                 func=objective,
@@ -567,7 +587,7 @@ class Hyperparams:
                 n_jobs=-1,
                 n_restarts_optimizer=10  # Helps with local minima
             )
-
+            print("check")
             
             best_params = dict(zip([dim.name for dim in space], res.x))
             print("\n_opt_bayes | Optimized Hyperparameters:\n", best_params)
@@ -584,7 +604,12 @@ class Hyperparams:
 
 #"""
 hp = Hyperparams()
+df = pd.read_csv(file_path)
+print("\n", df.shape[0])
+print("\n-----------------------------------\n")
 hp._opt_best()           # using the top 10 best runs
-hp._opt_bayes()          # using bayesian optimization
+print("\n-----------------------------------\n")
 hp._opt_balanced()       # using a weighted scoring method
+print("\n-----------------------------------\n")
+hp._opt_bayes()          # using bayesian optimization
 #"""

@@ -15,6 +15,13 @@ import time
 import wandb
 
 # --------------------------------------------------------------------------- #
+"""
+COMMANDs:
+
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
+python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
+"""
+
 import os
 import pandas as pd
 import pprint
@@ -34,6 +41,7 @@ sets = {
     'opt_bayes_1': 'hyperparams___opt_bayes_1',
     'opt_balanced_1': 'hyperparams___opt_balanced_1',
     'opt_balanced_2': 'hyperparams___opt_balanced_2',
+    'opt_balanced_3': 'hyperparams___opt_balanced_3',
 }
 name = sets['set_3']
 hyperparams = hp_manager.get_hyperparams(name)
@@ -50,7 +58,7 @@ else:
 # --------------------------------------------------------------------------- #
 
 
-sweep_config = {
+sweep_config_init = {
     'method': 'random',  # Can be 'grid', 'random', or 'bayes'
     'metric': {'name': 'val_loss', 'goal': 'minimize'},
     'parameters': {
@@ -67,13 +75,38 @@ sweep_config = {
         'es_delta': {'values': [1e-7, 1e-5]}, 
         'sched_patience': {'values': [10]},
         'sched_factor': {'values': [2]},
-        'loss': {'values': ["mse", "l1"]},  
-        'optimiser_mode': {'values': ["adam", "lamb"]},         # , "nesterov", "newton"]},
-        'discretisation_mode': {'values': ["TU", "FE"]},
+        'loss': {'values': ["mse", "l1"]},                                  # , "huber"]},
+        'optimiser_mode': {'values': ["adam", "lamb"]},                     # , "nesterov", "newton"]},
+        'discretisation_mode': {'values': ["TU", "FE", "RK4", "exact"]},    # , "BE"]},
         'x_update_mode': {'values': ["alpha", "beta"]},
     }
 }
 
+sweep_config_test = {
+    'method': 'random',  
+    'metric': {'name': 'val_loss', 'goal': 'minimize'},
+    'parameters': {
+        'control_rnn_size': {'values': [20]}, 
+        'control_rnn_depth': {'values': [1]}, 
+        'encoder_size': {'values': [2]},  
+        'encoder_depth': {'values': [2]},  
+        'decoder_size': {'values': [2]},  
+        'decoder_depth': {'values': [2]},  
+        'batch_size': {'values': [128]},
+        'lr': {'values': [0.001]},
+        'n_epochs': {'values': [500]},
+        'es_patience': {'values': [20]}, 
+        'es_delta': {'values': [1e-7]}, 
+        'sched_patience': {'values': [10]},
+        'sched_factor': {'values': [2]},
+        'loss': {'values': ["mse"]},  
+        'optimiser_mode': {'values': ["adam"]},         
+        'discretisation_mode': {'values': ["TU"]},        
+        'x_update_mode': {'values': ["alpha"]},
+    }
+}
+
+sweep_confif = sweep_config_test
 
 
 
