@@ -35,6 +35,7 @@ sets = {
     'set_2': 'hyperparams___set_2',
     'set_3': 'hyperparams___set_3',
     'set_4': 'hyperparams___set_4',
+    'set_5': 'hyperparams___set_5',
     'radiant_sweep_4': 'hyperparams___radiant_sweep_4',
     'swift_sweep_1': 'hyperparams___swift_sweep_1',
     'opt_best_1': 'hyperparams___opt_best_1', 
@@ -44,7 +45,7 @@ sets = {
     'opt_balanced_2': 'hyperparams___opt_balanced_2',
     'opt_balanced_3': 'hyperparams___opt_balanced_3',
 }
-name = sets['set_4']
+name = sets['set_5']
 hyperparams = hp_manager.get_hyperparams(name)
 
 SWEEP = False
