@@ -162,15 +162,16 @@ class Hyperparams:
             'hyperparams___opt_best_2': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU'},
             'hyperparams___opt_best_3': {}, 
 
-            # from _opt_bayes:
-            'hyperparams___opt_bayes_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE'},
-            'hyperparams___opt_bayes_2': {},
-
             # from _opt_balanced:
             'hyperparams___opt_balanced_1': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 35, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 15, 'control_rnn_size': 14, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU'},
             'hyperparams___opt_balanced_2': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU'},
             'hyperparams___opt_balanced_3': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE'},
-            'hyperparams___opt_balanced_4': {},
+            'hyperparams___opt_balanced_4': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU'},
+            'hyperparams___opt_balanced_5': {},
+
+            # from _opt_bayes:
+            'hyperparams___opt_bayes_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE'},
+            'hyperparams___opt_bayes_2': {},
 
 
             '': {},
@@ -642,7 +643,7 @@ class Hyperparams:
 # --------------------------------------------------------------- #
 
 
-"""
+#"""
 hp = Hyperparams()
 df = pd.read_csv(file_path)
 print("\n", df.shape[0])

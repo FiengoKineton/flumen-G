@@ -44,17 +44,18 @@ sets = {
     'opt_balanced_1': 'hyperparams___opt_balanced_1',
     'opt_balanced_2': 'hyperparams___opt_balanced_2',
     'opt_balanced_3': 'hyperparams___opt_balanced_3',
+    'opt_balanced_4': 'hyperparams___opt_balanced_4',
 }
 name = sets['set_5']
 hyperparams = hp_manager.get_hyperparams(name)
 
-SWEEP = False
+SWEEP = True
 
 
 if SWEEP:
     print("SWEEP: ", SWEEP, "\n\n")
 else:
-    print("SWEEP: ", SWEEP, "\n", f"{name}:")
+    print("SWEEP: ", SWEEP, "\n\n", f"{name}:")
     pprint.pprint(hyperparams)
     print("\n\n")
 # --------------------------------------------------------------------------- #
@@ -90,25 +91,25 @@ sweep_config_test = {
     'parameters': {
         'control_rnn_size': {'values': [20]}, 
         'control_rnn_depth': {'values': [1]}, 
-        'encoder_size': {'values': [2]},  
+        'encoder_size': {'values': [1]},  
         'encoder_depth': {'values': [2]},  
         'decoder_size': {'values': [2]},  
-        'decoder_depth': {'values': [2]},  
+        'decoder_depth': {'values': [1]},  
         'batch_size': {'values': [128]},
-        'lr': {'values': [0.001]},
-        'n_epochs': {'values': [200]},
+        'lr': {'values': [0.0005]},
+        'n_epochs': {'values': [300]},
         'es_patience': {'values': [20]}, 
         'es_delta': {'values': [1e-7]}, 
         'sched_patience': {'values': [10]},
         'sched_factor': {'values': [2]},
         'loss': {'values': ["mse"]},  
         'optimiser_mode': {'values': ["adam"]},         
-        'discretisation_mode': {'values': ["TU"]},        
+        'discretisation_mode': {'values': ["FE"]},        
         'x_update_mode': {'values': ["alpha"]},
     }
 }
 
-sweep_confif = sweep_config_init
+sweep_config = sweep_config_test
 
 
 

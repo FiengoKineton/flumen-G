@@ -130,6 +130,8 @@ class CalcValues:
             , {'run': "045", '_runtime': 11935.6086048, '_step': 72, '_timestamp': 1741898373.9301524, '_wandb': {'runtime': 11935}, 'batch_size': 128, 'best_epoch': 37, 'best_test': 0.05453523044430074, 'best_train': 0.02867371845675051, 'best_val': 0.0871459778457407, 'epoch': 72, 'lr': 0.00025, 'n_epochs': 1000, 'test_loss': 0.05989702445055757, 'time': 11906.330340385435, 'train_loss': 0.01179708170620774, 'val_loss': 0.11624310623913532}
             , {'run': "046", '_runtime': 7944.6774927, '_step': 65, '_timestamp': 1741894454.9260068, '_wandb': {'runtime': 7944}, 'batch_size': 128, 'best_epoch': 45, 'best_test': 0.057132279145575705, 'best_train': 0.03496928833346203, 'best_val': 0.1002613367542388, 'epoch': 65, 'lr': 0.0005, 'n_epochs': 1000, 'test_loss': 0.05603789833803025, 'time': 7925.196460485458, 'train_loss': 0.026033652389530468, 'val_loss': 0.12433141328039624}
             , {'run': "047", '_runtime': 15373.7449627, '_step': 61, '_timestamp': 1742229683.6684904, '_wandb': {'runtime': 15373}, 'batch_size': 128, 'best_epoch': 57, 'best_test': 0.03277164156593028, 'best_train': 0.005900937812550674, 'best_val': 0.025855697661874785, 'epoch': 61, 'lr': 0.0005, 'n_epochs': 600, 'test_loss': 0.03224825329842076, 'time': 15343.459737062454, 'train_loss': 0.0073168578018094335, 'val_loss': 0.028925311145564868}
+            , {'run': "048", '_runtime': 13606.6700094, '_step': 58, '_timestamp': 1742249642.4426694, '_wandb': {'runtime': 13621}, 'batch_size': 128, 'best_epoch': 55, 'best_test': 0.09819107535221272, 'best_train': 0.021722012854836607, 'best_val': 0.04362508317544347, 'coeff_train': 0.6076177960802271, 'epoch': 58, 'lr': 0.0005, 'n_epochs': 200, 'test_loss': 0.08230823340515296, 'time': 13542.980422735214, 'train_loss': 0.022515423196767057, 'val_loss': 0.08573220776660102}
+            , {'run': "049", '_runtime': 11995.576234156, '_step': 72, '_timestamp': 1742249640.9203196, '_wandb': {'runtime': 12024}, 'batch_size': 128, 'best_epoch': 68, 'best_test': 0.2817918884139212, 'best_train': 0.010568339875332577, 'best_val': 0.05043999835967072, 'coeff_train': 0.5078245317955713, 'epoch': 72, 'lr': 0.0005, 'n_epochs': 200, 'test_loss': 0.2890660311021502, 'time': 11965.97043466568, 'train_loss': 0.010115224222539278, 'val_loss': 0.05292532734927677}
         ]
 
         output = {
@@ -496,6 +498,8 @@ class CalcValues:
             plt.text(min_x, min_y, f"{min_y:.4f}", fontsize=10, ha='right', va='bottom', color='red')
             plt.text(min_x, min_y, f"{min_run}", fontsize=10, ha='left', va='bottom', color='blue')
 
+            print("Minimum for metric", metric, "in data set", dataset_name, "is", min_y, "for run", min_run)
+        print("\n")
 
         plt.xlabel("Training Steps (or Epochs)")
         plt.ylabel(metric.replace("_", " ").capitalize())  # Formatting metric name for display
@@ -510,3 +514,25 @@ class CalcValues:
 if __name__ == "__main__":
     args = CalcValues.parse_arguments()
     CalcValues(display=args.display, plot=args.plot, all=args.all)
+
+
+"""
+Minimum for metric val_loss in data set default_code_same_dim is 0.026048427477242456 for run 026
+Minimum for metric val_loss in data set sweep is 0.02143756610651811 for run radiant-sweep-4
+Minimum for metric val_loss in data set hyperparams is 0.028925311145564868 for run 047
+
+
+Minimum for metric test_loss in data set default_code_same_dim is 0.026321270325708957 for run 026
+Minimum for metric test_loss in data set sweep is 0.08527710055193258 for run glamorous-sweep-1
+Minimum for metric test_loss in data set hyperparams is 0.03224825329842076 for run 047
+
+
+Minimum for metric train_loss in data set default_code_same_dim is 0.014251226118258223 for run 027
+Minimum for metric train_loss in data set sweep is 0.007751289033207786 for run hearty-sweep-2
+Minimum for metric train_loss in data set hyperparams is 0.0073168578018094335 for run 047
+
+
+Minimum for metric time in data set default_code_same_dim is 7328.914924144745 for run 026
+Minimum for metric time in data set sweep is 4381.372041940689 for run faithful-sweep-4
+Minimum for metric time in data set hyperparams is 6442.120647192001 for run 044
+"""

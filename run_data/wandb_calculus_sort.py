@@ -50,7 +50,7 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
 file_path_1 = "run_data/wandb_get_runs.csv"  # Use the correct relative path
 file_path_2 = "run_data/temp.csv"  # Use the correct relative path
 
-file_path = file_path_2
+file_path = file_path_1
 df = pd.read_csv(file_path)
 
 n = 5 if file_path == file_path_1 else 2
@@ -119,21 +119,21 @@ Top 5 results by test_loss:
 
 
 Top 5 results by train_loss:
-                             val_loss  test_loss  train_loss         time
+                             val_loss  test_loss  train_loss         time   
   047___hyperparams___set_3  0.028925   0.032248    0.007317 15343.459737 68
              hearty-sweep-2  0.096895   0.319395    0.007751 25397.204516 65
     038___hyperparams-set-1  0.164580   0.040000    0.009215 18786.769175 55
 041___hyperparams-radiant-4  0.111757   0.047922    0.009571 23089.858831 58
-              stoic-sweep-3  0.104003   0.254928    0.011001 20042.328552 66
+  049___hyperparams___set_5  0.052925   0.289066    0.010115 11965.970435 71
 
 
 Top 5 results by time:
-                                val_loss  test_loss  train_loss        time
-           012___adam1_TU1_nf4  0.163657   0.193974    0.099135 3217.721420 15
-              faithful-sweep-4  0.095243   0.107093    0.013504 4381.372042 47
-             014___super-wrong  3.968048   3.987160    4.052914 4679.883023 16
-          025___x-update-alpha  0.169724   0.304397    0.059531 6438.592477 27
-044___hyperparams___opt_best_2  0.212758   0.100128    0.032983 6442.120647 61
+                               val_loss  test_loss  train_loss        time
+048___hyperparams___set_4(nf)  0.252035   0.089299    0.067268 1626.147287 69
+          012___adam1_TU1_nf4  0.163657   0.193974    0.099135 3217.721420 15
+             faithful-sweep-4  0.095243   0.107093    0.013504 4381.372042 47
+            014___super-wrong  3.968048   3.987160    4.052914 4679.883023 16
+         025___x-update-alpha  0.169724   0.304397    0.059531 6438.592477 27
 
 
 
