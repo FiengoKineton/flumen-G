@@ -73,15 +73,15 @@ sweep_config_init = {
         'decoder_depth': {'values': [1, 2]},  
         'batch_size': {'values': [64, 128, 256]},
         'lr': {'values': [0.001, 0.0005, 0.0001, 0.002]},
-        'n_epochs': {'values': [500, 1000]},
+        'n_epochs': {'values': [300, 400, 500]},
         'es_patience': {'values': [10, 20]}, 
         'es_delta': {'values': [1e-7, 1e-5]}, 
         'sched_patience': {'values': [10]},
         'sched_factor': {'values': [2]},
-        'loss': {'values': ["mse", "l1"]},                                  # , "huber"]},
-        'optimiser_mode': {'values': ["adam", "lamb"]},                     # , "nesterov", "newton"]},
-        'discretisation_mode': {'values': ["TU", "FE", "RK4", "exact"]},    # , "BE"]},
-        'x_update_mode': {'values': ["alpha", "beta"]},
+        'loss': {'values': ["mse", "l1"]},                                  # , "huber"]},              | can't be used
+        'optimiser_mode': {'values': ["adam", "lamb"]},                     # , "nesterov", "newton"]}, | do not work
+        'discretisation_mode': {'values': ["TU", "FE", "RK4", "exact"]},    # , "BE"]},                 | don't bother
+        'x_update_mode': {'values': ["alpha", "beta"]},                     # , "lamda"]}               | don't bother
     }
 }
 
@@ -109,7 +109,7 @@ sweep_config_test = {
     }
 }
 
-sweep_config = sweep_config_test
+sweep_config = sweep_config_init
 
 
 
@@ -337,7 +337,7 @@ def main(sweep):
 
         print(
             f"{epoch + 1:>5d} :: {train_loss:>16e} :: {val_loss:>16e} :: " \
-            f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e} :: {coeff:>8f}"   ###############
+            f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e} :: {coeff:>16f}"   ###############
         )
 
         if early_stop.best_model:
