@@ -141,7 +141,8 @@ def discretisation_RK4(x_prev, A, tau, I):
     batch_size = tau.shape[0]
     tau = tau.view(batch_size, 1, 1)
 
-    x_prev = x_prev.squeeze(0).unsqueeze(1)
+    x_prev = x_prev.squeeze(0).unsqueeze(-1)
+    A = A.expand(batch_size, -1, -1)
 
     k1 = torch.bmm(x_prev, A)
     k2 = torch.bmm(x_prev + 0.5 * tau * k1, A)

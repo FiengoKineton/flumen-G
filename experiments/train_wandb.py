@@ -45,7 +45,7 @@ sets = {
     'opt_balanced_2': 'hyperparams___opt_balanced_2',
     'opt_balanced_3': 'hyperparams___opt_balanced_3',
 }
-name = sets['set_5']
+name = sets['set_4']
 hyperparams = hp_manager.get_hyperparams(name)
 
 SWEEP = False
@@ -55,7 +55,7 @@ if SWEEP:
     print("SWEEP: ", SWEEP, "\n\n")
 else:
     print("SWEEP: ", SWEEP, "\n")
-    pprint.pprint(hyperparams)
+    pprint.pprint(name, ":", hyperparams)
     print("\n\n")
 # --------------------------------------------------------------------------- #
 
@@ -96,7 +96,7 @@ sweep_config_test = {
         'decoder_depth': {'values': [2]},  
         'batch_size': {'values': [128]},
         'lr': {'values': [0.001]},
-        'n_epochs': {'values': [500]},
+        'n_epochs': {'values': [200]},
         'es_patience': {'values': [20]}, 
         'es_delta': {'values': [1e-7]}, 
         'sched_patience': {'values': [10]},
