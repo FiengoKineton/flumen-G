@@ -91,7 +91,7 @@ class CausalFlowModel(nn.Module):
         ###h0, c0, tau = self.structure_function(x, deltas)
         ###rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0), tau)
 
-        h0, rnn_out_seq_packed = self.structure_function(x, deltas, rnn_input)
+        h0, rnn_out_seq_packed, coefficients = self.structure_function(x, deltas, rnn_input)    ###############
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
         h_shift = torch.roll(h, shifts=1, dims=1)   
@@ -103,7 +103,7 @@ class CausalFlowModel(nn.Module):
         output = output[:, :self.state_dim]  
 
         ###sys.exit()
-        return output
+        return output, coefficients ###############
 
 
     def mode_rnn_new(self, x, deltas, rnn_input):
@@ -112,9 +112,9 @@ class CausalFlowModel(nn.Module):
         z = z.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
         c0 = torch.zeros_like(z)
 
-        rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (z, c0), deltas)
+        rnn_out_seq_packed, _, coefficients = self.u_rnn(rnn_input, (z, c0), deltas)    ###############
 
-        return z, rnn_out_seq_packed
+        return z, rnn_out_seq_packed, coefficients  ###############
 
 
     def mode_rnn_old(self, x, deltas, rnn_input):
@@ -124,7 +124,7 @@ class CausalFlowModel(nn.Module):
 
         rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0))
 
-        return h0, rnn_out_seq_packed
+        return h0, rnn_out_seq_packed, None ###############
 
 
 class FFNet(nn.Module):

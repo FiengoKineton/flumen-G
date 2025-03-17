@@ -34,6 +34,7 @@ sets = {
     'set_1': 'hyperparams___set_1', 
     'set_2': 'hyperparams___set_2',
     'set_3': 'hyperparams___set_3',
+    'set_4': 'hyperparams___set_4',
     'radiant_sweep_4': 'hyperparams___radiant_sweep_4',
     'swift_sweep_1': 'hyperparams___swift_sweep_1',
     'opt_best_1': 'hyperparams___opt_best_1', 
@@ -43,7 +44,7 @@ sets = {
     'opt_balanced_2': 'hyperparams___opt_balanced_2',
     'opt_balanced_3': 'hyperparams___opt_balanced_3',
 }
-name = sets['set_3']
+name = sets['set_4']
 hyperparams = hp_manager.get_hyperparams(name)
 
 SWEEP = False
@@ -106,7 +107,7 @@ sweep_config_test = {
     }
 }
 
-sweep_confif = sweep_config_test
+sweep_confif = sweep_config_init
 
 
 
@@ -286,30 +287,36 @@ def main(sweep):
     test_dl = DataLoader(test_data, batch_size=bs, shuffle=True)
 
     header_msg = f"{'Epoch':>5} :: {'Loss (Train)':>16} :: " \
-        f"{'Loss (Val)':>16} :: {'Loss (Test)':>16} :: {'Best (Val)':>16}"
+        f"{'Loss (Val)':>16} :: {'Loss (Test)':>16} :: {'Best (Val)':>16} :: {'Coeff(Train)':>16}"  ###############
 
     print(header_msg)
     print('=' * len(header_msg))
 
     # Evaluate initial loss
     model.eval()
-    train_loss = validate(train_dl, loss, model, device)   
-    val_loss = validate(val_dl, loss, model, device)       
-    test_loss = validate(test_dl, loss, model, device)     
+    train_loss, coeff = validate(train_dl, loss, model, device)   
+    val_loss, _ = validate(val_dl, loss, model, device)       
+    test_loss, _ = validate(test_dl, loss, model, device)     
 
     early_stop.step(val_loss)
     print(
         f"{0:>5d} :: {train_loss:>16e} :: {val_loss:>16e} :: " \
-        f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e}"
+        f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e} :: {coeff:>16e}"  ###############
     )
 
     start = time.time()
 
     for epoch in range(__n_epochs):
         model.train()
+        #num_batches = len(train_dl)
+        #tot_coeff = 0
+
         for example in train_dl:        # for i in range 190
             ###print("check")
+            #_, mean_coeff = 
             train_step(example, loss, model, optimiser, device)
+
+            #tot_coeff += mean_coeff
     
             """   
         # --------------------------------------------------------------------------- #
@@ -317,17 +324,18 @@ def main(sweep):
         # --------------------------------------------------------------------------- #
             #"""
 
+        #avg_train_coeff = tot_coeff / num_batches
         model.eval()
-        train_loss = validate(train_dl, loss, model, device)   
-        val_loss = validate(val_dl, loss, model, device)       
-        test_loss = validate(test_dl, loss, model, device)     
+        train_loss, coeff = validate(train_dl, loss, model, device) ###############
+        val_loss, _ = validate(val_dl, loss, model, device) ###############
+        test_loss, _ = validate(test_dl, loss, model, device)   ############### 
 
         sched.step(val_loss)
         early_stop.step(val_loss)
 
         print(
             f"{epoch + 1:>5d} :: {train_loss:>16e} :: {val_loss:>16e} :: " \
-            f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e}"
+            f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e} :: {coeff:>8f}"   ###############
         )
 
         if early_stop.best_model:
@@ -344,6 +352,7 @@ def main(sweep):
             run.summary["best_val"] = val_loss
             run.summary["best_test"] = test_loss
             run.summary["best_epoch"] = epoch + 1
+            run.summary["coeff_train"] = coeff  ###############
 
         wandb.log({
             'time': time.time() - start,
@@ -352,6 +361,7 @@ def main(sweep):
             'train_loss': train_loss,
             'val_loss': val_loss,
             'test_loss': test_loss,
+            'coeff_train': coeff,   ###############
         })
 
         if early_stop.early_stop:

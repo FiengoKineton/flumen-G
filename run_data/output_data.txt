@@ -2299,10 +2299,42 @@ Timings: 0.014094829559326172, 0.9020476341247559
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-00_
+047___hyperparams___set_3
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-7mkhj8dt:v20
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 15373.7449627, '_step': 61, '_timestamp': 1742229683.6684904, '_wandb': {'runtime': 15373}, 'batch_size': 128, 'best_epoch': 57, 'best_test': 0.03277164156593028, 'best_train': 0.005900937812550674, 'best_val': 0.025855697661874785, 'epoch': 61, 'lr': 0.0005, 'n_epochs': 600, 'test_loss': 0.03224825329842076, 'time': 15343.459737062454, 'train_loss': 0.0073168578018094335, 'val_loss': 0.028925311145564868}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 20,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'dyn_factor': 0.2,
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mhu': 1.0,
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'alpha'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+Timings: 0.018285512924194336, 1.2291812896728516
+0.0037395658649259323
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -72,6 +72,10 @@ def main():
     fig2, ax2 = plt.subplots(2, 1, sharex=True)
     fig2.canvas.mpl_connect('close_event', on_close_window)
 
+    # Third Figure: Coefficient Evolution (for alpha, beta, lambda) ###############
+    fig3, ax3 = plt.subplots(2, 1, sharex=True)
+    fig3.canvas.mpl_connect('close_event', on_close_window)
+
     xx = np.linspace(0., 1., model.output_dim)
     time_horizon = num_times * metadata["data_args"]["time_horizon"]
 
@@ -88,9 +92,11 @@ def main():
         x0_feed, t_feed, u_feed, deltas_feed = pack_model_inputs(x0, t, u, delta)
 
         with torch.no_grad():
-            y_pred = model(x0_feed, u_feed, deltas_feed).numpy()
+            y_pred, coeffs = model(x0_feed, u_feed, deltas_feed)    ###############
 
-        y_pred = np.flip(y_pred, 0)
+        y_pred = np.flip(y_pred.numpy(), 0)
+        coeffs = np.flip(coeffs.numpy(), 0) ###############
+        coeffs = coeffs[:, -1, :]   ###############
         time_predict = time() - time_predict
 
         print(f"Timings: {time_integrate}, {time_predict}")
@@ -103,6 +109,8 @@ def main():
         for ax_ in ax1:
             ax_.cla()
         for ax_ in ax2:
+            ax_.cla()
+        for ax_ in ax3:     ###############
             ax_.cla()
 
         # **Remove previous insets and connection lines**
@@ -138,6 +146,18 @@ def main():
         ax2[1].legend()
         ax2[1].grid()
 
+        # **Plot Coefficients Evolution**   ###############
+        ax3[0].plot(t, coeffs[:, 0], label=r"$\alpha_1$", color='purple')
+        ax3[0].set_ylabel("Coefficient 1")
+        ax3[0].legend()
+        ax3[0].grid()
+
+        ax3[1].plot(t, coeffs[:, 1], label=r"$\alpha_2$", color='green')
+        ax3[1].set_ylabel("Coefficient 2")
+        ax3[1].set_xlabel("$t$")
+        ax3[1].legend()
+        ax3[1].grid()
+
         # **Zoomed-in Insets for Initial Conditions (first 5% of data)**
         for i, ax in enumerate(ax2):
             inset = inset_axes(ax, width="30%", height="30%", loc="lower right", borderpad=1)
@@ -160,6 +180,7 @@ def main():
 
         fig1.tight_layout()
         fig2.tight_layout()
+        fig3.tight_layout() ###############
 
         plt.show(block=False)
         plt.pause(0.1)

@@ -46,6 +46,7 @@ class LSTM(nn.Module):
         self.A, self.I = self.A.to(device), self.I.to(device)
 
         outputs = torch.empty(batch_size, seq_len, self.z_size, device=device)  # Preallocate tensor | before: torch.zeros
+        coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)  ###############
 
         for t in range(seq_len):
             rnn_input_t = rnn_input_unpacked[:, t, :]
@@ -66,12 +67,13 @@ class LSTM(nn.Module):
 
             x_mid = self.discretisation_function(x_prev, self.A, tau_t, self.I)             # same as the old one
             h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
-            x_next = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)      # same as the old one
+            x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)   ###############   
 
             z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)            # same as the old one
             outputs[:, t, :].copy_(z[-1])  # In-place assignment
+            coefficients[:, t, :].copy_(coeff)  ###############
 
-        return torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False), (z, c_z)
+        return torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False), (z, c_z), coefficients    ###############
 
 
 # ------------------------- LSTMCell ------------------------- #
@@ -169,15 +171,18 @@ def discretisation_exact(x_prev, A, tau, I):
 
 def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):
     alpha = torch.sigmoid(alpha_gate(h[-1]))
-    return (1 - alpha) * x_mid + alpha * W__h_to_x(h[-1])
+    x_next = (1 - alpha) * x_mid + alpha * W__h_to_x(h[-1])
+    return x_next, alpha    ###############
 
 def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):
     beta = torch.tanh(alpha_gate(h[-1]))
-    return beta * x_mid + (1 - beta) * W__h_to_x(h[-1])
+    x_next = beta * x_mid + (1 - beta) * W__h_to_x(h[-1])
+    return x_next, beta ###############
 
 def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):
     x_norm = torch.norm(x_mid, dim=-1, keepdim=True).clamp_min(1e-5)
     h_norm = torch.norm(h[-1], dim=-1, keepdim=True).clamp_min(1e-5)
 
     lambda_factor = x_norm / (x_norm + h_norm).clamp(0.1, 0.9)
-    return lambda_factor * x_mid + (1 - lambda_factor) * W__h_to_x(h[-1])
+    x_next = lambda_factor * x_mid + (1 - lambda_factor) * W__h_to_x(h[-1])
+    return x_next, lambda_factor    ###############

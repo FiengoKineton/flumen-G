@@ -40,15 +40,22 @@ def prep_inputs(x0, y, u, lengths, device):
 
 def validate(data, loss_fn, model, device):
     vl = 0.
+    total_samples, coeffs_sum = 0, 0    ###############
 
     with torch.no_grad():
         for example in data:
             x0, y, u, deltas = prep_inputs(*example, device)
 
-            y_pred = model(x0, u, deltas)  
+            y_pred, coefficients = model(x0, u, deltas) ###############
             vl += loss_fn(y, y_pred).item()
 
-    return model.state_dim * vl / len(data)
+            batch_size = y_pred.shape[0]    ###############
+            total_samples += batch_size ###############
+            coeffs_sum += coefficients.mean(dim=0).sum().item() ###############
+
+    mean_coeff = coeffs_sum / total_samples if total_samples > 0 else 0 ###############
+
+    return model.state_dim * vl / len(data), mean_coeff ###############
 
 
 
@@ -67,14 +74,16 @@ def train_step(example, loss_fn, model, optimiser, device):
 
     optimiser.zero_grad()
 
-    y_pred = model(x0, u, deltas)  
+    y_pred, _ = model(x0, u, deltas)    ###############
     loss = model.state_dim * loss_fn(y, y_pred)       
 
     loss.backward()
     ###torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)        ### added for lamda mode
     optimiser.step()
 
-    return loss.item()
+    #mean_coeff = coefficients.mean().item() 
+
+    return loss.item()  #, mean_coeff
 
 
 
