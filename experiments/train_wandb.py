@@ -45,7 +45,7 @@ sets = {
     'opt_balanced_2': 'hyperparams___opt_balanced_2',
     'opt_balanced_3': 'hyperparams___opt_balanced_3',
 }
-name = sets['set_4']
+name = sets['set_5']
 hyperparams = hp_manager.get_hyperparams(name)
 
 SWEEP = False
@@ -54,8 +54,8 @@ SWEEP = False
 if SWEEP:
     print("SWEEP: ", SWEEP, "\n\n")
 else:
-    print("SWEEP: ", SWEEP, "\n")
-    pprint.pprint(name, ":", hyperparams)
+    print("SWEEP: ", SWEEP, "\n", f"{name}:")
+    pprint.pprint(hyperparams)
     print("\n\n")
 # --------------------------------------------------------------------------- #
 
