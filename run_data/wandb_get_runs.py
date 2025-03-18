@@ -26,4 +26,4 @@ runs_df = pd.DataFrame({
     "name": name_list
     })
 
-runs_df.to_csv("run_data/wandb_get_runs.csv")
+runs_df.to_csv("run_data/csv_files/wandb_get_runs.csv")

@@ -47,16 +47,28 @@ sets = {
     'opt_balanced_3': 'hyperparams___opt_balanced_3',
     'opt_balanced_4': 'hyperparams___opt_balanced_4',
 }
-name = sets['swift_sweep_1']
-hyperparams = hp_manager.get_hyperparams(name)
 
+sweeps = {
+    'init': 'sweep_config_init', 
+    'test1': 'sweep_config_test_1',
+    'test2': 'sweep_config_test_2',
+}
+
+name_set = sets['swift_sweep_1']
+name_sweep = sweeps['test2']
+num_sweeps = 5
 SWEEP = True
 
 
+
 if SWEEP:
-    print("SWEEP: ", SWEEP, "\n\n")
+    sweep_config = hp_manager.get_sweep(name_sweep)
+    print("SWEEP: ", SWEEP, "\n\n", f"{name_sweep}")
+    pprint(sweep_config)
+    print("\n\n")
 else:
-    print("SWEEP: ", SWEEP, "\n\n", f"{name}:")
+    hyperparams = hp_manager.get_hyperparams(name_set)
+    print("SWEEP: ", SWEEP, "\n\n", f"{name_set}:")
     pprint.pprint(hyperparams)
     print("\n\n")
 # --------------------------------------------------------------------------- #
@@ -397,6 +409,6 @@ if __name__ == '__main__':
         sweep_id = wandb.sweep(sweep_config, 
                             entity='aguiar-kth-royal-institute-of-technology', 
                             project='g7-fiengo-msc-thesis')
-        wandb.agent(sweep_id, train_sweep, count=10)
+        wandb.agent(sweep_id, train_sweep, count=num_sweeps)
 
     else: main(SWEEP)

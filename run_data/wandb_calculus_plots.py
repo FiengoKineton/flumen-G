@@ -399,9 +399,9 @@ class DataVisualizer:
 
 
 if __name__ == "__main__":
-    loc_1 = "run_data/wandb_get_runs.csv"
-    loc_2 = "run_data/temp.csv"
-    loc_3 = "run_data/same_hyperparams.csv"
+    loc_1 = "run_data/csv_files/wandb_get_runs.csv"
+    loc_2 = "run_data/csv_files/temp.csv"
+    loc_3 = "run_data/csv_files/same_hyperparams.csv"
 
     csv_file = loc_1
     args = DataVisualizer.parse_arguments()

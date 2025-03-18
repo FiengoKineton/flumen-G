@@ -11,7 +11,7 @@ import argparse
 
 
 top_n = 15
-file_path = "run_data/wandb_get_runs.csv"
+file_path = "run_data/csv_files/wandb_get_runs.csv"
 
 PRIOR_SETS = ["hyperparams___set_1", 
               "hyperparams___set_2", 
@@ -179,6 +179,82 @@ class Hyperparams:
             '': {},
         }
     
+        self.hyperparams_sweep = {
+            'sweep_config_init': {
+                'method': 'random',  # Can be 'grid', 'random', or 'bayes'
+                'metric': {'name': 'val_loss', 'goal': 'minimize'},
+                'parameters': {
+                    'control_rnn_size': {'values': [8, 12, 20]}, 
+                    'control_rnn_depth': {'values': [1]}, 
+                    'encoder_size': {'values': [1, 2]},  
+                    'encoder_depth': {'values': [1, 2]},  
+                    'decoder_size': {'values': [1, 2]},  
+                    'decoder_depth': {'values': [1, 2]},  
+                    'batch_size': {'values': [64, 128, 256]},
+                    'lr': {'values': [0.001, 0.0005, 0.0001, 0.002]},
+                    'n_epochs': {'values': [300, 400, 500]},
+                    'es_patience': {'values': [10, 20]}, 
+                    'es_delta': {'values': [1e-7, 1e-5]}, 
+                    'sched_patience': {'values': [10]},
+                    'sched_factor': {'values': [2]},
+                    'loss': {'values': ["mse", "l1"]},                                  # , "huber"]},              | can't be used
+                    'optimiser_mode': {'values': ["adam", "lamb"]},                     # , "nesterov", "newton"]}, | do not work
+                    'discretisation_mode': {'values': ["TU", "FE", "RK4", "exact"]},    # , "BE"]},                 | don't bother
+                    'x_update_mode': {'values': ["alpha", "beta"]},                     # , "lamda"]}               | don't bother
+                }
+            },
+
+            'sweep_config_test_1': {                                # based on: hyperparams___run_037
+                'method': 'random',  
+                'metric': {'name': 'val_loss', 'goal': 'minimize'},
+                'parameters': {
+                    'control_rnn_size': {'values': [12]},           # before | 20
+                    'control_rnn_depth': {'values': [1]},           # before | 1
+                    'encoder_size': {'values': [2]},                # before | 1
+                    'encoder_depth': {'values': [1]},               # before | 2
+                    'decoder_size': {'values': [1]},                # before | 2
+                    'decoder_depth': {'values': [1]},               # before | 1
+                    'batch_size': {'values': [256]},                # before | 128
+                    'lr': {'values': [0.0005]},                     # before | 0005
+                    'n_epochs': {'values': [500]},                  # before | 300
+                    'es_patience': {'values': [20]},                # before | 20
+                    'es_delta': {'values': [1e-7]},                 # before | 1e-7
+                    'sched_patience': {'values': [10]},             # before | 10
+                    'sched_factor': {'values': [2]},                # before | 2
+                    'loss': {'values': ["mse"]},                    # before | mse
+                    'optimiser_mode': {'values': ["adam"]},         # before | adam      
+                    'discretisation_mode': {'values': ["TU"]},      # before | FE     
+                    'x_update_mode': {'values': ["beta"]},          # before | alpha
+                }
+            },
+
+            'sweep_config_test_2': {                                # based on: hyperparams___radiant_sweep_4
+                'method': 'random',  
+                'metric': {'name': 'val_loss', 'goal': 'minimize'},
+                'parameters': {
+                    'control_rnn_size': {'values': [12]},           # before | 20
+                    'control_rnn_depth': {'values': [1]},           # before | 1
+                    'encoder_size': {'values': [2]},                # before | 1
+                    'encoder_depth': {'values': [1]},               # before | 2
+                    'decoder_size': {'values': [1]},                # before | 2
+                    'decoder_depth': {'values': [1]},               # before | 1
+                    'batch_size': {'values': [256]},                # before | 128
+                    'lr': {'values': [0.0005]},                     # before | 0005
+                    'n_epochs': {'values': [500]},                  # before | 300
+                    'es_patience': {'values': [20]},                # before | 20
+                    'es_delta': {'values': [1e-7]},                 # before | 1e-7
+                    'sched_patience': {'values': [10]},             # before | 10
+                    'sched_factor': {'values': [2]},                # before | 2
+                    'loss': {'values': ["mse"]},                    # before | mse
+                    'optimiser_mode': {'values': ["adam"]},         # before | adam      
+                    'discretisation_mode': {'values': ["TU"]},      # before | FE     
+                    'x_update_mode': {'values': ["beta"]},          # before | alpha
+                }
+            },
+
+        }
+
+
     @staticmethod
     def parse_arguments():
         parser = argparse.ArgumentParser(description="Run results analysis with optional display and plotting.")
@@ -190,6 +266,8 @@ class Hyperparams:
     def get_hyperparams(self, name):
         return self.hyperparams_sets.get(name, f"Hyperparameter set '{name}' not found.")
 
+    def get_sweep(self, name):
+        return self.hyperparams_sweep.get(name, f"Hyperparameter set '{name}' not found.")
 
 # ---------------- OPTIMAL Problem | top best runs ----------------------------------------------- #
 
