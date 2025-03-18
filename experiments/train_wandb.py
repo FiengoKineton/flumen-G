@@ -24,7 +24,7 @@ python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test
 
 import os
 import pandas as pd
-import pprint
+from pprint import pprint
 import torch_optimizer as optim
 
 
@@ -55,7 +55,7 @@ sweeps = {
 }
 
 name_set = sets['swift_sweep_1']
-name_sweep = sweeps['test2']
+name_sweep = sweeps['test1']
 num_sweeps = 5
 SWEEP = True
 
@@ -63,13 +63,13 @@ SWEEP = True
 
 if SWEEP:
     sweep_config = hp_manager.get_sweep(name_sweep)
-    print("SWEEP: ", SWEEP, "\n\n", f"{name_sweep}")
+    print("SWEEP: ", SWEEP, "\n\n", f"{name_sweep} --- num_sweeps: {num_sweeps}")
     pprint(sweep_config)
     print("\n\n")
 else:
     hyperparams = hp_manager.get_hyperparams(name_set)
     print("SWEEP: ", SWEEP, "\n\n", f"{name_set}:")
-    pprint.pprint(hyperparams)
+    pprint(hyperparams)
     print("\n\n")
 # --------------------------------------------------------------------------- #
 
