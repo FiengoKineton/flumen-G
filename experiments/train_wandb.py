@@ -55,77 +55,25 @@ sweeps = {
 }
 
 name_set = sets['swift_sweep_1']
-name_sweep = sweeps['test1']
+name_sweep = sweeps['test2']
+
+sweep_config = hp_manager.get_sweep(name_sweep)
+hyperparams = hp_manager.get_hyperparams(name_set)
+
 num_sweeps = 5
 SWEEP = True
 
 
 
 if SWEEP:
-    sweep_config = hp_manager.get_sweep(name_sweep)
     print("SWEEP: ", SWEEP, "\n\n", f"{name_sweep} --- num_sweeps: {num_sweeps}")
     pprint(sweep_config)
     print("\n\n")
 else:
-    hyperparams = hp_manager.get_hyperparams(name_set)
     print("SWEEP: ", SWEEP, "\n\n", f"{name_set}:")
     pprint(hyperparams)
     print("\n\n")
 # --------------------------------------------------------------------------- #
-
-
-sweep_config_init = {
-    'method': 'random',  # Can be 'grid', 'random', or 'bayes'
-    'metric': {'name': 'val_loss', 'goal': 'minimize'},
-    'parameters': {
-        'control_rnn_size': {'values': [8, 12, 20]}, 
-        'control_rnn_depth': {'values': [1]}, 
-        'encoder_size': {'values': [1, 2]},  
-        'encoder_depth': {'values': [1, 2]},  
-        'decoder_size': {'values': [1, 2]},  
-        'decoder_depth': {'values': [1, 2]},  
-        'batch_size': {'values': [64, 128, 256]},
-        'lr': {'values': [0.001, 0.0005, 0.0001, 0.002]},
-        'n_epochs': {'values': [300, 400, 500]},
-        'es_patience': {'values': [10, 20]}, 
-        'es_delta': {'values': [1e-7, 1e-5]}, 
-        'sched_patience': {'values': [10]},
-        'sched_factor': {'values': [2]},
-        'loss': {'values': ["mse", "l1"]},                                  # , "huber"]},              | can't be used
-        'optimiser_mode': {'values': ["adam", "lamb"]},                     # , "nesterov", "newton"]}, | do not work
-        'discretisation_mode': {'values': ["TU", "FE", "RK4", "exact"]},    # , "BE"]},                 | don't bother
-        'x_update_mode': {'values': ["alpha", "beta"]},                     # , "lamda"]}               | don't bother
-    }
-}
-
-sweep_config_test = {
-    'method': 'random',  
-    'metric': {'name': 'val_loss', 'goal': 'minimize'},
-    'parameters': {
-        'control_rnn_size': {'values': [12]},           # before | 20
-        'control_rnn_depth': {'values': [1]},           # before | 1
-        'encoder_size': {'values': [2]},                # before | 1
-        'encoder_depth': {'values': [1]},               # before | 2
-        'decoder_size': {'values': [1]},                # before | 2
-        'decoder_depth': {'values': [1]},               # before | 1
-        'batch_size': {'values': [256]},                # before | 128
-        'lr': {'values': [0.0005]},                     # before | 0005
-        'n_epochs': {'values': [500]},                  # before | 300
-        'es_patience': {'values': [20]},                # before | 20
-        'es_delta': {'values': [1e-7]},                 # before | 1e-7
-        'sched_patience': {'values': [10]},             # before | 10
-        'sched_factor': {'values': [2]},                # before | 2
-        'loss': {'values': ["mse"]},                    # before | mse
-        'optimiser_mode': {'values': ["adam"]},         # before | adam      
-        'discretisation_mode': {'values': ["TU"]},      # before | FE     
-        'x_update_mode': {'values': ["beta"]},          # before | alpha
-    }
-}
-
-
-
-sweep_config = sweep_config_test
-
 
 
 def get_loss(which):
