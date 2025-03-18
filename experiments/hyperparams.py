@@ -7,6 +7,7 @@ from skopt.utils import use_named_args
 from sklearn.preprocessing import MinMaxScaler
 from collections import defaultdict
 from statistics import median
+import argparse
 
 
 top_n = 15
@@ -177,7 +178,14 @@ class Hyperparams:
             '': {},
         }
     
-    
+    @staticmethod
+    def parse_arguments():
+        parser = argparse.ArgumentParser(description="Run results analysis with optional display and plotting.")
+        parser.add_argument("--run", action="store_true", help="Select all metrics across datasets.")
+        args = parser.parse_args()
+        return args
+
+   
     def get_hyperparams(self, name):
         return self.hyperparams_sets.get(name, f"Hyperparameter set '{name}' not found.")
 
@@ -643,14 +651,19 @@ class Hyperparams:
 # --------------------------------------------------------------- #
 
 
-"""
-hp = Hyperparams()
-df = pd.read_csv(file_path)
-print("\n", df.shape[0])
-print("\n-----------------------------------\n")
-hp._opt_best()           # using the top 10 best runs
-print("\n-----------------------------------\n")
-hp._opt_balanced()       # using a weighted scoring method
-print("\n-----------------------------------\n")
-hp._opt_bayes()          # using bayesian optimization
-#"""
+if __name__ == "__main__":
+    args = Hyperparams.parse_arguments()
+    hp = Hyperparams()
+
+    run = args.run
+
+    if run: 
+        df = pd.read_csv(file_path)
+        df = pd.read_csv(file_path)
+        print("\n", df.shape[0])
+        print("\n-----------------------------------\n")
+        hp._opt_best()           # using the top 10 best runs
+        print("\n-----------------------------------\n")
+        hp._opt_balanced()       # using a weighted scoring method
+        print("\n-----------------------------------\n")
+        hp._opt_bayes()          # using bayesian optimization

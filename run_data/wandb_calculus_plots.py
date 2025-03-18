@@ -29,6 +29,11 @@ param_combinations_2 = [
     ('batch_size', 'loss', 'lr')  # Combined effect of batch_size, loss function, and lr
 ]
 
+param_2D = {
+    "param1": 'lr', 
+    "param2": 'batch_size'
+}
+
 param_combinations = param_combinations_2
 
 
@@ -39,6 +44,7 @@ class DataVisualizer:
         and extracting relevant data.
         """
         self.data = pd.read_csv(csv_file)
+        print(self.data.shape[0])
         
         # Convert summary and config columns from string to dictionary
         self.data['summary'] = self.data['summary'].apply(ast.literal_eval)
@@ -71,7 +77,7 @@ class DataVisualizer:
             self.plot_pairplot()
             self.plot_correlation_heatmap()
             self.plot_val_loss_vs_hyperparams()
-            self.plot_val_loss_2D('lr', 'batch_size')
+            self.plot_val_loss_2D()
             self.plot_val_loss_3D()
         else:
             #self.plot_box()
@@ -80,7 +86,7 @@ class DataVisualizer:
             #self.plot_pairplot()
             #self.plot_correlation_heatmap()
             #self.plot_val_loss_vs_hyperparams()
-            #self.plot_val_loss_2D('lr', 'batch_size')
+            self.plot_val_loss_2D()
             self.plot_val_loss_3D()
 
     @staticmethod
@@ -241,12 +247,14 @@ class DataVisualizer:
         plt.tight_layout()  # Ensure there's no overlap between subplots
         plt.show()
 
-    def plot_val_loss_2D(self, param1, param2):
+    def plot_val_loss_2D(self):
         """
         Val Loss vs Two Hyperparameters
         Scatter plot showing how the validation loss changes based on the combination of two hyperparameters.
         This helps to understand the joint effect of two hyperparameters on the performance.
         """
+
+        param1, param2 = param_2D["param1"], param_2D["param2"]
         # Ensure both parameters are numerical and not missing
         filtered_data = self.data.dropna(subset=[param1, param2, 'val_loss'])
         filtered_data = filtered_data[(filtered_data[param1] != float('inf')) & (filtered_data[param2] != float('inf'))]
@@ -259,7 +267,6 @@ class DataVisualizer:
             plt.ylabel(param2)
             plt.legend(title='val_loss', loc='best', labels=[f'{x}' for x in filtered_data['val_loss']])
             plt.yscale('log')  # Apply log scale to the y-axis for better visibility of loss
-            plt.show()
         else:
             print(f"No valid data found for the parameters: {param1}, {param2}")
 
@@ -350,7 +357,7 @@ class DataVisualizer:
 
                 # Add the legend only if there are any labels to display
                 if legend_labels:
-                    ax.legend(legend_labels, title='Parameter Labels', loc='upper left', fontsize=1, bbox_to_anchor=(0, 1))
+                    ax.legend(legend_labels, title='Parameter Labels', loc='upper left', fontsize=10, bbox_to_anchor=(0, 1))
 
 
                 # Display values near each point
