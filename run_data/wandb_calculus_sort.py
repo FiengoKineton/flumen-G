@@ -50,7 +50,7 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
 file_path_1 = "run_data/wandb_get_runs.csv"  # Use the correct relative path
 file_path_2 = "run_data/temp.csv"  # Use the correct relative path
 
-file_path = file_path_2
+file_path = file_path_1
 df = pd.read_csv(file_path)
 
 n = 5 if file_path == file_path_1 else 8

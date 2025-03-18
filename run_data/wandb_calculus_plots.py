@@ -80,13 +80,13 @@ class DataVisualizer:
             self.plot_val_loss_2D()
             self.plot_val_loss_3D()
         else:
-            #self.plot_box()
+            self.plot_box()
             #self.plot_distribution()
             #self.plot_trend()
             #self.plot_pairplot()
             #self.plot_correlation_heatmap()
             #self.plot_val_loss_vs_hyperparams()
-            self.plot_val_loss_2D()
+            #self.plot_val_loss_2D()
             self.plot_val_loss_3D()
 
     @staticmethod
@@ -105,13 +105,25 @@ class DataVisualizer:
         with the median inside the box and outliers displayed as individual points.
         Log scale is applied for better visualization.
         """
-        for metric in self.metrics:
-            plt.figure(figsize=(10, 6))
-            sns.boxplot(y=self.data[metric])
-            plt.title(f'Box Plot of {metric}')
-            plt.ylabel(metric)
-            plt.yscale('log')  # Log scale for better visualization
-            plt.show()
+        num_metrics = len(self.metrics)
+        cols = 2
+        rows = (num_metrics // cols) + (num_metrics % cols != 0)  # Determine number of rows based on metrics
+
+        fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))  # Create a grid of subplots
+        axes = axes.flatten()  # Flatten the axes for easier iteration
+
+        for i, metric in enumerate(self.metrics):
+            sns.boxplot(y=self.data[metric], ax=axes[i])  # Plot on the i-th subplot
+            axes[i].set_title(f'Box Plot of {metric}')
+            axes[i].set_ylabel(metric)
+            axes[i].set_yscale('log')  # Log scale for better visualization
+
+        # Remove any unused subplots (in case of uneven number of metrics)
+        for j in range(i + 1, len(axes)):
+            fig.delaxes(axes[j])
+
+        plt.tight_layout()  # Ensure no overlap between subplots
+        plt.show()
 
     def plot_distribution(self):
         """
@@ -120,14 +132,26 @@ class DataVisualizer:
         Kernel Density Estimation (KDE) curve added to illustrate the probability distribution.
         Log scale is applied to better accommodate outliers.
         """
-        for metric in self.metrics:
-            plt.figure(figsize=(10, 6))
-            sns.histplot(self.data[metric], bins=20, kde=True)
-            plt.title(f'Distribution of {metric}')
-            plt.xlabel(metric)
-            plt.ylabel('Frequency')
-            plt.yscale('log')
-            plt.show()
+        num_metrics = len(self.metrics)
+        cols = 2  # Number of columns in the grid
+        rows = (num_metrics // cols) + (num_metrics % cols != 0)  # Determine number of rows based on metrics
+
+        fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))  # Create a grid of subplots
+        axes = axes.flatten()  # Flatten the axes for easier iteration
+
+        for i, metric in enumerate(self.metrics):
+            sns.histplot(self.data[metric], bins=20, kde=True, ax=axes[i])  # Plot on the i-th subplot
+            axes[i].set_title(f'Distribution of {metric}')
+            axes[i].set_xlabel(metric)
+            axes[i].set_ylabel('Frequency')
+            axes[i].set_yscale('log')  # Apply log scale for better visualization
+
+        # Remove any unused subplots (in case of uneven number of metrics)
+        for j in range(i + 1, len(axes)):
+            fig.delaxes(axes[j])
+
+        plt.tight_layout()  # Ensure no overlap between subplots
+        plt.show()
 
     def plot_trend(self):
         """
