@@ -401,8 +401,9 @@ class DataVisualizer:
 if __name__ == "__main__":
     loc_1 = "run_data/csv_files/wandb_get_runs.csv"
     loc_2 = "run_data/csv_files/temp.csv"
-    loc_3 = "run_data/csv_files/same_hyperparams.csv"
+    loc_3 = "run_data/csv_files/sweep_test1.csv"
+    loc_4 = "run_data/csv_files/sweep_test2.csv"
 
-    csv_file = loc_1
+    csv_file = loc_4
     args = DataVisualizer.parse_arguments()
     DataVisualizer(csv_file, all=args.all)

@@ -49,14 +49,16 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
 # Example usage
 file_path_1 = "run_data/csv_files/wandb_get_runs.csv"  # Use the correct relative path
 file_path_2 = "run_data/csv_files/temp.csv"  # Use the correct relative path
+file_path_3 = "run_data/csv_files/sweep_test1.csv"
+file_path_4 = "run_data/csv_files/sweep_test2.csv"
 
-file_path = file_path_2
+file_path = file_path_4
 df = pd.read_csv(file_path)
 
-n = 5 if file_path == file_path_1 else 8
-starting_point = 15 
-end_point = df.shape[0] - 1
-id_ranges = [(starting_point, end_point)] if file_path == file_path_1 else [(10, end_point)]
+n = 5 if file_path == file_path_1 else df.shape[0]
+starting_point = 15 if file_path == file_path_1 else 1
+end_point = df.shape[0]
+id_ranges = [(starting_point, end_point)]
 
 """best = False
 print("\nOrder by max:")

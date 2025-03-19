@@ -134,6 +134,19 @@ class CalcValues:
             , {'run': "049", '_runtime': 11995.576234156, '_step': 72, '_timestamp': 1742249640.9203196, '_wandb': {'runtime': 12024}, 'batch_size': 128, 'best_epoch': 68, 'best_test': 0.2817918884139212, 'best_train': 0.010568339875332577, 'best_val': 0.05043999835967072, 'coeff_train': 0.5078245317955713, 'epoch': 72, 'lr': 0.0005, 'n_epochs': 200, 'test_loss': 0.2890660311021502, 'time': 11965.97043466568, 'train_loss': 0.010115224222539278, 'val_loss': 0.05292532734927677}
         ]
 
+        sweep_test1 = [
+            {'run': "misty-sweep-1", '_runtime': 11024.115094132, '_step': 120, '_timestamp': 1742332662.2408974, '_wandb': {'runtime': 11024}, 'batch_size': 256, 'best_epoch': 100, 'best_test': 0.06888132111635059, 'best_train': 0.019719987686135268, 'best_val': 0.1474378340644762, 'coeff_train': -0.0029620062603088557, 'epoch': 120, 'lr': 0.00025, 'n_epochs': 250, 'test_loss': 0.061660713981837034, 'time': 11005.445610761642, 'train_loss': 0.01480889403702397, 'val_loss': 0.15918675158172846}
+            , {'run': "tough-sweep-2", '_runtime': 9072.666214127, '_step': 98, '_timestamp': 1742341739.210579, '_wandb': {'runtime': 9072}, 'batch_size': 256, 'best_epoch': 78, 'best_test': 0.06129547767341137, 'best_train': 0.019257749783757487, 'best_val': 0.1410989115247503, 'coeff_train': 0.28187683257297497, 'epoch': 98, 'lr': 0.00025, 'n_epochs': 250, 'test_loss': 0.06198051362298429, 'time': 9055.438225507736, 'train_loss': 0.0172425540262147, 'val_loss': 0.1520931125851348}
+            , {'run': "faithful-sweep-3", '_runtime': 12593.076943028, '_step': 137, '_timestamp': 1742354339.667109, '_wandb': {'runtime': 12593}, 'batch_size': 256, 'best_epoch': 117, 'best_test': 0.058772760326974094, 'best_train': 0.01931111704754202, 'best_val': 0.1228409290779382, 'coeff_train': 0.1475546443047215, 'epoch': 137, 'lr': 3.125e-05, 'n_epochs': 250, 'test_loss': 0.0591220295173116, 'time': 12575.965531110764, 'train_loss': 0.01811363609801782, 'val_loss': 0.12682463508099318}
+            , {'run': "magic-sweep-4", '_runtime': 2969.878919974, '_step': 32, '_timestamp': 1742357315.3178823, '_wandb': {'runtime': 2969}, 'batch_size': 256, 'best_epoch': 31, 'best_test': 0.07250649214256555, 'best_train': 0.05460579689396055, 'best_val': 0.2550557474605739, 'coeff_train': -0.02147659520011636, 'epoch': 32, 'lr': 0.0005, 'n_epochs': 250, 'test_loss': 0.07228638930246234, 'time': 2952.6616582870483, 'train_loss': 0.058277693782982073, 'val_loss': 0.2611319711431861}
+        ]
+
+        sweep_test2 = [
+            {'run': "confused-sweep-1", '_runtime': 51452.0871214, '_step': 250, '_timestamp': 1742372941.412101, '_wandb': {'runtime': 51452}, 'batch_size': 128, 'best_epoch': 239, 'best_test': 0.031004800801239317, 'best_train': 0.009287979094084924, 'best_val': 0.05454751444123094, 'coeff_train': 0.48955478367718497, 'epoch': 250, 'lr': 7.8125e-06, 'n_epochs': 250, 'test_loss': 0.031127572089197145, 'time': 51363.07405257225, 'train_loss': 0.009128478685857129, 'val_loss': 0.055135754779690786}
+            , {'run': "kind-sweep-2", '_runtime': 4765.9567248, '_step': 23, '_timestamp': 1742377714.834724, '_wandb': {'runtime': 4765}, 'batch_size': 128, 'best_epoch': 22, 'best_test': 0.05200566363240045, 'best_train': 0.0390533279903509, 'best_val': 0.1447693050380737, 'coeff_train': 0.5105882402676255, 'epoch': 23, 'lr': 0.0005, 'n_epochs': 250, 'test_loss': 0.04705867461032338, 'time': 4740.496947526932, 'train_loss': 0.031076323940719245, 'val_loss': 0.1772086930180353}
+            , {'run': "wandering-sweep-1", '_runtime': 5411.234816351, '_step': 33, '_timestamp': 1742377666.220598, '_wandb': {'runtime': 5411}, 'batch_size': 128, 'best_epoch': 31, 'best_test': 0.06264887513622405, 'best_train': 0.02754823205174593, 'best_val': 0.045402715840036904, 'coeff_train': 0.5256197361606073, 'epoch': 33, 'lr': 0.0005, 'n_epochs': 250, 'test_loss': 0.04745392788142439, 'time': 5391.924602031708, 'train_loss': 0.02155147857530407, 'val_loss': 0.04864443992338483}
+        ]
+
         output = {
             "default_code_same_dim": default_code_same_dim,
             "new_LSTM": new_LSTM,
@@ -144,9 +157,8 @@ class CalcValues:
             "sweep": sweep, 
             "hyperparams": hyperparams
             } if all else {
-            "default_code_same_dim": default_code_same_dim,
-            "sweep": sweep, 
-            "hyperparams": hyperparams
+            "sweep_test1": sweep_test1, 
+            "sweep_test2": sweep_test2, 
             }
 
         return output
