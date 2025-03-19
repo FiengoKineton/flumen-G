@@ -54,14 +54,14 @@ sweeps = {
     'test2': 'sweep_config_test_2',
 }
 
-name_set = sets['swift_sweep_1']
+name_set = sets['radiant_sweep_4']
 name_sweep = sweeps['test2']
 
 sweep_config = hp_manager.get_sweep(name_sweep)
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 num_sweeps = 5
-SWEEP = True
+SWEEP = False
 
 
 
@@ -121,13 +121,12 @@ def main(sweep):
 
     with data_path.open('rb') as f:
         data = pickle.load(f)
+    print("\nmodel name:", data["settings"]["dynamics"]["name"], "\n\n")
 
     train_data = TrajectoryDataset(data["train"])
     val_data = TrajectoryDataset(data["val"])
     test_data = TrajectoryDataset(data["test"])
 
-    mhu = data["settings"]["dynamics"]["args"]["damping"]
-    dyn_factor = data["settings"]["control_delta"]
 
 
     # normally wandb.config["param_name"], config.param_name when sweep
@@ -181,9 +180,8 @@ def main(sweep):
         'decoder_depth': __decoder_depth,
         'discretisation_mode': __discretisation_mode,
         'x_update_mode': __x_update_mode,
-        'mhu': mhu,
-        'dyn_factor': dyn_factor,
         'use_batch_norm': False,
+        'model_data': data,     #------------#
     }
 
     model_metadata = {

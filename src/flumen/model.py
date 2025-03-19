@@ -18,9 +18,8 @@ class CausalFlowModel(nn.Module):
                  decoder_depth,
                  discretisation_mode,
                  x_update_mode,
-                 mhu, 
-                 dyn_factor,
-                 use_batch_norm=False):
+                 use_batch_norm=False,
+                 model_data=None):
         super(CausalFlowModel, self).__init__()
 
         self.state_dim = state_dim
@@ -30,8 +29,9 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode_rnn = "new"                               # if new then h0_stack, else h0
+        self.mode_rnn = "old"                               # if new then h0_stack, else h0
         self.mode_dnn = True                                # if True then old dnn
+        print("\n\nmode_rnn:", self.mode_rnn, "\nmode_dnn:", self.mode_dnn, "\n\n")
 
         function_name = f"mode_rnn_{self.mode_rnn}"
         self.structure_function = getattr(self, function_name, None)
@@ -46,8 +46,7 @@ class CausalFlowModel(nn.Module):
             state_dim=self.state_dim,
             discretisation_mode=discretisation_mode, 
             x_update_mode=x_update_mode, 
-            mhu=mhu,
-            dyn_factor=dyn_factor
+            model_data=model_data
         ) if self.mode_rnn=="new" else torch.nn.LSTM(
             input_size=control_dim + 1,                     # output | 2
             hidden_size=control_rnn_size,                   # output | 8
@@ -117,14 +116,14 @@ class CausalFlowModel(nn.Module):
         return z, rnn_out_seq_packed, coefficients  ###############
 
 
-    def mode_rnn_old(self, x, deltas, rnn_input):
+    def mode_rnn_old(self, x, _, rnn_input):
         h0 = self.x_dnn(x)
         h0 = torch.stack(h0.split(self.control_rnn_size, dim=1))
         c0 = torch.zeros_like(h0)
 
         rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0))
 
-        return h0, rnn_out_seq_packed, None ###############
+        return h0, rnn_out_seq_packed, torch.tensor([[0, 0], [0, 0]], dtype=torch.float32) ###############
 
 
 class FFNet(nn.Module):

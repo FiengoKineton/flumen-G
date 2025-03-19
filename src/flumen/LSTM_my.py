@@ -8,7 +8,7 @@ from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
-                 state_dim=None, discretisation_mode=None, x_update_mode=None, mhu=1.0, dyn_factor=0.2):
+                 state_dim=None, discretisation_mode=None, x_update_mode=None, model_data=None):
         super(LSTM, self).__init__()
 
         self.input_size = input_size
@@ -21,9 +21,11 @@ class LSTM(nn.Module):
         self.dropout = dropout
         self.bidirectional = bidirectional
         self.state_dim = state_dim
+        self.data = model_data
 
-        self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
-        self.I = torch.eye(self.A.shape[0], dtype=self.A.dtype)
+        self.A, _ = self.get_dyn_matrix()
+        self.I = torch.eye(self.A.shape[0])
+        self.dtype = torch.float32
 
         self.discretisation_function = globals().get(f"discretisation_{discretisation_mode}")
         self.x_update_function = globals().get(f"x_update_mode__{x_update_mode}")
@@ -43,7 +45,7 @@ class LSTM(nn.Module):
         device = rnn_input_unpacked.device
 
         z, c_z = hidden_state
-        self.A, self.I = self.A.to(device), self.I.to(device)
+        self.A, self.I, tau = self.A.to(device, dtype=self.dtype), self.I.to(device, dtype=self.dtype), tau.to(device, dtype=self.dtype)
 
         outputs = torch.empty(batch_size, seq_len, self.z_size, device=device)  # Preallocate tensor | before: torch.zeros
         coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)  ###############
@@ -74,6 +76,71 @@ class LSTM(nn.Module):
             coefficients[:, t, :].copy_(coeff)  ###############
 
         return torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False), (z, c_z), coefficients    ###############
+
+
+    def get_dyn_matrix(self): 
+        """
+        Computes the linearized dynamics matrix A and equilibrium points for different systems based on self.data.
+        Returns:
+            A (torch.Tensor): Linearized system dynamics matrix.
+            eq_point (torch.Tensor): Equilibrium state (x*).
+        """
+        model_name = self.data["settings"]["dynamics"]["name"]
+        dyn_factor = self.data["settings"]["control_delta"]
+
+        if model_name == "VanDerPol":
+            mhu = self.data["settings"]["dynamics"]["args"]["damping"]
+            A = dyn_factor * torch.tensor([[0, 1], [-1, mhu]])          # before | self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
+            # Equilibrium point for VdP: (x*, y*) = (0, 0)
+            eq_point = torch.tensor([0, 0])
+
+        elif model_name == "FitzHughNagumo":
+            tau = self.data["settings"]["dynamics"]["args"]["tau"]
+            a = self.data["settings"]["dynamics"]["args"]["a"]
+            b = self.data["settings"]["dynamics"]["args"]["b"]
+            
+            # Solve equilibrium equations
+            # w* = (v* + a) / b
+            # v* - v*^3 / 3 - (v* + a)/b = 0 (solve numerically)
+            from scipy.optimize import fsolve
+            
+            def fhn_equilibrium(v):
+                return v - v**3 / 3 - (v + a) / b  # R * I_ext not considered
+
+            v_star = fsolve(fhn_equilibrium, 0)[0]
+            w_star = (v_star + a) / b
+            
+            A = dyn_factor * torch.tensor([[1 - v_star**2, -1], [1 / tau, -b / tau]])
+            eq_point = torch.tensor([v_star, w_star])
+
+        elif model_name == "GreenshieldsTraffic":
+            v0 = self.data["settings"]["dynamics"]["args"]["v0"]
+            n = self.data["settings"]["dynamics"]["args"]["n"]
+            A = dyn_factor * torch.tensor([[-v0 / n]])
+            eq_point = torch.tensor([n])  # Equilibrium at max density
+
+        elif model_name in ["HodgkinHuxleyFFE", "HodgkinHuxleyFS"]:
+            # HH model equilibrium is at resting potential (V*, n*, m*, h*)
+            # This is complex, so a placeholder value is used
+            A = dyn_factor * torch.tensor([[-1, 1], [-1, 0]])  # Placeholder
+            eq_point = torch.tensor([0, 0])  # Should be the HH resting potential
+
+        elif model_name == "LinearSys":
+            A = dyn_factor * torch.tensor(self.data["settings"]["dynamics"]["args"]["a"])
+            eq_point = torch.zeros(A.shape[0])  # Equilibrium at x* = 0
+
+        elif model_name == "TwoTank":
+            # Placeholder values for resistances (R1, R2) and capacitances (C1, C2)
+            R1, R2, C1, C2 = 1, 1, 1, 1  # These should be properly defined
+            A = dyn_factor * torch.tensor([[-1 / (R1 * C1), 0], [1 / (R1 * C2), -1 / (R2 * C2)]])
+            eq_point = torch.tensor([0, 0])  # At rest with no input
+
+        else:
+            raise ValueError(f"Unknown model name: {model_name}")
+        
+        #print(A.shape[0])
+        return A, eq_point
+
 
 
 # ------------------------- LSTMCell ------------------------- #
@@ -175,16 +242,50 @@ def discretisation_exact(x_prev, A, tau, I):
 # ------------------------- x_update_mode ------------------------- #
 
 def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):
+    """
+    Alpha-based update rule (Sigmoid function, bounded between 0 and 1).
+    
+    - **alpha = 0** → `x_next = x_mid` (relies entirely on past dynamics).
+    - **alpha = 0.5** → Equal mix of `x_mid` and `W__h_to_x(h[-1])`.
+    - **alpha = 1** → `x_next = W__h_to_x(h[-1])` (fully determined by learned influence).
+    
+    This means:
+    - When **alpha is low**, the system relies on past dynamics.
+    - When **alpha is high**, the system is heavily influenced by the learned transformation.
+    """
     alpha = torch.sigmoid(alpha_gate(h[-1]))
     x_next = (1 - alpha) * x_mid + alpha * W__h_to_x(h[-1])
     return x_next, alpha    ###############
 
 def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):
+    """
+    Beta-based update rule (Tanh function, bounded between -1 and 1).
+    
+    - **beta = -1** → Strong reversal: `x_next = -x_mid + 2 * W__h_to_x(h[-1])`.
+    - **beta = 0** → `x_next = W__h_to_x(h[-1])` (ignores past dynamics).
+    - **beta = 1** → `x_next = x_mid` (fully follows past dynamics).
+    
+    This means:
+    - When **beta is near -1**, past dynamics are reversed, leading to strong corrective behavior.
+    - When **beta is near 1**, past dynamics dominate.
+    - When **beta is near 0**, the update is fully controlled by `h[-1]`.
+    """
     beta = torch.tanh(alpha_gate(h[-1]))
     x_next = beta * x_mid + (1 - beta) * W__h_to_x(h[-1])
     return x_next, beta ###############
 
 def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):
+    """
+    Lambda-based update rule (Adaptive scaling, bounded between ~0.1 and 0.9).
+    
+    - **lambda ≈ 0.1** → `x_next` mostly determined by `W__h_to_x(h[-1])` (learned influence dominates).
+    - **lambda ≈ 0.5** → Equal contribution from `x_mid` and `W__h_to_x(h[-1])`.
+    - **lambda ≈ 0.9** → `x_next` mostly follows past dynamics.
+    
+    This means:
+    - When **x_prev is large**, lambda is high → the system follows past dynamics.
+    - When **h[-1] is large**, lambda is low → the system relies on learned influence.
+    """
     x_norm = torch.norm(x_mid, dim=-1, keepdim=True).clamp_min(1e-5)
     h_norm = torch.norm(h[-1], dim=-1, keepdim=True).clamp_min(1e-5)
 

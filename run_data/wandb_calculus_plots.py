@@ -51,7 +51,7 @@ class DataVisualizer:
         self.data['config'] = self.data['config'].apply(ast.literal_eval)
 
         # Extract relevant metrics
-        self.metrics = ['val_loss', 'test_loss', 'train_loss', 'time']
+        self.metrics = ['val_loss', 'best_val', 'test_loss', 'train_loss', 'time']
         for metric in self.metrics:
             self.data[metric] = self.data['summary'].apply(lambda x: x.get(metric, float('inf')))
 

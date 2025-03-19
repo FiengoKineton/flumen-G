@@ -16,6 +16,7 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
     
     # Extract val_loss, test_loss, and train_loss
     df['val_loss'] = df['summary'].apply(lambda x: x.get('val_loss', float('inf')))
+    df['best_val'] = df['summary'].apply(lambda x: x.get('best_val', float('inf')))
     df['test_loss'] = df['summary'].apply(lambda x: x.get('test_loss', float('inf')))
     df['train_loss'] = df['summary'].apply(lambda x: x.get('train_loss', float('inf')))
     df['time'] = df['summary'].apply(lambda x: x.get('time', float('inf')))
@@ -37,8 +38,8 @@ def filter_top_n_by_metric(file_path, n, id_ranges, metric, best=True):
     df = df.nsmallest(n, metric) if best else df.nlargest(n, metric)
     
     # Format output
-    df_output = df[['name', 'val_loss', 'test_loss', 'train_loss', 'time', 'ID_number']]
-    df_output.columns = ['', 'val_loss', 'test_loss', 'train_loss', 'time', '']
+    df_output = df[['name', 'val_loss', 'best_val', 'test_loss', 'train_loss', 'time', 'ID_number']]
+    df_output.columns = ['', 'val_loss', 'best_val', 'test_loss', 'train_loss', 'time', '']
     
     # Print table
     print(f"\n\nTop {n} results by {metric}:")
@@ -68,7 +69,7 @@ filter_top_n_by_metric(file_path, n, id_ranges, 'train_loss', best)"""
 
 best = True
 print("\n---------------------------------------\nOrder by min:\n---------------------------------------")
-name = ['val_loss', 'test_loss', 'train_loss', 'time']
+name = ['val_loss', 'best_val'] #, 'test_loss', 'train_loss', 'time']
 for name in name:   filter_top_n_by_metric(file_path, n, id_ranges, name, best)
 
 
