@@ -118,7 +118,6 @@ class CalcValues:
             , {'run': "serene-sweep-4", '_runtime': 22556.832118349, '_step': 243, '_timestamp': 1741988648.1885312, '_wandb': {'runtime': 22594}, 'batch_size': 256, 'best_epoch': 227, 'best_test': 0.288103133905679, 'best_train': 0.021198425412570176, 'best_val': 0.11791448248550296, 'epoch': 243, 'lr': 0.00025, 'n_epochs': 500, 'test_loss': 0.29501010989770293, 'time': 22538.295169591904, 'train_loss': 0.013506667806129706, 'val_loss': 0.12043031281791627}
         ]
 
-
         hyperparams = [
             {'run': "038", '_runtime': 18812.5908758, '_step': 113, '_timestamp': 1741824679.444635, '_wandb': {'runtime': 18985}, 'batch_size': 128, 'best_epoch': 98, 'best_test': 0.032758295240383296, 'best_train': 0.018323482102936224, 'best_val': 0.1541849288734652, 'epoch': 113, 'lr': 0.000125, 'n_epochs': 500, 'test_loss': 0.03999957615243537, 'time': 18786.76917457581, 'train_loss': 0.009215078745332976, 'val_loss': 0.1645800969785168}
             , {'run': "039", '_runtime': 13081.172081066, '_step': 64, '_timestamp': 1741819893.582723, '_wandb': {'runtime': 13081}, 'batch_size': 64, 'best_epoch': 54, 'best_test': 0.426040991845112, 'best_train': 0.0412505230784851, 'best_val': 0.0775034295927201, 'epoch': 64, 'lr': 0.00075, 'n_epochs': 600, 'test_loss': 0.3696995698329475, 'time': 13057.94013261795, 'train_loss': 0.022297281211128443, 'val_loss': 0.0940718236157582}
@@ -143,8 +142,10 @@ class CalcValues:
 
         sweep_test2 = [
             {'run': "confused-sweep-1", '_runtime': 51452.0871214, '_step': 250, '_timestamp': 1742372941.412101, '_wandb': {'runtime': 51452}, 'batch_size': 128, 'best_epoch': 239, 'best_test': 0.031004800801239317, 'best_train': 0.009287979094084924, 'best_val': 0.05454751444123094, 'coeff_train': 0.48955478367718497, 'epoch': 250, 'lr': 7.8125e-06, 'n_epochs': 250, 'test_loss': 0.031127572089197145, 'time': 51363.07405257225, 'train_loss': 0.009128478685857129, 'val_loss': 0.055135754779690786}
-            , {'run': "kind-sweep-2", '_runtime': 4765.9567248, '_step': 23, '_timestamp': 1742377714.834724, '_wandb': {'runtime': 4765}, 'batch_size': 128, 'best_epoch': 22, 'best_test': 0.05200566363240045, 'best_train': 0.0390533279903509, 'best_val': 0.1447693050380737, 'coeff_train': 0.5105882402676255, 'epoch': 23, 'lr': 0.0005, 'n_epochs': 250, 'test_loss': 0.04705867461032338, 'time': 4740.496947526932, 'train_loss': 0.031076323940719245, 'val_loss': 0.1772086930180353}
-            , {'run': "wandering-sweep-1", '_runtime': 5411.234816351, '_step': 33, '_timestamp': 1742377666.220598, '_wandb': {'runtime': 5411}, 'batch_size': 128, 'best_epoch': 31, 'best_test': 0.06264887513622405, 'best_train': 0.02754823205174593, 'best_val': 0.045402715840036904, 'coeff_train': 0.5256197361606073, 'epoch': 33, 'lr': 0.0005, 'n_epochs': 250, 'test_loss': 0.04745392788142439, 'time': 5391.924602031708, 'train_loss': 0.02155147857530407, 'val_loss': 0.04864443992338483}
+            , {'run': "kind-sweep-2", '_runtime': 8845.4009014, '_step': 40, '_timestamp': 1742381794.2783391, '_wandb': {'runtime': 9179}, 'batch_size': 128, 'best_epoch': 39, 'best_test': 0.033578491636684964, 'best_train': 0.018692423402277565, 'best_val': 0.10012891486523644, 'coeff_train': 0.5069728789637931, 'epoch': 40, 'lr': 0.0005, 'n_epochs': 250, 'test_loss': 0.03411439492825478, 'time': 8819.940562725067, 'train_loss': 0.02000996027457178, 'val_loss': 0.1017378441516369}
+            , {'run': "wandering-sweep-1", '_runtime': 22879.018983845, '_step': 140, '_timestamp': 1742395134.0447586, '_wandb': {'runtime': 22879}, 'batch_size': 128, 'best_epoch': 120, 'best_test': 0.034756482770991706, 'best_train': 0.013779155131449145, 'best_val': 0.03721843429264568, 'coeff_train': 0.5139751889812413, 'epoch': 140, 'lr': 1.5625e-05, 'n_epochs': 250, 'test_loss': 0.03257751355450305, 'time': 22859.748757839203, 'train_loss': 0.012557587495182085, 'val_loss': 0.03811853015351863}
+            , {'run': "cosmic-sweep-2", '_runtime': 15593.099980067, '_step': 95, '_timestamp': 1742410733.3457065, '_wandb': {'runtime': 15593}, 'batch_size': 128, 'best_epoch': 75, 'best_test': 0.035720562266688495, 'best_train': 0.014536536106514552, 'best_val': 0.021167820777803187, 'coeff_train': 0.4582362064279332, 'epoch': 95, 'lr': 0.000125, 'n_epochs': 250, 'test_loss': 0.03200252268404242, 'time': 15573.552463769913, 'train_loss': 0.011725604201533964, 'val_loss': 0.02607648769423129}
+            , {'run': "ethereal-sweep-3", '_runtime': 2552.018827057, '_step': 16, '_timestamp': 1742413298.1097324, '_wandb': {'runtime': 2552}, 'batch_size': 128, 'best_epoch': 15, 'best_test': 0.06577068998936624, 'best_train': 0.05015127708711637, 'best_val': 0.09928515547561267, 'coeff_train': 0.4959154152751562, 'epoch': 16, 'lr': 0.0005, 'n_epochs': 250, 'test_loss': 0.055743689840984725, 'time': 2533.227169275284, 'train_loss': 0.05400414753054816, 'val_loss': 0.11469864898494311}
         ]
 
         output = {
@@ -155,9 +156,10 @@ class CalcValues:
             "x_update_beta": x_update_beta, 
             "improving": improving,
             "sweep": sweep, 
-            "hyperparams": hyperparams
-            } if all else {
+            "hyperparams": hyperparams,
             "sweep_test1": sweep_test1, 
+            "sweep_test2": sweep_test2, 
+            } if all else {
             "sweep_test2": sweep_test2, 
             }
 
