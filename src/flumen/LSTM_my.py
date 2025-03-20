@@ -1,6 +1,17 @@
 import torch, sys
 import torch.nn as nn
 from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
+import yaml 
+from pathlib import Path
+from pprint import pprint
+
+
+"""
+COMMANDs:
+
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
+python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
+"""
 
 
 # ------------------------- LSTM ------------------------- #
@@ -8,9 +19,10 @@ from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
-                 state_dim=None, discretisation_mode=None, x_update_mode=None, model_data=None):
+                 state_dim=None, discretisation_mode=None, x_update_mode=None, model_name=None): #model_data=None):
         super(LSTM, self).__init__()
 
+    # -------------------------------------------
         self.input_size = input_size
         self.z_size = z_size
         self.hidden_size = z_size - state_dim
@@ -21,20 +33,33 @@ class LSTM(nn.Module):
         self.dropout = dropout
         self.bidirectional = bidirectional
         self.state_dim = state_dim
-        self.data = model_data
+
+    # -------------------------------------------
+        self.model_name = model_name
+        self.data = self.get_model_data()
 
         self.A, _ = self.get_dyn_matrix()
         self.I = torch.eye(self.A.shape[0])
         self.dtype = torch.float32
 
+
+        ###pprint(self.data)
+        print("\ndyn matrix:")
+        pprint(self.A)
+        print("\n")
+        ###sys.exit()
+    
+    # -------------------------------------------
         self.discretisation_function = globals().get(f"discretisation_{discretisation_mode}")
         self.x_update_function = globals().get(f"x_update_mode__{x_update_mode}")
 
+    # -------------------------------------------
         self.lstm_cells = nn.ModuleList([
             LSTMCell(input_size + state_dim if layer == 0 else self.hidden_size, self.hidden_size, bias)        # torch.jit.script()    
             for layer in range(num_layers)
         ])
 
+    # -------------------------------------------
         self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
         self.W__h_to_x = nn.Linear(self.hidden_size, self.state_dim, bias=bias)   # Mapping function
 
@@ -85,19 +110,19 @@ class LSTM(nn.Module):
             A (torch.Tensor): Linearized system dynamics matrix.
             eq_point (torch.Tensor): Equilibrium state (x*).
         """
-        model_name = self.data["settings"]["dynamics"]["name"]
-        dyn_factor = self.data["settings"]["control_delta"]
+        model_name = self.model_name
+        dyn_factor = self.data["control_delta"]
 
         if model_name == "VanDerPol":
-            mhu = self.data["settings"]["dynamics"]["args"]["damping"]
+            mhu = self.data["dynamics"]["args"]["damping"]
             A = dyn_factor * torch.tensor([[0, 1], [-1, mhu]])          # before | self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
             # Equilibrium point for VdP: (x*, y*) = (0, 0)
             eq_point = torch.tensor([0, 0])
 
         elif model_name == "FitzHughNagumo":
-            tau = self.data["settings"]["dynamics"]["args"]["tau"]
-            a = self.data["settings"]["dynamics"]["args"]["a"]
-            b = self.data["settings"]["dynamics"]["args"]["b"]
+            tau = self.data["dynamics"]["args"]["tau"]
+            a = self.data["dynamics"]["args"]["a"]
+            b = self.data["dynamics"]["args"]["b"]
             
             # Solve equilibrium equations
             # w* = (v* + a) / b
@@ -114,8 +139,8 @@ class LSTM(nn.Module):
             eq_point = torch.tensor([v_star, w_star])
 
         elif model_name == "GreenshieldsTraffic":
-            v0 = self.data["settings"]["dynamics"]["args"]["v0"]
-            n = self.data["settings"]["dynamics"]["args"]["n"]
+            v0 = self.data["dynamics"]["args"]["v0"]
+            n = self.data["dynamics"]["args"]["n"]
             A = dyn_factor * torch.tensor([[-v0 / n]])
             eq_point = torch.tensor([n])  # Equilibrium at max density
 
@@ -126,7 +151,7 @@ class LSTM(nn.Module):
             eq_point = torch.tensor([0, 0])  # Should be the HH resting potential
 
         elif model_name == "LinearSys":
-            A = dyn_factor * torch.tensor(self.data["settings"]["dynamics"]["args"]["a"])
+            A = dyn_factor * torch.tensor(self.data["dynamics"]["args"]["a"])
             eq_point = torch.zeros(A.shape[0])  # Equilibrium at x* = 0
 
         elif model_name == "TwoTank":
@@ -141,6 +166,36 @@ class LSTM(nn.Module):
         #print(A.shape[0])
         return A, eq_point
 
+
+    def get_model_data(self): 
+        """
+        Loads model-specific data from YAML files located in 'data_generation/'.
+        The file name is determined by self.model_name.
+        
+        Returns:
+            dict: Parsed YAML data containing settings for the model.
+        """
+
+        if self.model_name == "VanDerPol": model_ID = "vdp"
+        elif self.model_name == "FitzHughNagumo": model_ID = "fhn"
+        elif self.model_name == "GreenshieldsTraffic": model_ID = "greenshields"
+        elif self.model_name == "HodgkinHuxleyFFE": model_ID = "hhffe"
+        elif self.model_name == "HodgkinHuxleyFS": model_ID = "hhfs"
+        elif self.model_name == "LinearSys": model_ID = "linsys"
+        elif self.model_name == "TwoTank": model_ID = "twotank"
+        else: model_ID = ""
+
+        # Define the file path
+        file_path = Path(f"data_generation/{model_ID.lower()}.yaml")
+
+        if not file_path.exists():
+            raise FileNotFoundError(f"Configuration file {file_path} not found!")
+
+        # Load the YAML file
+        with file_path.open('r') as f:
+            model_data = yaml.safe_load(f)
+        
+        return model_data
 
 
 # ------------------------- LSTMCell ------------------------- #

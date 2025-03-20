@@ -148,6 +148,13 @@ class CalcValues:
             , {'run': "ethereal-sweep-3", '_runtime': 2552.018827057, '_step': 16, '_timestamp': 1742413298.1097324, '_wandb': {'runtime': 2552}, 'batch_size': 128, 'best_epoch': 15, 'best_test': 0.06577068998936624, 'best_train': 0.05015127708711637, 'best_val': 0.09928515547561267, 'coeff_train': 0.4959154152751562, 'epoch': 16, 'lr': 0.0005, 'n_epochs': 250, 'test_loss': 0.055743689840984725, 'time': 2533.227169275284, 'train_loss': 0.05400414753054816, 'val_loss': 0.11469864898494311}
         ]
 
+        models = [
+            {'run': "050___vdp", }
+            , {'run': "051___fhn", '_runtime': 22108.2997181, '_step': 77, '_timestamp': 1742446219.0934548, '_wandb': {'runtime': 22108}, 'batch_size': 128, 'best_epoch': 57, 'best_test': 0.031174158928768028, 'best_train': 0.028783515184408144, 'best_val': 0.036670097874270544, 'coeff_train': 0.6384884914948572, 'epoch': 77, 'lr': 0.00025, 'n_epochs': 500, 'test_loss': 0.02827900384242336, 'time': 22070.82731485367, 'train_loss': 0.02422400077351581, 'val_loss': 0.04486035347162258}
+            , {'run': "052___fhn-default-code", '_runtime': 13967.7160078, '_step': 127, '_timestamp': 1742439179.7070515, '_wandb': {'runtime': 13968}, 'batch_size': 128, 'best_epoch': 107, 'best_test': 0.026796013301622772, 'best_train': 0.022122922061484248, 'best_val': 0.03483917065970008, 'coeff_train': 0, 'epoch': 127, 'lr': 0.000125, 'n_epochs': 500, 'test_loss': 0.02568249670892126, 'time': 13939.861764431, 'train_loss': 0.019775001585936893, 'val_loss': 0.03675157647757303}
+            , {'run': "053___vdp-default-code", }
+        ]
+
         output = {
             "default_code_same_dim": default_code_same_dim,
             "new_LSTM": new_LSTM,
@@ -161,6 +168,7 @@ class CalcValues:
             "sweep_test2": sweep_test2, 
             } if all else {
             "sweep_test2": sweep_test2, 
+            "models": models,
             }
 
         return output

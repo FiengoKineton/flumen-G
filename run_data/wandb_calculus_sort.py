@@ -52,6 +52,7 @@ file_path_1 = "run_data/csv_files/wandb_get_runs.csv"  # Use the correct relativ
 file_path_2 = "run_data/csv_files/temp.csv"  # Use the correct relative path
 file_path_3 = "run_data/csv_files/sweep_test1.csv"
 file_path_4 = "run_data/csv_files/sweep_test2.csv"
+file_path_5 = "run_data/csv_files/models.csv"
 
 file_path = file_path_4
 df = pd.read_csv(file_path)

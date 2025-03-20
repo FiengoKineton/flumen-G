@@ -403,6 +403,7 @@ if __name__ == "__main__":
     loc_2 = "run_data/csv_files/temp.csv"
     loc_3 = "run_data/csv_files/sweep_test1.csv"
     loc_4 = "run_data/csv_files/sweep_test2.csv"
+    loc_5 = "run_data/csv_files/models.csv"
 
     csv_file = loc_1
     args = DataVisualizer.parse_arguments()

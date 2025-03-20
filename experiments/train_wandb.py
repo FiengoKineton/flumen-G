@@ -121,7 +121,10 @@ def main(sweep):
 
     with data_path.open('rb') as f:
         data = pickle.load(f)
-    print("\nmodel name:", data["settings"]["dynamics"]["name"], "\n\n")
+    
+    model_name = data["settings"]["dynamics"]["name"]
+    print("\nmodel name:", model_name, "\n\n")
+    ###pprint(data)
 
     train_data = TrajectoryDataset(data["train"])
     val_data = TrajectoryDataset(data["val"])
@@ -180,8 +183,8 @@ def main(sweep):
         'decoder_depth': __decoder_depth,
         'discretisation_mode': __discretisation_mode,
         'x_update_mode': __x_update_mode,
+        'model_name': model_name,     #------------#
         'use_batch_norm': False,
-        'model_data': data,     #------------#
     }
 
     model_metadata = {
