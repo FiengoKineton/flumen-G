@@ -51,7 +51,13 @@ def validate(data, loss_fn, model, device):
 
             batch_size = y_pred.shape[0]    ###############
             total_samples += batch_size ###############
-            coeffs_sum += coefficients.mean(dim=0).sum().item() ###############
+            #coeff_norm = coefficients.mean(dim=0).sum().item()              # mean      | quella iniziale
+            coeff_norm = torch.norm(coefficients, p="fro").item()           # Frobenius | Se vuoi un valore rappresentativo globale della matrice.
+            #coeff_norm = torch.norm(coefficients, p=1, dim=0).max().item()  # L1        | Se vuoi valutare la dominanza di righe o colonne.
+            #coeff_norm = torch.norm(coefficients, p=1, dim=1).max().item()  # Linf      | Se vuoi valutare la dominanza di righe o colonne.
+            #coeff_norm = torch.linalg.svdvals(coefficients).max().item()    # spectral  | Se vuoi valutare la stabilità della matrice rispetto a perturbazioni.
+            
+            coeffs_sum += coeff_norm    ###############
 
     mean_coeff = coeffs_sum / total_samples if total_samples > 0 else 0 ###############
 

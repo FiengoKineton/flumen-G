@@ -59,15 +59,14 @@ sweeps = {
     'test2': 'sweep_config_test_2',
 }
 
-name_set = sets['set_3']
-name_sweep = sweeps['test2']
 
-sweep_config = hp_manager.get_sweep(name_sweep)
+name_set = sets['set_3']    # radiant_sweep_4
 hyperparams = hp_manager.get_hyperparams(name_set)
 
+name_sweep = sweeps['test2']
+sweep_config = hp_manager.get_sweep(name_sweep)
 num_sweeps = 5
 SWEEP = False
-
 
 
 if SWEEP:
@@ -152,6 +151,7 @@ def get_loss(which):
 # --------------------------------------------------------------------------- #
 
 
+# ------ Run Processing ----------------------------------------------------- #
 def main(sweep):
     initial_metrics = get_initial_metrics()     # Execution Performance Summary
 
@@ -414,7 +414,7 @@ def main(sweep):
     ...
     # --------------------------------------------------------------------------- #
     #"""
-
+# --------------------------------------------------------------------------- #
 
 
 # ------ Run Initialization ------------------------------------------------- #
