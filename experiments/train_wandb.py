@@ -21,6 +21,8 @@ COMMANDs:
 
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
 python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
+
+python experiments/train_wandb.py data/{model_name}_test_data.pkl {run_name} 
 """
 
 import os
@@ -35,6 +37,7 @@ from hyperparams import Hyperparams
 
 # ------ Current Run Settings ----------------------------------------------- #
 hp_manager = Hyperparams()
+
 sets = {
     'set_1': 'hyperparams___set_1', 
     'set_2': 'hyperparams___set_2',
@@ -60,7 +63,7 @@ sweeps = {
 }
 
 
-name_set = sets['set_3']    # radiant_sweep_4
+name_set = sets['set_4']
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['test2']

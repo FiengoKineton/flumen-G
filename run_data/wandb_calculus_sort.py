@@ -54,7 +54,7 @@ file_path_3 = "run_data/csv_files/sweep_test1.csv"
 file_path_4 = "run_data/csv_files/sweep_test2.csv"
 file_path_5 = "run_data/csv_files/models.csv"
 
-file_path = file_path_4
+file_path = file_path_5
 df = pd.read_csv(file_path)
 
 n = 5 if file_path == file_path_1 else df.shape[0]
@@ -70,7 +70,7 @@ filter_top_n_by_metric(file_path, n, id_ranges, 'train_loss', best)"""
 
 best = True
 print("\n---------------------------------------\nOrder by min:\n---------------------------------------")
-name = ['val_loss', 'best_val'] #, 'test_loss', 'train_loss', 'time']
+name = ['val_loss', 'best_val', 'test_loss', 'train_loss', 'time']
 for name in name:   filter_top_n_by_metric(file_path, n, id_ranges, name, best)
 
 

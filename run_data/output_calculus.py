@@ -153,6 +153,9 @@ class CalcValues:
             , {'run': "051___fhn", '_runtime': 22108.2997181, '_step': 77, '_timestamp': 1742446219.0934548, '_wandb': {'runtime': 22108}, 'batch_size': 128, 'best_epoch': 57, 'best_test': 0.031174158928768028, 'best_train': 0.028783515184408144, 'best_val': 0.036670097874270544, 'coeff_train': 0.6384884914948572, 'epoch': 77, 'lr': 0.00025, 'n_epochs': 500, 'test_loss': 0.02827900384242336, 'time': 22070.82731485367, 'train_loss': 0.02422400077351581, 'val_loss': 0.04486035347162258}
             , {'run': "052___fhn-default-code", '_runtime': 13967.7160078, '_step': 127, '_timestamp': 1742439179.7070515, '_wandb': {'runtime': 13968}, 'batch_size': 128, 'best_epoch': 107, 'best_test': 0.026796013301622772, 'best_train': 0.022122922061484248, 'best_val': 0.03483917065970008, 'coeff_train': 0, 'epoch': 127, 'lr': 0.000125, 'n_epochs': 500, 'test_loss': 0.02568249670892126, 'time': 13939.861764431, 'train_loss': 0.019775001585936893, 'val_loss': 0.03675157647757303}
             , {'run': "053___vdp-default-code", '_runtime': 9794.1529896, '_step': 117, '_timestamp': 1742466946.665296, '_wandb': {'runtime': 9861}, 'batch_size': 128, 'best_epoch': 112, 'best_test': 0.033960099849436015, 'best_train': 0.013545496137960562, 'best_val': 0.06969134811134566, 'coeff_train': 0, 'epoch': 117, 'lr': 0.000125, 'n_epochs': 500, 'test_loss': 0.03329164023318934, 'time': 9766.92120027542, 'train_loss': 0.013237217680191395, 'val_loss': 0.07226177934734594}
+            , {'run': "054___vdp-set3", '_runtime': 9844.692996, '_step': 33, '_timestamp': 1742490344.026744, '_wandb': {'runtime': 10118}, 'batch_size': 128, 'best_epoch': 26, 'best_test': 0.02325438444931356, 'best_train': 0.01138090737479389, 'best_val': 0.04191491572511575, 'coeff_train': 0.4454360099969614, 'epoch': 33, 'lr': 0.001, 'n_epochs': 600, 'test_loss': 0.026860858254607708, 'time': 9747.53641295433, 'train_loss': 0.010035054814858883, 'val_loss': 0.05350164176216201}
+            , {'run': "055___vdp-set3-gru", '_runtime': 7211.1819151, '_step': 28, '_timestamp': 1742490299.8464868, '_wandb': {'runtime': 7520}, 'batch_size': 128, 'best_epoch': 19, 'best_test': 0.03480247207104214, 'best_train': 0.011666294832827238, 'best_val': 0.03446821563891948, 'coeff_train': 0.628063944916227, 'epoch': 28, 'lr': 0.001, 'n_epochs': 600, 'test_loss': 0.03800599498762971, 'time': 7170.803230762482, 'train_loss': 0.008743340018939562, 'val_loss': 0.03799575786032374}
+            , {'run': "056___fhn-gru", '_runtime': 4183.6232569, '_step': 15, '_timestamp': 1742490490.8742442, '_wandb': {'runtime': 4306}, 'batch_size': 128, 'best_epoch': 15, 'best_test': 0.06614899209567479, 'best_train': 0.06748723043572336, 'best_val': 0.06988165243750527, 'coeff_train': 0.5852923851898851, 'epoch': 15, 'lr': 0.0005, 'n_epochs': 500, 'test_loss': 0.06614899209567479, 'time': 4142.826177120209, 'train_loss': 0.06748723043572336, 'val_loss': 0.06988165243750527}
         ]
 
         output = {
@@ -167,7 +170,7 @@ class CalcValues:
             "sweep_test1": sweep_test1, 
             "sweep_test2": sweep_test2, 
             } if all else {
-            "sweep_test2": sweep_test2, 
+            #"sweep_test2": sweep_test2, 
             "models": models,
             }
 

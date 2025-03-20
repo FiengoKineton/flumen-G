@@ -30,7 +30,7 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode_rnn = "gru"                               # {"new", "old", "gru"} | if new then h0_stack, else h0
+        self.mode_rnn = "new"                               # {"new", "old", "gru"} | if new then h0_stack, else h0
         self.mode_dnn = True                                # if True then old dnn  | better always True
         print("\n\nmode_rnn:", self.mode_rnn, "\nmode_dnn:", self.mode_dnn, "\n\n")
 
