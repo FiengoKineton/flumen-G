@@ -13,6 +13,7 @@ from argparse import ArgumentParser
 import time
 
 import wandb
+import psutil
 
 # --------------------------------------------------------------------------- #
 """
@@ -29,6 +30,10 @@ import torch_optimizer as optim
 
 
 from hyperparams import Hyperparams  
+
+
+
+# ------ Current Run Setting ------------------------------------------------ #
 hp_manager = Hyperparams()
 sets = {
     'set_1': 'hyperparams___set_1', 
@@ -76,6 +81,65 @@ else:
 # --------------------------------------------------------------------------- #
 
 
+# ------ Execution Performance Summary -------------------------------------- #
+def get_initial_metrics():
+    """ Capture initial system metrics before execution starts. """
+    process = psutil.Process()
+    return {
+        "start_time": time.time(),
+        "start_memory": process.memory_info().rss,  # Bytes
+        "start_cpu": process.cpu_percent(interval=None),  # No wait, first read
+        "start_disk": psutil.disk_usage('/').used,  # Bytes
+        "start_net": psutil.net_io_counters(),
+        "system_mem_start": psutil.virtual_memory()  # Full system memory stats
+    }
+
+def format_time(seconds):
+    """ Convert seconds into hours, minutes, and seconds. """
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    sec = seconds % 60  # Keep decimals for milliseconds precision
+    return f"{hours}h {minutes}min {sec:.1f}sec"
+
+def print_system_performance(initial_metrics):
+    """ Print system resource usage after execution and compare with initial. """
+    process = psutil.Process()
+
+    # Capture final metrics
+    end_time = time.time()
+    mem_info = process.memory_info()
+    system_mem = psutil.virtual_memory()
+    cpu_percent = process.cpu_percent(interval=1)  # Final CPU measurement
+    disk_usage = psutil.disk_usage('/')
+    net_io = psutil.net_io_counters()
+
+    # Calculate differences
+    time_elapsed = end_time - initial_metrics["start_time"]
+    formatted_time = format_time(time_elapsed)
+    memory_used = (mem_info.rss - initial_metrics["start_memory"]) / (1024 ** 2)  # MB
+    disk_used = (disk_usage.used - initial_metrics["start_disk"]) / (1024 ** 3)  # GB
+    net_sent = (net_io.bytes_sent - initial_metrics["start_net"].bytes_sent) / (1024 ** 2)  # MB
+    net_recv = (net_io.bytes_recv - initial_metrics["start_net"].bytes_recv) / (1024 ** 2)  # MB
+
+    # Print summary
+    print("\n===== SYSTEM PERFORMANCE SUMMARY =====")
+    print(f"Total Execution Time: {formatted_time}")
+    print(f"Total Memory Allocation: {system_mem.total / (1024 ** 3):.2f} GB")
+    print(f"Process Memory In Use: {mem_info.rss / (1024 ** 2):.2f} MB")
+    print(f"Memory Used During Execution: {memory_used:.2f} MB")
+    print(f"System Memory Utilization: {system_mem.percent}%")
+    print(f"Process CPU Utilization: {cpu_percent}%")
+    print(f"Disk Utilization: {disk_usage.used / (1024 ** 3):.2f} GB / {disk_usage.total / (1024 ** 3):.2f} GB")
+    print(f"Disk Space Used During Execution: {disk_used:.2f} GB")
+    print(f"Network Sent: {net_io.bytes_sent / (1024 ** 2):.2f} MB")
+    print(f"Network Received: {net_io.bytes_recv / (1024 ** 2):.2f} MB")
+    print(f"Network Traffic Sent During Execution: {net_sent:.2f} MB")
+    print(f"Network Traffic Received During Execution: {net_recv:.2f} MB")
+    print("======================================\n")
+# --------------------------------------------------------------------------- #
+
+
+# ------ Loss Function ------------------------------------------------------ #
 def get_loss(which):
     if which == "mse":
         return torch.nn.MSELoss()
@@ -85,9 +149,13 @@ def get_loss(which):
         return torch.nn.HuberLoss()        
     else:
         raise ValueError(f"Unknown loss {which}.")
+# --------------------------------------------------------------------------- #
 
 
 def main(sweep):
+    initial_metrics = get_initial_metrics()     # Execution Performance Summary
+
+
     ap = ArgumentParser()
 
     ap.add_argument('load_path', type=str, help="Path to trajectory dataset")
@@ -123,8 +191,9 @@ def main(sweep):
         data = pickle.load(f)
     
     model_name = data["settings"]["dynamics"]["name"]
-    print("\nmodel name:", model_name, "\n\n")
-    ###pprint(data)
+    print("\nmodel name:", model_name, "\n")
+    pprint(data)
+    print("\n\n")
 
     train_data = TrajectoryDataset(data["train"])
     val_data = TrajectoryDataset(data["val"])
@@ -338,6 +407,7 @@ def main(sweep):
 
     print(f"Training took {train_time:.2f} seconds.")
 
+    print_system_performance(initial_metrics)       # Execution Performance Summary
     
     """
     # --------------------------------------------------------------------------- #
@@ -346,10 +416,13 @@ def main(sweep):
     #"""
 
 
+
+# ------ Run Initialization ------------------------------------------------- #
 def train_sweep():
     with wandb.init(entity='aguiar-kth-royal-institute-of-technology', 
                      project='g7-fiengo-msc-thesis'):
         main(sweep=True)
+
 
 if __name__ == '__main__':
     print_gpu_info()
@@ -361,3 +434,4 @@ if __name__ == '__main__':
         wandb.agent(sweep_id, train_sweep, count=num_sweeps)
 
     else: main(SWEEP)
+# --------------------------------------------------------------------------- #
