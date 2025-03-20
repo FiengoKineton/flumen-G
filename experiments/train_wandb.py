@@ -33,7 +33,7 @@ from hyperparams import Hyperparams
 
 
 
-# ------ Current Run Setting ------------------------------------------------ #
+# ------ Current Run Settings ----------------------------------------------- #
 hp_manager = Hyperparams()
 sets = {
     'set_1': 'hyperparams___set_1', 
@@ -59,7 +59,7 @@ sweeps = {
     'test2': 'sweep_config_test_2',
 }
 
-name_set = sets['radiant_sweep_4']
+name_set = sets['set_3']
 name_sweep = sweeps['test2']
 
 sweep_config = hp_manager.get_sweep(name_sweep)
@@ -71,11 +71,11 @@ SWEEP = False
 
 
 if SWEEP:
-    print("SWEEP: ", SWEEP, "\n\n", f"{name_sweep} --- num_sweeps: {num_sweeps}")
+    print("\nSWEEP: ", SWEEP, "\n\n", f"{name_sweep} --- num_sweeps: {num_sweeps}")
     pprint(sweep_config)
     print("\n\n")
 else:
-    print("SWEEP: ", SWEEP, "\n\n", f"{name_set}:")
+    print("\nSWEEP: ", SWEEP, "\n\n", f"{name_set}:")
     pprint(hyperparams)
     print("\n\n")
 # --------------------------------------------------------------------------- #

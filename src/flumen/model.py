@@ -1,6 +1,7 @@
 import torch, sys
 from torch import nn
 from flumen.LSTM_my import LSTM
+from flumen.GRU_my import GRU
 
 
 
@@ -29,31 +30,47 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode_rnn = "new"                               # if new then h0_stack, else h0
-        self.mode_dnn = True                                # if True then old dnn
+        self.mode_rnn = "gru"                               # {"new", "old", "gru"} | if new then h0_stack, else h0
+        self.mode_dnn = True                                # if True then old dnn  | better always True
         print("\n\nmode_rnn:", self.mode_rnn, "\nmode_dnn:", self.mode_dnn, "\n\n")
 
         function_name = f"mode_rnn_{self.mode_rnn}"
         self.structure_function = getattr(self, function_name, None)
 
 
-        self.u_rnn = LSTM(
-            input_size=control_dim + 1,                     # output | 2
-            z_size=control_rnn_size + state_dim,            # output | 10
-            batch_first=True,
-            num_layers=self.control_rnn_depth,              # output | 1
-            dropout=0, 
-            state_dim=self.state_dim,
-            discretisation_mode=discretisation_mode, 
-            x_update_mode=x_update_mode, 
-            model_name=model_name
-        ) if self.mode_rnn=="new" else torch.nn.LSTM(
-            input_size=control_dim + 1,                     # output | 2
-            hidden_size=control_rnn_size,                   # output | 8
-            batch_first=True,
-            num_layers=self.control_rnn_depth,              # output | 1
-            dropout=0      
-        )
+        if self.mode_rnn=="new": 
+            self.u_rnn = LSTM(
+                input_size=control_dim + 1,                     # output | 2
+                z_size=control_rnn_size + state_dim,            # output | 10
+                batch_first=True,
+                num_layers=self.control_rnn_depth,              # output | 1
+                dropout=0, 
+                state_dim=self.state_dim,
+                discretisation_mode=discretisation_mode, 
+                x_update_mode=x_update_mode, 
+                model_name=model_name
+            ) 
+        elif self.mode_rnn=="old": 
+            self.u_rnn = torch.nn.LSTM(
+                input_size=control_dim + 1,                     # output | 2
+                hidden_size=control_rnn_size,                   # output | 8
+                batch_first=True,
+                num_layers=self.control_rnn_depth,              # output | 1
+                dropout=0      
+            )
+        elif self.mode_rnn=="gru": 
+            self.u_rnn = GRU(
+                input_size=control_dim + 1,                     # output | 2
+                z_size=control_rnn_size + state_dim,            # output | 10
+                batch_first=True,
+                num_layers=self.control_rnn_depth,              # output | 1
+                dropout=0, 
+                state_dim=self.state_dim,
+                discretisation_mode=discretisation_mode, 
+                x_update_mode=x_update_mode, 
+                model_name=model_name
+            ) 
+
 
     #-- ENCODER
         x_dnn_osz = control_rnn_size * self.control_rnn_depth
@@ -70,7 +87,7 @@ class CausalFlowModel(nn.Module):
         )
 
     #-- Updated DECODER that takes [x_tilde, h_tilde]
-        u_dnn_isz = control_rnn_size + state_dim if self.mode_rnn=="new" else control_rnn_size
+        u_dnn_isz = control_rnn_size if self.mode_rnn=="old" else control_rnn_size + state_dim
         self.u_dnn = FFNet(
             in_size=u_dnn_isz,                              # output | 10
             out_size=output_dim,                            # output | 2
@@ -84,8 +101,7 @@ class CausalFlowModel(nn.Module):
         )
             
 
-
-
+    # ----------------------------------------------------------------------- #
     def forward(self, x, rnn_input, deltas):
         ###h0, c0, tau = self.structure_function(x, deltas)
         ###rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0), tau)
@@ -104,6 +120,7 @@ class CausalFlowModel(nn.Module):
         ###sys.exit()
         return output, coefficients ###############
 
+    # ----------------------------------------------------------------------- #
 
     def mode_rnn_new(self, x, deltas, rnn_input):
         h0 = self.x_dnn(x)
@@ -115,6 +132,14 @@ class CausalFlowModel(nn.Module):
 
         return z, rnn_out_seq_packed, coefficients  ###############
 
+    def mode_rnn_gru(self, x, deltas, rnn_input):
+        h0 = self.x_dnn(x)
+        z = torch.cat((x, h0), dim=1) 
+        z = z.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
+
+        rnn_out_seq_packed, _, coefficients = self.u_rnn(rnn_input, z, deltas)    ###############
+
+        return z, rnn_out_seq_packed, coefficients  ###############
 
     def mode_rnn_old(self, x, _, rnn_input):
         h0 = self.x_dnn(x)
@@ -126,6 +151,8 @@ class CausalFlowModel(nn.Module):
         return h0, rnn_out_seq_packed, torch.tensor([[0, 0], [0, 0]], dtype=torch.float32) ###############
 
 
+
+# ---------------- Encoder/Decoder ------------------------------------------ #
 class FFNet(nn.Module):
 
     def __init__(self,

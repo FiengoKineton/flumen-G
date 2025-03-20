@@ -14,13 +14,13 @@ python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test
 """
 
 
-# ---------------- LSTM ----------------------------------------------------- #
+# ---------------- GRU ------------------------------------------------------ #
 
-class LSTM(nn.Module):
+class GRU(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
-                 state_dim=None, discretisation_mode=None, x_update_mode=None, model_name=None): #model_data=None):
-        super(LSTM, self).__init__()
+                 state_dim=None, discretisation_mode=None, x_update_mode=None, model_name=None):
+        super(GRU, self).__init__()
 
     # -------------------------------------------
         self.input_size = input_size
@@ -54,12 +54,11 @@ class LSTM(nn.Module):
         self.x_update_function = globals().get(f"x_update_mode__{x_update_mode}")
 
     # -------------------------------------------
-        self.lstm_cells = nn.ModuleList([
-            LSTMCell(input_size + state_dim if layer == 0 else self.hidden_size, self.hidden_size, bias)        # torch.jit.script()    
+        self.gru_cells = nn.ModuleList([
+            GRUCell(input_size + state_dim if layer == 0 else self.hidden_size, self.hidden_size, bias)
             for layer in range(num_layers)
         ])
 
-    # -------------------------------------------
         self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
         self.W__h_to_x = nn.Linear(self.hidden_size, self.state_dim, bias=bias)   # Mapping function
 
@@ -69,38 +68,36 @@ class LSTM(nn.Module):
         batch_size, seq_len, _ = rnn_input_unpacked.shape
         device = rnn_input_unpacked.device
 
-        z, c_z = hidden_state
+        z = hidden_state
         self.A, self.I, tau = self.A.to(device, dtype=self.dtype), self.I.to(device, dtype=self.dtype), tau.to(device, dtype=self.dtype)
 
-        outputs = torch.empty(batch_size, seq_len, self.z_size, device=device)  # Preallocate tensor | before: torch.zeros
-        coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)  ###############
+        outputs = torch.empty(batch_size, seq_len, self.z_size, device=device)  
+        coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)
 
         for t in range(seq_len):
             rnn_input_t = rnn_input_unpacked[:, t, :]
             tau_t = tau[:, t, :]
 
-            x_prev, c_x = z[:, :, :self.state_dim], c_z[:, :, :self.state_dim]
-            h, c = z[:, :, self.state_dim:], c_z[:, :, self.state_dim:]
+            x_prev = z[:, :, :self.state_dim]
+            h = z[:, :, self.state_dim:]
 
-            # Generalized fix: Ensure proper tensor shape for single and multi-layer cases
-            x_in = x_prev.squeeze(0) if x_prev.dim() == 2 else x_prev[-1]  # Take last layer if multi-layer
+            x_in = x_prev.squeeze(0) if x_prev.dim() == 2 else x_prev[-1]
             u_t = torch.cat((x_in, rnn_input_t), dim=1)
 
-            h_list, c_list = [], []
-            for layer, cell in enumerate(self.lstm_cells):
-                h_new, c_new = cell(u_t, h[layer], c[layer])
+            h_list = []
+            for layer, cell in enumerate(self.gru_cells):
+                h_new = cell(u_t, h[layer])
                 h_list.append(h_new)
-                c_list.append(c_new)
 
-            x_mid = self.discretisation_function(x_prev, self.A, tau_t, self.I)             # same as the old one
-            h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
-            x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)   ###############   
+            x_mid = self.discretisation_function(x_prev, self.A, tau_t, self.I)
+            h = torch.stack(h_list, dim=0)
+            x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)
 
-            z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)            # same as the old one
-            outputs[:, t, :].copy_(z[-1])  # In-place assignment
-            coefficients[:, t, :].copy_(coeff)  ###############
+            z = torch.cat((x_next, h), dim=-1)
+            outputs[:, t, :].copy_(z[-1])
+            coefficients[:, t, :].copy_(coeff)
 
-        return torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False), (z, c_z), coefficients    ###############
+        return torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False), z, coefficients
 
 
     def get_dyn_matrix(self): 
@@ -198,25 +195,24 @@ class LSTM(nn.Module):
 
 
 
-# ---------------- LSTMCell ------------------------------------------------- #
+# ---------------- GRUCell -------------------------------------------------- #
 
-class LSTMCell(nn.Module):
+class GRUCell(nn.Module):
     def __init__(self, input_size: int, hidden_size: int, bias: bool=True):
-        super(LSTMCell, self).__init__()
+        super(GRUCell, self).__init__()
         self.hidden_size = hidden_size
-        self.WU = nn.Linear(input_size + hidden_size, 4 * hidden_size, bias=bias)
+        self.WU = nn.Linear(input_size + hidden_size, 3 * hidden_size, bias=bias)
+    
+    def forward(self, u, h):
+        gates = self.WU(torch.cat((u, h), dim=1))
+        r, z, n = gates.chunk(3, dim=1)
+        
+        r, z = torch.sigmoid(r), torch.sigmoid(z)
+        n = torch.tanh(n + r * h)
+        h_new = (1 - z) * n + z * h
 
-    def forward(self, u, h, c):
-        gates = self.WU(torch.cat((u, h), dim=1))  # Single matrix multiplication
-        i, f, g, o = gates.chunk(4, dim=1)
+        return h_new
 
-        i, f, o = torch.sigmoid(i), torch.sigmoid(f), torch.sigmoid(o)
-        g = torch.tanh(g)
-
-        c.mul_(f).add_(i * g)               # c_next = f * c + i * g            | old
-        h = o * torch.tanh(c)               # h_next = o * torch.tanh(c_next)   | old
-
-        return h, c
 
 
 # ---------------- Discretisation functions --------------------------------- #
