@@ -54,7 +54,7 @@ file_path_3 = "run_data/csv_files/sweep_test1.csv"
 file_path_4 = "run_data/csv_files/sweep_test2.csv"
 file_path_5 = "run_data/csv_files/models.csv"
 
-file_path = file_path_4
+file_path = file_path_1
 df = pd.read_csv(file_path)
 
 n = 5 if file_path == file_path_1 else df.shape[0]

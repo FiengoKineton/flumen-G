@@ -405,6 +405,6 @@ if __name__ == "__main__":
     loc_4 = "run_data/csv_files/sweep_test2.csv"
     loc_5 = "run_data/csv_files/models.csv"
 
-    csv_file = loc_4
+    csv_file = loc_5
     args = DataVisualizer.parse_arguments()
     DataVisualizer(csv_file, all=args.all)
