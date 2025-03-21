@@ -69,7 +69,7 @@ hyperparams = hp_manager.get_hyperparams(name_set)
 name_sweep = sweeps['test2']
 sweep_config = hp_manager.get_sweep(name_sweep)
 num_sweeps = 5
-SWEEP = False
+SWEEP = True
 
 
 if SWEEP:
@@ -175,6 +175,8 @@ def main(sweep):
                     help="If reset_noise is set, set standard deviation ' \
                             'of the measurement noise to this value.")
 
+    ap.add_argument('--model_log_rate', type=int, default=15)                       # not pulled from flumen
+    
     sys_args = ap.parse_args()
     data_path = Path(sys_args.load_path)
 
@@ -345,6 +347,7 @@ def main(sweep):
         f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e} :: {coeff:>16e}"  ###############
     )
 
+    last_save_epoch = 0
     start = time.time()
 
     for epoch in range(__n_epochs):
@@ -382,12 +385,14 @@ def main(sweep):
         if early_stop.best_model:
             torch.save(model.state_dict(), model_save_dir / "state_dict.pth")
 
-            if sweep: 
-                artifact = wandb.Artifact("model_checkpoint", type="model")
-                artifact.add_file(str(model_save_dir / "state_dict.pth"))
-                wandb.log_artifact(artifact)                
-            else: 
-                run.log_model(model_save_dir.as_posix(), name=model_name)
+            if epoch > last_save_epoch + sys_args.model_log_rate:                   # not pulled from flumen
+                if sweep: 
+                    artifact = wandb.Artifact("model_checkpoint", type="model")
+                    artifact.add_file(str(model_save_dir / "state_dict.pth"))
+                    wandb.log_artifact(artifact)                
+                else: 
+                    run.log_model(model_save_dir.as_posix(), name=model_name)
+                last_save_epoch = epoch
 
             run.summary["best_train"] = train_loss
             run.summary["best_val"] = val_loss
@@ -412,6 +417,8 @@ def main(sweep):
     train_time = time.time() - start
 
     print(f"Training took {train_time:.2f} seconds.")
+
+    run.log_model(model_save_dir.as_posix(), name=model_name, aliases=["best"])     # not pulled from flumen
 
     print_system_performance(initial_metrics)       # Execution Performance Summary
     
