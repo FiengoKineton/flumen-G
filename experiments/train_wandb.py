@@ -68,8 +68,8 @@ hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['test2']
 sweep_config = hp_manager.get_sweep(name_sweep)
-num_sweeps = 5
-SWEEP = True
+num_sweeps = 6
+SWEEP = False
 
 
 if SWEEP:

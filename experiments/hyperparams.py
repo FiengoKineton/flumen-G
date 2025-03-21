@@ -207,6 +207,7 @@ class Hyperparams:
                     'optimiser_mode': {'values': ["adam", "lamb"]},                     # , "nesterov", "newton"]}, | do not work
                     'discretisation_mode': {'values': ["TU", "FE", "RK4", "exact"]},    # , "BE"]},                 | don't bother
                     'x_update_mode': {'values': ["alpha", "beta"]},                     # , "lamda"]}               | don't bother
+                    'mode_rnn': {'values': ["new", "gru", "old"]}, 
                 }
             },
 
@@ -231,6 +232,7 @@ class Hyperparams:
                     'optimiser_mode': {'values': ["adam"]},         # before | adam      
                     'discretisation_mode': {'values': ["TU"]},      # before | FE     
                     'x_update_mode': {'values': ["beta"]},          # before | alpha
+                    'mode_rnn': {'values': ["new", "gru"]}, 
                 }
             },
 
@@ -255,6 +257,7 @@ class Hyperparams:
                     'optimiser_mode': {'values': ["adam"]},         # before | adam      
                     'discretisation_mode': {'values': ["TU"]},      # before | FE     
                     'x_update_mode': {'values': ["alpha"]},         # before | alpha
+                    'mode_rnn': {'values': ["new", "gru"]}, 
                 }
             },
 
