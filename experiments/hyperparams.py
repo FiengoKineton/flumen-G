@@ -137,7 +137,7 @@ class Hyperparams:
                 "discretisation_mode": "exact",    
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
-                "mode_rnn": "gru"            
+                "mode_rnn": "old"            
             },
 
             'hyperparams___set_5': {

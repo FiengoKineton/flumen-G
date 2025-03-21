@@ -2744,7 +2744,18 @@ Network Traffic Received During Execution: 108.84 MB
 PC ...
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 3h 32min 10.0sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 656.54 MB
+Memory Used During Execution: 171.91 MB
+System Memory Utilization: 24.8%
+Process CPU Utilization: 2.0%
+Disk Utilization: 58.47 GB / 72.86 GB
+Disk Space Used During Execution: 0.01 GB
+Network Sent: 567.68 MB
+Network Received: 808.44 MB
+Network Traffic Sent During Execution: 25.25 MB
+Network Traffic Received During Execution: 35.07 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2797,7 +2808,18 @@ Timings: 0.3832128047943115, 1.0321857929229736
 0.013470972957423166
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 2h 10min 49.6sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 639.19 MB
+Memory Used During Execution: 154.45 MB
+System Memory Utilization: 27.7%
+Process CPU Utilization: 1.0%
+Disk Utilization: 58.47 GB / 72.86 GB
+Disk Space Used During Execution: 0.00 GB
+Network Sent: 560.66 MB
+Network Received: 797.17 MB
+Network Traffic Sent During Execution: 18.12 MB
+Network Traffic Received During Execution: 23.68 MB
 ======================================  
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
