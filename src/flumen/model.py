@@ -20,6 +20,7 @@ class CausalFlowModel(nn.Module):
                  discretisation_mode,
                  x_update_mode,
                  model_name,
+                 mode_rnn='new',
                  use_batch_norm=False):
         super(CausalFlowModel, self).__init__()
 
@@ -30,7 +31,7 @@ class CausalFlowModel(nn.Module):
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth   
 
-        self.mode_rnn = "new"                               # {"new", "old", "gru"} | if new then h0_stack, else h0
+        self.mode_rnn = mode_rnn                            # {"new", "old", "gru"} | if new then h0_stack, else h0
         self.mode_dnn = True                                # if True then old dnn  | better always True
         print("\n\nmode_rnn:", self.mode_rnn, "\nmode_dnn:", self.mode_dnn, "\n\n")
 
@@ -38,7 +39,7 @@ class CausalFlowModel(nn.Module):
         self.structure_function = getattr(self, function_name, None)
 
 
-        if self.mode_rnn=="new": 
+        if self.mode_rnn=='new': 
             self.u_rnn = LSTM(
                 input_size=control_dim + 1,                     # output | 2
                 z_size=control_rnn_size + state_dim,            # output | 10
@@ -50,7 +51,7 @@ class CausalFlowModel(nn.Module):
                 x_update_mode=x_update_mode, 
                 model_name=model_name
             ) 
-        elif self.mode_rnn=="old": 
+        elif self.mode_rnn=='old': 
             self.u_rnn = torch.nn.LSTM(
                 input_size=control_dim + 1,                     # output | 2
                 hidden_size=control_rnn_size,                   # output | 8
@@ -58,7 +59,7 @@ class CausalFlowModel(nn.Module):
                 num_layers=self.control_rnn_depth,              # output | 1
                 dropout=0      
             )
-        elif self.mode_rnn=="gru": 
+        elif self.mode_rnn=='gru': 
             self.u_rnn = GRU(
                 input_size=control_dim + 1,                     # output | 2
                 z_size=control_rnn_size + state_dim,            # output | 10

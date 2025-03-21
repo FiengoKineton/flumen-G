@@ -223,6 +223,7 @@ def main(sweep):
         __discretisation_mode = config.discretisation_mode
         __optimiser_mode = config.optimiser_mode
         __x_update_mode = config.x_update_mode
+        __mode_rnn = config.mode_rnn
     else:
         __control_rnn_size = wandb.config["control_rnn_size"]
         __control_rnn_depth = wandb.config["control_rnn_depth"]
@@ -241,6 +242,7 @@ def main(sweep):
         __discretisation_mode = wandb.config["discretisation_mode"]
         __optimiser_mode = wandb.config["optimiser_mode"]
         __x_update_mode = wandb.config["x_update_mode"]
+        __mode_rnn = wandb.config["mode_rnn"]
 
 
     model_args = {
@@ -256,6 +258,7 @@ def main(sweep):
         'discretisation_mode': __discretisation_mode,
         'x_update_mode': __x_update_mode,
         'model_name': model_name,     #------------#
+        'mode_rnn': __mode_rnn,
         'use_batch_norm': False,
     }
 
