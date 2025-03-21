@@ -261,6 +261,31 @@ class Hyperparams:
                 }
             },
 
+            'sweep_config_test_3': {                                # based on: hyperparams___set_4
+                'method': 'grid',     
+                'metric': {'name': 'val_loss', 'goal': 'minimize'},
+                'parameters': {
+                    "control_rnn_size": {'values': [24]},         
+                    "control_rnn_depth": {'values': [1]},        
+                    "encoder_size": {'values': [2]},  
+                    "encoder_depth": {'values': [2]},   
+                    "decoder_size": {'values': [2]}, 
+                    "decoder_depth": {'values': [2]},  
+                    "batch_size": {'values': [256]},  
+                    "lr": {'values': [0.001]},                     
+                    "n_epochs": {'values': [200]},  
+                    "es_patience": {'values': [20]},              
+                    "es_delta": {'values': [1e-7]},
+                    "sched_patience": {'values': [10]},
+                    "sched_factor": {'values': [2]},
+                    "loss": {'values': ["mse"]},                  
+                    "discretisation_mode": {'values': ["exact"]},    
+                    "optimiser_mode": {'values': ["adam"]},       
+                    "x_update_mode": {'values': ["alpha"]},
+                    "mode_rnn": {'values': ["new", "gru", "old"]},     
+                }
+            }
+
         }
 
 

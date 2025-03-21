@@ -23,6 +23,7 @@ python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --tim
 python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
 
 python experiments/train_wandb.py data/{model_name}_test_data.pkl {run_name} 
+{model_name}: [vdp, fhn, twotank, linsys, hhfs, hhffe, greenshields]
 """
 
 import os
@@ -60,16 +61,17 @@ sweeps = {
     'init': 'sweep_config_init', 
     'test1': 'sweep_config_test_1',
     'test2': 'sweep_config_test_2',
+    'test3': 'sweep_config_test_3',
 }
 
 
 name_set = sets['set_4']
 hyperparams = hp_manager.get_hyperparams(name_set)
 
-name_sweep = sweeps['test2']
+name_sweep = sweeps['test3']
 sweep_config = hp_manager.get_sweep(name_sweep)
-num_sweeps = 6
-SWEEP = False
+num_sweeps = 9
+SWEEP = True
 
 
 if SWEEP:
