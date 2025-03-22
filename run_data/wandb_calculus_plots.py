@@ -93,6 +93,7 @@ class DataVisualizer:
     def parse_arguments():
         parser = argparse.ArgumentParser(description="Run results analysis with optional display and plotting.")
         parser.add_argument("--all", action="store_true", help="Select all metrics across datasets.")
+        parser.add_argument("--loc", type=str, help="Path to the directory")
         args = parser.parse_args()
         return args
 
@@ -404,7 +405,9 @@ if __name__ == "__main__":
     loc_3 = "run_data/csv_files/sweep_test1.csv"
     loc_4 = "run_data/csv_files/sweep_test2.csv"
     loc_5 = "run_data/csv_files/models.csv"
+    loc_6 = "run_data/csv_files/sweep_test3.csv"
 
-    csv_file = loc_5
     args = DataVisualizer.parse_arguments()
-    DataVisualizer(csv_file, all=args.all)
+    csv_file = loc_6 if args.loc is None else args.loc
+
+    DataVisualizer(csv_file=csv_file, all=args.all)

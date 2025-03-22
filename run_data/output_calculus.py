@@ -39,6 +39,7 @@ class CalcValues:
         args = parser.parse_args()
         return args
 
+
     def DataSet(self, all):
         default_code_same_dim = [
             {'run': "017", '_runtime': 7546.45702, '_step': 117, '_timestamp': 1741182593.7156532, '_wandb': {'runtime': 7546}, 'best_epoch': 98, 'best_test': 0.03409814938075013, 'best_train': 0.018149984931504284, 'best_val': 0.028380416333675385, 'epoch': 118, 'lr': 0.000125, 'test_loss': 0.03472252781428988, 'time': 7528.629385232925, 'train_loss': 0.015891212812334143, 'val_loss': 0.03212327557423758}
@@ -176,9 +177,16 @@ class CalcValues:
             , {'run': "060___fhn-set4-old", '_runtime': 7848.923654686, '_step': 115, '_timestamp': 1742556992.6555638, '_wandb': {'runtime': 7849}, 'batch_size': 256, 'best_epoch': 95, 'best_test': 0.03578539553564042, 'best_train': 0.012222266184950346, 'best_val': 0.031619106186553836, 'coeff_train': 0, 'epoch': 115, 'lr': 0.00025, 'n_epochs': 200, 'test_loss': 0.02979799290187657, 'time': 7834.196428775787, 'train_loss': 0.008440809986112933, 'val_loss': 0.0350145691918442}
         ]
 
+        sweep_test3 = [
+            {'run': "rural-sweep-1--new", '_runtime': 17462.796973622, '_step': 139, '_timestamp': 1742603220.945015, '_wandb': {'runtime': 17464}, 'batch_size': 256, 'best_epoch': 119, 'best_test': 0.030992308777058497, 'best_train': 0.007364878394199829, 'best_val': 0.027395313343731686, 'coeff_train': 0.33505770049087247, 'epoch': 139, 'lr': 0.000125, 'n_epochs': 200, 'test_loss': 0.02920797813567333, 'time': 17438.81091785431, 'train_loss': 0.0059961314264096715, 'val_loss': 0.030780186265474185}
+            , {'run': "astral-sweep-2--gru", '_runtime': 19809.434212023, '_step': 185, '_timestamp': 1742623037.4117568, '_wandb': {'runtime': 19810}, 'batch_size': 256, 'best_epoch': 165, 'best_test': 0.037519468256505206, 'best_train': 0.004345168837493188, 'best_val': 0.02628742677916307, 'coeff_train': 0.4821195112136664, 'epoch': 185, 'lr': 0.000125, 'n_epochs': 200, 'test_loss': 0.035830627093673684, 'time': 19788.18929862976, 'train_loss': 0.003011567703766846, 'val_loss': 0.03380165572161786}
+            , {'run': "scarlet-sweep-3--old", '_runtime': 9186.905935175, '_step': 160, '_timestamp': 1742632239.425357, '_wandb': {'runtime': 9188}, 'batch_size': 256, 'best_epoch': 140, 'best_test': 0.03074078288045712, 'best_train': 0.005162834616279916, 'best_val': 0.02126801016856916, 'coeff_train': 0, 'epoch': 160, 'lr': 0.000125, 'n_epochs': 200, 'test_loss': 0.034998951421584934, 'time': 9174.278196811676, 'train_loss': 0.00436640358529985, 'val_loss': 0.02286278140672948}
+        ]
+
         temp = [
             {'run': "", }
         ]
+
 
         output = {
             "default_code_same_dim": default_code_same_dim,
@@ -193,10 +201,12 @@ class CalcValues:
             "sweep_test2": sweep_test2, 
             "vdp_gru": vdp_gru,
             "fhn_model": fhn_model,
+            "sweep_test3": sweep_test3, 
             } if all else {
-            "sweep_test2": sweep_test2, 
+            #"sweep_test2": sweep_test2, 
             #"vdp_gru": vdp_gru,
             #"fhn_model": fhn_model,
+            "sweep_test3": sweep_test3, 
             }
 
         return output
