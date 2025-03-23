@@ -269,7 +269,7 @@ class Hyperparams:
                     'discretisation_mode': {'values': ["FE", "RK4"]},          
                     'x_update_mode': {'values': ["alpha"]},         
                     'mode_rnn': {'values': ["new"]}, 
-                    'mode_rnn': {'values': ["FFNet"]},
+                    'mode_dnn': {'values': ["FFNet"]},
                 }
             },
 
