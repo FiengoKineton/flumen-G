@@ -163,7 +163,8 @@ class Hyperparams:
                 "discretisation_mode": "RK4",    
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha", 
-                "mode_rnn": "new"            
+                "mode_rnn": "new",
+                "mode_dnn": "FFNet"          
             },
 
             'hyperparams___run_037' : {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
@@ -217,7 +218,7 @@ class Hyperparams:
                     'discretisation_mode': {'values': ["TU", "FE", "RK4", "exact"]},    # , "BE"]},                 | don't bother
                     'x_update_mode': {'values': ["alpha", "beta"]},                     # , "lamda"]}               | don't bother
                     'mode_rnn': {'values': ["new", "gru", "old"]}, 
-                    'mode_rnn': {'values': ["FFNet"]}                                   # , 'ConvNet', 'SelfAttention', 'ResidualBlock', 'GRUEncoderDecoder']}
+                    'mode_dnn': {'values': ["FFNet"]}                                   # , 'ConvNet', 'SelfAttention', 'ResidualBlock', 'GRUEncoderDecoder']}
                 }
             },
 
@@ -243,7 +244,7 @@ class Hyperparams:
                     'discretisation_mode': {'values': ["TU"]},      # before | FE     
                     'x_update_mode': {'values': ["beta"]},          # before | alpha
                     'mode_rnn': {'values': ["new", "gru"]}, 
-                    'mode_rnn': {'values': ["FFNet"]}
+                    'mode_dnn': {'values': ["FFNet"]}
                 }
             },
 
@@ -295,7 +296,7 @@ class Hyperparams:
                     "optimiser_mode": {'values': ["adam"]},       
                     "x_update_mode": {'values': ["alpha"]},
                     "mode_rnn": {'values': ["new", "gru", "old"]},   
-                    'mode_rnn': {'values': ["FFNet"]},  
+                    'mode_dnn': {'values': ["FFNet"]},  
                 }
             }
 
