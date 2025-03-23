@@ -9,7 +9,11 @@ table = [
     'mode_dnn', 
     'discretisation_mode', 
     'x_update_mode', 
-    'optimiser_mode'
+    'optimiser_mode',
+    'control_rnn_size', 
+    'batch_size', 
+    'lr',
+    'loss',
     ]
 
 
@@ -44,10 +48,10 @@ class FilterParam:
         df_high = df[(df[self.which] > self.high_thresh) & (df[self.which] < 1)].sort_values(by=self.which)
 
         # Output
-        print("\n--- Runs with val_loss < {} ---\n".format(self.low_thresh))
+        print("\n--- Runs with", self.which, "< {} ---\n".format(self.low_thresh))
         print(df_low[columns].to_string(index=False))
 
-        print("\n--- Runs with val_loss > {} ---\n".format(self.high_thresh))
+        print("\n\n--- Runs with", self.which, "> {} ---\n".format(self.high_thresh))
         print(df_high[columns].to_string(index=False))
 
 

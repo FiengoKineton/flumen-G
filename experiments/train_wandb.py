@@ -45,6 +45,7 @@ sets = {
     'set_3': 'hyperparams___set_3',
     'set_4': 'hyperparams___set_4',
     'set_5': 'hyperparams___set_5',
+    'set_6': 'hyperparams___set_6',
     'run_037': 'hyperparams___run_037',
     'radiant_sweep_4': 'hyperparams___radiant_sweep_4',
     'swift_sweep_1': 'hyperparams___swift_sweep_1',
@@ -65,7 +66,7 @@ sweeps = {
 }
 
 
-name_set = sets['set_4']
+name_set = sets['set_6']
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['test2']
