@@ -1,13 +1,14 @@
 import subprocess
 
 
-file_path_1 = "run_data/csv_files/wandb_get_runs.csv"  # Use the correct relative path
-file_path_2 = "run_data/csv_files/temp.csv"  # Use the correct relative path
+file_path_1 = "run_data/csv_files/wandb_get_runs.csv"  
+file_path_2 = "run_data/csv_files/temp.csv"  
 file_path_3 = "run_data/csv_files/sweep_test1.csv"
 file_path_4 = "run_data/csv_files/sweep_test2.csv"
 file_path_5 = "run_data/csv_files/models.csv"
 file_path_6 = "run_data/csv_files/sweep_test3.csv"
 file_path_7 = "run_data/csv_files/sweep_test4.csv"
+file_path_8 = "run_data/csv_files/sweep_test5.csv"
 
 csv_path = file_path_7
 
@@ -17,8 +18,8 @@ scripts = [
     #{"file": "run_data/wandb_get_runs.py", "args": []},
     {"file": "run_data/output_calculus.py", "args": ["--plot", "--display", "--loc", csv_path]},            # ["--plot", "--all", "--display", "--loc"]
     {"file": "run_data/wandb_calculus_sort.py", "args": ["--loc", csv_path, "--all"]},                      # ["--loc", "--all"]
-    {"file": "run_data/wandb_calculus_plots.py", "args": ["--all", "--loc", csv_path]},                     # ["--all", "--loc"]
-    {"file": "run_data\wandb_calculus_min_max.py", "args": ["--which", 'train_loss']},                        # ["--loc", "--which"]
+    {"file": "run_data/wandb_calculus_plots.py", "args": ["--loc", csv_path]},                              # ["--all", "--loc"]
+    {"file": "run_data\wandb_calculus_min_max.py", "args": ["--which", 'val_loss']},                        # ["--loc", "--which"]
     #{"file": "experiments/hyperparams.py", "args": ["--run"]},                                              # ["--run"]
 ]
 

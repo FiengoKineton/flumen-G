@@ -81,13 +81,13 @@ class DataVisualizer:
             self.plot_val_loss_3D()
         else:
             self.plot_box()
-            #self.plot_distribution()
-            #self.plot_trend()
-            #self.plot_pairplot()
-            #self.plot_correlation_heatmap()
-            #self.plot_val_loss_vs_hyperparams()
+            self.plot_distribution()
+            self.plot_trend()
+            self.plot_pairplot()
+            self.plot_correlation_heatmap()
+            self.plot_val_loss_vs_hyperparams()
             #self.plot_val_loss_2D()
-            self.plot_val_loss_3D()
+            #self.plot_val_loss_3D()
 
     @staticmethod
     def parse_arguments():
