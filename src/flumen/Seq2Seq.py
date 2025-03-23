@@ -82,6 +82,9 @@ class ConvNet(nn.Module):
             self.bn2 = nn.BatchNorm1d(num_filters)
 
     def forward(self, x):
+        if x.dim()==2: x = x.unsqueeze(1)
+        x = x.permute(0, 2, 1)
+        
         x = self.conv1(x)
         if self.use_batch_norm:
             x = self.bn1(x)
@@ -111,7 +114,7 @@ class SelfAttention(nn.Module):
         use_batch_norm (bool): Whether to apply batch normalization (default: False).
     """
 
-    def __init__(self, input_dim, hidden_dim, output_dim, activation=nn.ReLU, use_batch_norm=False):
+    def __init__(self, input_dim, output_dim, hidden_dim, activation=nn.ReLU, use_batch_norm=False):
         super(SelfAttention, self).__init__()
         self.attn_weights = nn.Parameter(torch.rand(input_dim, hidden_dim))
         self.attn_bias = nn.Parameter(torch.zeros(hidden_dim))

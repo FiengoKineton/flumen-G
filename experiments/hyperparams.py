@@ -142,7 +142,7 @@ class Hyperparams:
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
                 "mode_rnn": "old", 
-                "mode_dnn": "FFNet"         
+                "mode_dnn": "FFNet"             # FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder 
             },
 
             'hyperparams___set_5': {
@@ -266,8 +266,8 @@ class Hyperparams:
                     'sched_patience': {'values': [10]},             
                     'sched_factor': {'values': [2]},                
                     'loss': {'values': ["mse"]},                   
-                    'optimiser_mode': {'values': ["adam", "lamb"]},              
-                    'discretisation_mode': {'values': ["FE", "RK4"]},          
+                    'optimiser_mode': {'values': ["adam"]},              
+                    'discretisation_mode': {'values': ["RK4"]},          
                     'x_update_mode': {'values': ["alpha"]},         
                     'mode_rnn': {'values': ["new"]}, 
                     'mode_dnn': {'values': ["FFNet"]},

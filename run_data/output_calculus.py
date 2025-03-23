@@ -1,11 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
+import csv, ast
 
 
 class CalcValues:
-    def __init__(self, display=False, plot=False, all=False):
-        self.datasets = self.DataSet(all)
+    def __init__(self, display=False, plot=False, all=False, loc=None):
+        self.datasets = self.DataSet(all) if loc is None else self.get_from_csv(loc)
+        #print(self.datasets)
 
         self.metrics = [
             "_step", 
@@ -36,9 +38,12 @@ class CalcValues:
         parser.add_argument("--display", action="store_true", help="Display results and comparisons.")
         parser.add_argument("--plot", action="store_true", help="Plot selected metrics across datasets.")
         parser.add_argument("--all", action="store_true", help="Select all metrics across datasets.")
+        parser.add_argument("--loc", type=str, help="Path to the directory")
         args = parser.parse_args()
         return args
 
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
 
     def DataSet(self, all):
         default_code_same_dim = [
@@ -217,6 +222,23 @@ class CalcValues:
 
         return output
 
+
+    def get_from_csv(self, loc):
+        results = []
+
+        with open(loc, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                try:
+                    summary = ast.literal_eval(row['summary'])
+                    name = row.get('name', 'unknown_run')
+                    summary['run'] = name
+                    results.append(summary)
+                except Exception as e:
+                    print(f"Errore nella riga {row}: {e}")
+
+        return {'dir_passed': results}
 
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------------ #
 
@@ -579,7 +601,7 @@ class CalcValues:
 
 if __name__ == "__main__":
     args = CalcValues.parse_arguments()
-    CalcValues(display=args.display, plot=args.plot, all=args.all)
+    CalcValues(display=args.display, plot=args.plot, all=args.all, loc=args.loc)
 
 
 """

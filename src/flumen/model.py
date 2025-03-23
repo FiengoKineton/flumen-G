@@ -151,7 +151,7 @@ class CausalFlowModel(nn.Module):
                     input_dim=self.state_dim,                            
                     output_dim=self.x_dnn_osz,                           
                     hidden_dim=self.encoder_depth *                   
-                    (self.encoder_size * self.x_dnn_osz, ),
+                    (self.encoder_size * self.x_dnn_osz),
                     use_batch_norm=self.use_batch_norm
                 )
             
@@ -160,7 +160,7 @@ class CausalFlowModel(nn.Module):
                     input_dim=self.state_dim,                            
                     output_dim=self.x_dnn_osz,                           
                     hidden_dim=self.encoder_depth *                   
-                    (self.encoder_size * self.x_dnn_osz, ),
+                    (self.encoder_size * self.x_dnn_osz),
                     use_batch_norm=self.use_batch_norm
                 )
             
@@ -169,7 +169,7 @@ class CausalFlowModel(nn.Module):
                     input_size=self.state_dim,                            
                     output_size=self.x_dnn_osz,                           
                     hidden_size=self.encoder_depth *                   
-                    (self.encoder_size * self.x_dnn_osz, ),
+                    (self.encoder_size * self.x_dnn_osz),
                     use_batch_norm=self.use_batch_norm
                 )
         
@@ -197,7 +197,7 @@ class CausalFlowModel(nn.Module):
                     input_dim=self.u_dnn_isz,                            
                     output_dim=self.output_dim,                           
                     hidden_dim=self.decoder_depth *                     
-                    (self.decoder_size * self.u_dnn_isz, ),
+                    (self.decoder_size * self.u_dnn_isz),
                     use_batch_norm=self.use_batch_norm
                 )
             
@@ -206,7 +206,7 @@ class CausalFlowModel(nn.Module):
                     input_dim=self.u_dnn_isz,                            
                     output_dim=self.output_dim,                           
                     hidden_dim=self.decoder_depth *                     
-                    (self.decoder_size * self.u_dnn_isz, ),
+                    (self.decoder_size * self.u_dnn_isz),
                     use_batch_norm=self.use_batch_norm
                 )
             
@@ -215,7 +215,7 @@ class CausalFlowModel(nn.Module):
                     input_size=self.u_dnn_isz,                            
                     output_size=self.output_dim,                           
                     hidden_size=self.decoder_depth *                     
-                    (self.decoder_size * self.u_dnn_isz, ),
+                    (self.decoder_size * self.u_dnn_isz),
                     use_batch_norm=self.use_batch_norm
                 )
 
@@ -289,4 +289,3 @@ class FFNet(nn.Module):
 
         return input
 """
-
