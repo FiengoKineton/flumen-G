@@ -228,7 +228,7 @@ def main(sweep):
         __optimiser_mode = config.optimiser_mode
         __x_update_mode = config.x_update_mode
         __mode_rnn = config.mode_rnn
-        __mode_rnn = config.mode_dnn
+        __mode_dnn = config.mode_dnn
     else:
         __control_rnn_size = wandb.config["control_rnn_size"]
         __control_rnn_depth = wandb.config["control_rnn_depth"]
