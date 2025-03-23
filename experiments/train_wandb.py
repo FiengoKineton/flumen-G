@@ -71,7 +71,7 @@ hyperparams = hp_manager.get_hyperparams(name_set)
 name_sweep = sweeps['test2']
 sweep_config = hp_manager.get_sweep(name_sweep)
 num_sweeps = 6
-SWEEP = True
+SWEEP = False
 
 
 if SWEEP:
@@ -228,6 +228,7 @@ def main(sweep):
         __optimiser_mode = config.optimiser_mode
         __x_update_mode = config.x_update_mode
         __mode_rnn = config.mode_rnn
+        __mode_rnn = config.mode_dnn
     else:
         __control_rnn_size = wandb.config["control_rnn_size"]
         __control_rnn_depth = wandb.config["control_rnn_depth"]
@@ -247,6 +248,7 @@ def main(sweep):
         __optimiser_mode = wandb.config["optimiser_mode"]
         __x_update_mode = wandb.config["x_update_mode"]
         __mode_rnn = wandb.config["mode_rnn"]
+        __mode_dnn = wandb.config["mode_dnn"]
 
 
     model_args = {
@@ -263,6 +265,7 @@ def main(sweep):
         'x_update_mode': __x_update_mode,
         'model_name': model_name,     #------------#
         'mode_rnn': __mode_rnn,
+        'mode_dnn': __mode_dnn,
         'use_batch_norm': False,
     }
 

@@ -52,7 +52,8 @@ class Hyperparams:
                 'discretisation_mode': "TU",    #-- {TU, FE, BE}
                 'optimiser_mode': "adam",       #-- {adam, tbptt, nesterov, newton}
                 'x_update_mode': "alpha",       #-- {alpha, beta, lamda}
-                "mode_rnn": "new"
+                "mode_rnn": "new",
+                "mode_dnn": "FFNet"
             },
 
 
@@ -74,7 +75,8 @@ class Hyperparams:
                 "discretisation_mode": "FE",    
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
-                "mode_rnn": "new"      
+                "mode_rnn": "new",
+                "mode_dnn": "FFNet"     
             },
 
             'hyperparams___set_2': {
@@ -95,7 +97,8 @@ class Hyperparams:
                 "discretisation_mode": "FE",    
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
-                "mode_rnn": "new"  
+                "mode_rnn": "new",
+                "mode_dnn": "FFNet"
             },
 
             'hyperparams___set_3': {
@@ -116,7 +119,8 @@ class Hyperparams:
                 "discretisation_mode": "TU",    
                 "optimiser_mode": "lamb",       # or adam
                 "x_update_mode": "alpha",       # or beta      
-                "mode_rnn": "new"
+                "mode_rnn": "new",
+                "mode_dnn": "FFNet"
             },            
             
             'hyperparams___set_4': {
@@ -137,7 +141,8 @@ class Hyperparams:
                 "discretisation_mode": "exact",    
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
-                "mode_rnn": "old"            
+                "mode_rnn": "old", 
+                "mode_dnn": "FFNet"         
             },
 
             'hyperparams___set_5': {
@@ -161,27 +166,27 @@ class Hyperparams:
                 "mode_rnn": "new"            
             },
 
-            'hyperparams___run_037' : {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new'},
-            'hyperparams___radiant_sweep_4': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE', 'mode_rnn': 'new'},
-            'hyperparams___swift_sweep_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 2, 'sched_factor': 2, 'decoder_depth': 1, 'encoder_depth': 1, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 12, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new'},
+            'hyperparams___run_037' : {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
+            'hyperparams___radiant_sweep_4': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
+            'hyperparams___swift_sweep_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 2, 'sched_factor': 2, 'decoder_depth': 1, 'encoder_depth': 1, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 12, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
 
 
             # from _opt_best:
-            'hyperparams___opt_best_1': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new'},
-            'hyperparams___opt_best_2': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new'},
-            'hyperparams___opt_best_3': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'gru'}, 
+            'hyperparams___opt_best_1': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
+            'hyperparams___opt_best_2': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
+            'hyperparams___opt_best_3': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'gru', 'mode_dnn': 'FFNet'}, 
             'hyperparams___opt_best_4': {},
 
             # from _opt_balanced:
-            'hyperparams___opt_balanced_1': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 35, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 15, 'control_rnn_size': 14, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU', 'mode_rnn': 'new'},
-            'hyperparams___opt_balanced_2': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU', 'mode_rnn': 'new'},
-            'hyperparams___opt_balanced_3': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE', 'mode_rnn': 'new'},
-            'hyperparams___opt_balanced_4': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU', 'mode_rnn': 'new'},
-            'hyperparams___opt_balanced_5': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 12, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'gru'},
+            'hyperparams___opt_balanced_1': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 35, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 15, 'control_rnn_size': 14, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
+            'hyperparams___opt_balanced_2': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
+            'hyperparams___opt_balanced_3': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
+            'hyperparams___opt_balanced_4': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
+            'hyperparams___opt_balanced_5': {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 12, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'gru', 'mode_dnn': 'FFNet'},
             'hyperparams___opt_balanced_6': {},
 
             # from _opt_bayes:
-            'hyperparams___opt_bayes_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE', 'mode_rnn': 'new'},
+            'hyperparams___opt_bayes_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 20, 'control_rnn_depth': 1, 'discretisation_mode': 'FE', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
             'hyperparams___opt_bayes_2': {},
 
 
@@ -212,6 +217,7 @@ class Hyperparams:
                     'discretisation_mode': {'values': ["TU", "FE", "RK4", "exact"]},    # , "BE"]},                 | don't bother
                     'x_update_mode': {'values': ["alpha", "beta"]},                     # , "lamda"]}               | don't bother
                     'mode_rnn': {'values': ["new", "gru", "old"]}, 
+                    'mode_rnn': {'values': ["FFNet"]}                                   # , 'ConvNet', 'SelfAttention', 'ResidualBlock', 'GRUEncoderDecoder']}
                 }
             },
 
@@ -237,6 +243,7 @@ class Hyperparams:
                     'discretisation_mode': {'values': ["TU"]},      # before | FE     
                     'x_update_mode': {'values': ["beta"]},          # before | alpha
                     'mode_rnn': {'values': ["new", "gru"]}, 
+                    'mode_rnn': {'values': ["FFNet"]}
                 }
             },
 
@@ -262,6 +269,7 @@ class Hyperparams:
                     'discretisation_mode': {'values': ["TU", "exact", "RK4"]},          
                     'x_update_mode': {'values': ["alpha"]},         
                     'mode_rnn': {'values': ["new"]}, 
+                    'mode_rnn': {'values': ["FFNet"]},
                 }
             },
 
@@ -286,7 +294,8 @@ class Hyperparams:
                     "discretisation_mode": {'values': ["exact"]},    
                     "optimiser_mode": {'values': ["adam"]},       
                     "x_update_mode": {'values': ["alpha"]},
-                    "mode_rnn": {'values': ["new", "gru", "old"]},     
+                    "mode_rnn": {'values': ["new", "gru", "old"]},   
+                    'mode_rnn': {'values': ["FFNet"]},  
                 }
             }
 
