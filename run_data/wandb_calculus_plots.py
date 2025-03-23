@@ -292,6 +292,7 @@ class DataVisualizer:
             plt.ylabel(param2)
             plt.legend(title='val_loss', loc='best', labels=[f'{x}' for x in filtered_data['val_loss']])
             plt.yscale('log')  # Apply log scale to the y-axis for better visibility of loss
+            plt.show()
         else:
             print(f"No valid data found for the parameters: {param1}, {param2}")
 

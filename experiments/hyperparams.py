@@ -241,27 +241,27 @@ class Hyperparams:
             },
 
             'sweep_config_test_2': {                                # based on: hyperparams___radiant_sweep_4
-                'method': 'random',  
+                'method': 'grid',  
                 'metric': {'name': 'val_loss', 'goal': 'minimize'},
                 'parameters': {
-                    'control_rnn_size': {'values': [20]},           # before | 20
-                    'control_rnn_depth': {'values': [1]},           # before | 1
-                    'encoder_size': {'values': [1]},                # before | 1
-                    'encoder_depth': {'values': [2]},               # before | 2
-                    'decoder_size': {'values': [2]},                # before | 2
-                    'decoder_depth': {'values': [2]},               # before | 1
-                    'batch_size': {'values': [256]},                # before | 128
-                    'lr': {'values': [0.0005]},                     # before | 0005
-                    'n_epochs': {'values': [250]},                  # before | 300
-                    'es_patience': {'values': [20]},                # before | 20
-                    'es_delta': {'values': [1e-7]},                 # before | 1e-7
-                    'sched_patience': {'values': [10]},             # before | 10
-                    'sched_factor': {'values': [2]},                # before | 2
-                    'loss': {'values': ["mse"]},                    # before | mse
-                    'optimiser_mode': {'values': ["adam"]},         # before | adam      
-                    'discretisation_mode': {'values': ["TU"]},      # before | FE     
-                    'x_update_mode': {'values': ["alpha"]},         # before | alpha
-                    'mode_rnn': {'values': ["new", "gru"]}, 
+                    'control_rnn_size': {'values': [24]},           
+                    'control_rnn_depth': {'values': [1]},           
+                    'encoder_size': {'values': [1]},                
+                    'encoder_depth': {'values': [2]},               
+                    'decoder_size': {'values': [2]},                
+                    'decoder_depth': {'values': [2]},               
+                    'batch_size': {'values': [256]},                
+                    'lr': {'values': [0.0005]},                     
+                    'n_epochs': {'values': [250]},                  
+                    'es_patience': {'values': [20]},                
+                    'es_delta': {'values': [1e-7]},                
+                    'sched_patience': {'values': [10]},             
+                    'sched_factor': {'values': [2]},                
+                    'loss': {'values': ["mse"]},                   
+                    'optimiser_mode': {'values': ["adam", "lamb"]},              
+                    'discretisation_mode': {'values': ["TU", "exact", "RK4"]},          
+                    'x_update_mode': {'values': ["alpha"]},         
+                    'mode_rnn': {'values': ["new"]}, 
                 }
             },
 

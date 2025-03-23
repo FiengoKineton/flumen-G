@@ -9,7 +9,7 @@ import argparse
 import ast
 
 class Sort(): 
-    def __init__(self, loc=None):
+    def __init__(self, loc=None, all=False):
         # Example usage
         file_path_1 = "run_data/csv_files/wandb_get_runs.csv"  # Use the correct relative path
         file_path_2 = "run_data/csv_files/temp.csv"  # Use the correct relative path
@@ -35,7 +35,7 @@ class Sort():
 
         best = True
         print("\n---------------------------------------\nOrder by min:\n---------------------------------------")
-        name = ['val_loss', 'best_val'] #, 'test_loss', 'train_loss', 'time']
+        name = ['val_loss', 'best_val', 'test_loss', 'train_loss', 'time'] if all else ['val_loss', 'best_val']
         for name in name:   self.filter_top_n_by_metric(file_path, n, id_ranges, name, best)
 
 
@@ -43,6 +43,7 @@ class Sort():
     def parse_arguments():
         parser = argparse.ArgumentParser(description="Run results analysis with optional display and plotting.")
         parser.add_argument("--loc", type=str, help="Path to the directory")
+        parser.add_argument("--all", action="store_true", help="Select all metrics across datasets.")
         args = parser.parse_args()
         return args
     
@@ -91,7 +92,7 @@ class Sort():
 
 if __name__ == "__main__":
     args = Sort.parse_arguments()
-    Sort(loc=args.loc) 
+    Sort(loc=args.loc, all=args.all) 
 
 
 """
