@@ -35,7 +35,7 @@ class Sort():
 
         best = True
         print("\n---------------------------------------\nOrder by min:\n---------------------------------------")
-        name = ['val_loss', 'best_val', 'best_test', 'best_train', 'time'] if all else ['val_loss', 'best_val']
+        name = ['val_loss', 'best_val', 'best_test', 'best_train', 'epoch'] if all else ['best_val', 'epoch']
         for name in name:   self.filter_top_n_by_metric(file_path, n, id_ranges, name, best)
 
 
@@ -60,7 +60,7 @@ class Sort():
         df['best_val'] = df['summary'].apply(lambda x: x.get('best_val', float('inf')))
         df['best_test'] = df['summary'].apply(lambda x: x.get('best_test', float('inf')))
         df['best_train'] = df['summary'].apply(lambda x: x.get('best_train', float('inf')))
-        df['time'] = df['summary'].apply(lambda x: x.get('time', float('inf')))
+        df['epoch'] = df['summary'].apply(lambda x: x.get('epoch', float('inf')))
         
         # Extract ID number and filter based on given ID ranges
         df.reset_index(inplace=True)
@@ -79,8 +79,8 @@ class Sort():
         df = df.nsmallest(n, metric) if best else df.nlargest(n, metric)
         
         # Format output
-        df_output = df[['name', 'val_loss', 'best_val', 'best_test', 'best_train', 'time', 'ID_number']]
-        df_output.columns = ['', 'val_loss', 'best_val', 'best_test', 'best_train', 'time', '']
+        df_output = df[['name', 'val_loss', 'best_val', 'best_test', 'best_train', 'epoch', 'ID_number']]
+        df_output.columns = ['', 'val_loss', 'best_val', 'best_test', 'best_train', 'epoch', '']
         
         # Print table
         print(f"\n\nTop {n} results by {metric}:")

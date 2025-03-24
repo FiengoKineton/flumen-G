@@ -71,10 +71,10 @@ sweeps = {
 name_set = sets['set_4']
 hyperparams = hp_manager.get_hyperparams(name_set)
 
-name_sweep = sweeps['new']
+name_sweep = sweeps['old']
 sweep_config = hp_manager.get_sweep(name_sweep)
-num_sweeps = 16
-SWEEP = True
+num_sweeps = 8
+SWEEP = False
 
 
 if SWEEP:
@@ -338,7 +338,7 @@ def main(sweep):
     test_dl = DataLoader(test_data, batch_size=bs, shuffle=True)
 
     header_msg = f"{'Epoch':>5} :: {'Loss (Train)':>16} :: " \
-        f"{'Loss (Val)':>16} :: {'Loss (Test)':>16} :: {'Best (Val)':>16} :: {'Coeff(Train)':>16}"  ###############
+        f"{'Loss (Val)':>16} :: {'Loss (Test)':>16} :: {'Best (Val)':>16}"  # :: {'Coeff(Train)':>16}"  ###############
 
     print(header_msg)
     print('=' * len(header_msg))

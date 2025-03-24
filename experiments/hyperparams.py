@@ -124,7 +124,7 @@ class Hyperparams:
             },            
             
             'hyperparams___set_4': {
-                "control_rnn_size": 24,         
+                "control_rnn_size": 22,         # 24 for 'old'   
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
                 "encoder_depth": 2,  

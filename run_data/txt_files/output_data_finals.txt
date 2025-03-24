@@ -1,4 +1,4 @@
-000___
+vdp_001--radiant_sweep_4
 
 
 PC ...
@@ -9,7 +9,121 @@ PC ...
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+vdp_002--radiant_sweep_4-old
+
+
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_002--radiant_sweep_4-old-nj7q65oi:v6
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 15778.5584256, '_step': 141, '_timestamp': 1742851603.6209075, '_wandb': {'runtime': 15837}, 'batch_size': 128, 'best_epoch': 140, 'best_test': 0.03947306696384672, 'best_train': 0.015337004560346484, 'best_val': 0.08943426112333934, 'epoch': 141, 'lr': 0.00025, 'n_epochs': 500, 'test_loss': 0.04599780060114369, 'time': 15752.437944889069, 'train_loss': 0.01717148176714699, 'val_loss': 0.09800643612822844}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 22,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'FE',
+          'encoder_depth': 1,
+          'encoder_size': 1,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'old',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'alpha'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+
+
+mode_rnn: old 
+mode_dnn: FFNet 
+
+
+Timings: 0.04107308387756348, 1.0314970016479492
+0.02132510105764994
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+*missing
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+fhn_001--set_4-old
+
+
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-fhn_test_data-fhn_test-udh4lra2:v4
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 6888.7235276, '_step': 93, '_timestamp': 1742840120.159695, '_wandb': {'runtime': 6890}, 'batch_size': 256, 'best_epoch': 73, 'best_test': 0.030052300833631307, 'best_train': 0.02029415260706293, 'best_val': 0.036439133255044, 'epoch': 93, 'lr': 0.00025, 'n_epochs': 200, 'test_loss': 0.025896803970681503, 'time': 6866.352095603943, 'train_loss': 0.01600103479761042, 'val_loss': 0.04088959353975952}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 24,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'exact',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'old',
+          'model_name': 'FitzHughNagumo',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'alpha'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'fhn_test_data',
+               'settings': 'data_generation/fhn.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/fhn_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'a': -0.3, 'b': 1.4, 'tau': 0.8},
+                                'name': 'FitzHughNagumo'},
+                   'sequence_generator': {'args': {'mean': -0.7,
+                                                   'period': 8,
+                                                   'std': 0.5},
+                                          'name': 'LogNormalSqWave'}}}
+
+
+mode_rnn: old
+mode_dnn: FFNet
+
+
+Timings: 0.3350074291229248, 1.0264029502868652
+0.004100560954157975
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+Total Execution Time: 1h 54min 50.1sec
+Total Memory Allocation: 15.84 GB
+Process Memory In Use: 347.59 MB
+Memory Used During Execution: 46.35 MB
+System Memory Utilization: 75.1%
+Process CPU Utilization: 0.0%
+Disk Utilization: 173.10 GB / 237.22 GB
+Disk Space Used During Execution: 0.30 GB
+Network Sent: 54.81 MB
+Network Received: 186.61 MB
+Network Traffic Sent During Execution: 6.07 MB
+Network Traffic Received During Execution: 2.24 MB
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+fhn_002--set_4
 
 
 PC ...
@@ -20,7 +134,7 @@ PC ...
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+vdp_003--set_6
 
 
 PC ...
@@ -31,29 +145,7 @@ PC ...
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
-
-
-PC ...
-
-===== SYSTEM PERFORMANCE SUMMARY =====      
-
-====================================== 
-
-------------------------------------------------------------------------------------------------------------------------------------------------
-
-000___
-
-
-PC ...
-
-===== SYSTEM PERFORMANCE SUMMARY =====      
-
-====================================== 
-
-------------------------------------------------------------------------------------------------------------------------------------------------
-
-000___
+vdp_004--set_6-old
 
 
 PC ...

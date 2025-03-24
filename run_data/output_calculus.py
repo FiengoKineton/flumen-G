@@ -24,8 +24,8 @@ class CalcValues:
 
         if display:
             for name, data in self.datasets.items():    self.display_results(name, data)
-            self.display_final_comparison__best()
-            self.display_final_comparison__mean()
+            if loc is None:                             self.display_final_comparison__best()
+            if loc is None:                             self.display_final_comparison__mean()
 
         if plot:
             for param in ["val_loss", "best_val", "test_loss", "train_loss", "time"]: 
