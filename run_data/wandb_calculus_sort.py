@@ -35,7 +35,7 @@ class Sort():
 
         best = True
         print("\n---------------------------------------\nOrder by min:\n---------------------------------------")
-        name = ['val_loss', 'best_val', 'test_loss', 'train_loss', 'time'] if all else ['val_loss', 'best_val']
+        name = ['val_loss', 'best_val', 'best_test', 'best_train', 'time'] if all else ['val_loss', 'best_val']
         for name in name:   self.filter_top_n_by_metric(file_path, n, id_ranges, name, best)
 
 
@@ -58,8 +58,8 @@ class Sort():
         # Extract val_loss, test_loss, and train_loss
         df['val_loss'] = df['summary'].apply(lambda x: x.get('val_loss', float('inf')))
         df['best_val'] = df['summary'].apply(lambda x: x.get('best_val', float('inf')))
-        df['test_loss'] = df['summary'].apply(lambda x: x.get('test_loss', float('inf')))
-        df['train_loss'] = df['summary'].apply(lambda x: x.get('train_loss', float('inf')))
+        df['best_test'] = df['summary'].apply(lambda x: x.get('best_test', float('inf')))
+        df['best_train'] = df['summary'].apply(lambda x: x.get('best_train', float('inf')))
         df['time'] = df['summary'].apply(lambda x: x.get('time', float('inf')))
         
         # Extract ID number and filter based on given ID ranges
@@ -79,8 +79,8 @@ class Sort():
         df = df.nsmallest(n, metric) if best else df.nlargest(n, metric)
         
         # Format output
-        df_output = df[['name', 'val_loss', 'best_val', 'test_loss', 'train_loss', 'time', 'ID_number']]
-        df_output.columns = ['', 'val_loss', 'best_val', 'test_loss', 'train_loss', 'time', '']
+        df_output = df[['name', 'val_loss', 'best_val', 'best_test', 'best_train', 'time', 'ID_number']]
+        df_output.columns = ['', 'val_loss', 'best_val', 'best_test', 'best_train', 'time', '']
         
         # Print table
         print(f"\n\nTop {n} results by {metric}:")

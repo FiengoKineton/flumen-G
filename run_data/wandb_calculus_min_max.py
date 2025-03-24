@@ -69,7 +69,7 @@ if __name__ == "__main__":
     args = FilterParam.parse_arguments()
 
     file_path = dir if args.loc is None else args.loc
-    which = 'val_loss' if args.which is None else args.which
+    which = 'best_val' if args.which is None else args.which
     metrics = table
 
 

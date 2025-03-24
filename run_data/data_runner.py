@@ -5,13 +5,13 @@ general = "run_data/csv_files/wandb_get_runs.csv"
 temp = "run_data/csv_files/temp.csv"  
 models = "run_data/csv_files/models.csv"
 
-test1 = "run_data/csv_files/sweep_test1.csv"
-test2 = "run_data/csv_files/sweep_test2.csv"
-test3 = "run_data/csv_files/sweep_test3.csv"
-test4 = "run_data/csv_files/sweep_test4.csv"
-test5 = "run_data/csv_files/sweep_test5.csv"
+test1 = "run_data/csv_files/sweep_test1.csv"            # comment | vdp beta update
+test2 = "run_data/csv_files/sweep_test2.csv"            # comment | vdp sweep_config_test_2
+test3 = "run_data/csv_files/sweep_test3.csv"            # comment | fhn sweep_config_test_3
+test4 = "run_data/csv_files/sweep_test4.csv"            # comment | vdp sweep_config_test_2 right dyn_model
+test5 = "run_data/csv_files/sweep_test5.csv"            # comment | twotank sweep_config_test_3
 
-csv_path = test5
+csv_path = test3
 print(f"csv_path: {csv_path}\n")
 
 # Define your scripts and optional args

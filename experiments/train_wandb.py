@@ -66,7 +66,7 @@ sweeps = {
 }
 
 
-name_set = sets['set_6']
+name_set = sets['radiant_sweep_4']
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['test3']
@@ -343,14 +343,14 @@ def main(sweep):
 
     # Evaluate initial loss
     model.eval()
-    train_loss, coeff = validate(train_dl, loss, model, device)   
-    val_loss, _ = validate(val_dl, loss, model, device)       
-    test_loss, _ = validate(test_dl, loss, model, device)     
+    train_loss = validate(train_dl, loss, model, device)   ###
+    val_loss = validate(val_dl, loss, model, device)       
+    test_loss = validate(test_dl, loss, model, device)     
 
     early_stop.step(val_loss)
     print(
         f"{0:>5d} :: {train_loss:>16e} :: {val_loss:>16e} :: " \
-        f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e} :: {coeff:>16e}"  ###############
+        f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e}" ###:: {coeff:>16e}"  ###############
     )
 
     last_save_epoch = 0
@@ -376,16 +376,16 @@ def main(sweep):
 
         #avg_train_coeff = tot_coeff / num_batches
         model.eval()
-        train_loss, coeff = validate(train_dl, loss, model, device) ###############
-        val_loss, _ = validate(val_dl, loss, model, device) ###############
-        test_loss, _ = validate(test_dl, loss, model, device)   ############### 
+        train_loss = validate(train_dl, loss, model, device) ### ###############
+        val_loss = validate(val_dl, loss, model, device) ###############
+        test_loss = validate(test_dl, loss, model, device)   ############### 
 
         sched.step(val_loss)
         early_stop.step(val_loss)
 
         print(
             f"{epoch + 1:>5d} :: {train_loss:>16e} :: {val_loss:>16e} :: " \
-            f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e} :: {coeff:>16f}"   ###############
+            f"{test_loss:>16e} :: {early_stop.best_val_loss:>16e}" ### :: {coeff:>16f}"   ###############
         )
 
         if early_stop.best_model:
@@ -404,7 +404,7 @@ def main(sweep):
             run.summary["best_val"] = val_loss
             run.summary["best_test"] = test_loss
             run.summary["best_epoch"] = epoch + 1
-            run.summary["coeff_train"] = coeff  ###############
+            ###run.summary["coeff_train"] = coeff  ###############
 
         wandb.log({
             'time': time.time() - start,
@@ -413,7 +413,7 @@ def main(sweep):
             'train_loss': train_loss,
             'val_loss': val_loss,
             'test_loss': test_loss,
-            'coeff_train': coeff,   ###############
+            ###'coeff_train': coeff,   ###############
         })
 
         if early_stop.early_stop:
