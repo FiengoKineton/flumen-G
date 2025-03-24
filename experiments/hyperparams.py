@@ -138,10 +138,10 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 2,
                 "loss": "mse",                  
-                "discretisation_mode": "exact",    
+                "discretisation_mode": "TU",    
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
-                "mode_rnn": "old", 
+                "mode_rnn": "new", 
                 "mode_dnn": "FFNet"             # FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder 
             },
 
@@ -191,7 +191,7 @@ class Hyperparams:
 
 
             'hyperparams___run_037' : {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
-            'hyperparams___radiant_sweep_4': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 22, 'control_rnn_depth': 1, 'discretisation_mode': 'FE', 'mode_rnn': 'old', 'mode_dnn': 'FFNet'},
+            'hyperparams___radiant_sweep_4': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 2, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 1, 'x_update_mode': 'alpha', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 22, 'control_rnn_depth': 1, 'discretisation_mode': 'FE', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
             'hyperparams___swift_sweep_1': {'lr': 0.0005, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 500, 'batch_size': 256, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 2, 'sched_factor': 2, 'decoder_depth': 1, 'encoder_depth': 1, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 12, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
 
 
@@ -321,7 +321,59 @@ class Hyperparams:
                     "mode_rnn": {'values': ["new", "gru", "old"]},   
                     'mode_dnn': {'values': ["FFNet"]},  
                 }
-            }
+            },
+
+            'sweep_config_test_4_new': {
+                'method': 'grid',     
+                'metric': {'name': 'best_val', 'goal': 'minimize'},
+                'parameters': {
+                    "control_rnn_size": {'values': [20, 24]},         
+                    "control_rnn_depth": {'values': [1]},        
+                    "encoder_size": {'values': [2]},  
+                    "encoder_depth": {'values': [2]},   
+                    "decoder_size": {'values': [2]}, 
+                    "decoder_depth": {'values': [2]},  
+                    "batch_size": {'values': [128, 256]},  
+                    "lr": {'values': [0.001, 5e-4]},                     
+                    "n_epochs": {'values': [250]},  
+                    "es_patience": {'values': [20]},              
+                    "es_delta": {'values': [1e-7]},
+                    "sched_patience": {'values': [10]},
+                    "sched_factor": {'values': [2]},
+                    "loss": {'values': ["mse"]},                  
+                    "discretisation_mode": {'values': ["TU", "FE"]},    
+                    "optimiser_mode": {'values': ["adam"]},       
+                    "x_update_mode": {'values': ["alpha"]},
+                    "mode_rnn": {'values': ["new"]},   
+                    'mode_dnn': {'values': ["FFNet"]},  
+                }
+            },
+
+            'sweep_config_test_4_old': {
+                'method': 'grid',     
+                'metric': {'name': 'best_val', 'goal': 'minimize'},
+                'parameters': {
+                    "control_rnn_size": {'values': [22, 26]},         
+                    "control_rnn_depth": {'values': [1]},        
+                    "encoder_size": {'values': [2]},  
+                    "encoder_depth": {'values': [2]},   
+                    "decoder_size": {'values': [2]}, 
+                    "decoder_depth": {'values': [2]},  
+                    "batch_size": {'values': [128, 256]},  
+                    "lr": {'values': [0.001, 5e-4]},                     
+                    "n_epochs": {'values': [250]},  
+                    "es_patience": {'values': [20]},              
+                    "es_delta": {'values': [1e-7]},
+                    "sched_patience": {'values': [10]},
+                    "sched_factor": {'values': [2]},
+                    "loss": {'values': ["mse"]},                  
+                    "discretisation_mode": {'values': ["TU"]},    
+                    "optimiser_mode": {'values': ["adam"]},       
+                    "x_update_mode": {'values': ["alpha"]},
+                    "mode_rnn": {'values': ["old"]},   
+                    'mode_dnn': {'values': ["FFNet"]},  
+                }
+            },
 
         }
 

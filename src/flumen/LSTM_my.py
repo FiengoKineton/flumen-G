@@ -260,14 +260,14 @@ def discretisation_BE(x_prev, A, tau, I):
     batch_size = tau.shape[0]
     tau = tau.view(batch_size, 1, 1)
     A_neg = I - tau * A
-    x_prev = x_prev.squeeze(0).unsqueeze(1)
+    x_prev = x_prev.squeeze(0).unsqueeze(2)
 
     x_next = torch.linalg.solve(A_neg, x_prev)
 
     """inv_matrix = torch.inverse(A_neg)
     x_next = torch.bmm(x_prev, inv_matrix)"""
 
-    return x_next.permute(1, 0, 2)
+    return x_next.squeeze(2).unsqueeze(0)
 
 
 def discretisation_TU(x_prev, A, tau, I):
@@ -276,7 +276,7 @@ def discretisation_TU(x_prev, A, tau, I):
 
     A_pos = I + (tau / 2) * A
     A_neg = I - (tau / 2) * A
-    x_prev = x_prev.squeeze(0).unsqueeze(1)
+    x_prev = x_prev.squeeze(0).unsqueeze(2)
 
     v = torch.linalg.solve(A_neg, x_prev)
     x_next = torch.bmm(A_pos, v)
@@ -285,7 +285,7 @@ def discretisation_TU(x_prev, A, tau, I):
     transform_matrix = torch.bmm(A_pos, A_neg_inv)
     x_next = torch.bmm(x_prev, transform_matrix)"""
 
-    return x_next.permute(1, 0, 2)
+    return x_next.squeeze(2).unsqueeze(0)  #permute(1, 0, 2)
 
 
 def discretisation_RK4(x_prev, A, tau, I):

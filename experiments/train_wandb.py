@@ -63,16 +63,18 @@ sweeps = {
     'test1': 'sweep_config_test_1',
     'test2': 'sweep_config_test_2',
     'test3': 'sweep_config_test_3',
+    'new': 'sweep_config_test_4_new', 
+    'old': 'sweep_config_test_4_old',
 }
 
 
-name_set = sets['radiant_sweep_4']
+name_set = sets['set_4']
 hyperparams = hp_manager.get_hyperparams(name_set)
 
-name_sweep = sweeps['test3']
+name_sweep = sweeps['new']
 sweep_config = hp_manager.get_sweep(name_sweep)
-num_sweeps = 3
-SWEEP = False
+num_sweeps = 16
+SWEEP = True
 
 
 if SWEEP:
