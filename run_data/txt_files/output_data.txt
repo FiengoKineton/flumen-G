@@ -2875,6 +2875,228 @@ Network Traffic Received During Execution: 23.68 MB
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
+062___twotank-set6-new
+
+
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-twotank_test_data-twotank_test-j8w4fye1:v2
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 8231.902984492, '_step': 57, '_timestamp': 1742773937.217528, '_wandb': {'runtime': 8233}, 'batch_size': 256, 'best_epoch': 37, 'best_test': 0.0014147546935419086, 'best_train': 0.0008222298543459098, 'best_val': 0.0039207562076626346, 'coeff_train': 0.273925009295715, 'epoch': 57, 'lr': 0.0005, 'n_epochs': 200, 'test_loss': 0.001485283675719984, 'time': 8200.505754470825, 'train_loss': 0.0006525056623535132, 'val_loss': 0.004251571757777128}
+{'args': {'control_dim': 2,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 24,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'exact',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'TwoTank',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'alpha'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'twotank_test_data',
+               'settings': 'data_generation/twotank.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/twotank_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {}, 'name': 'TwoTank'},
+                   'sequence_generator': {'args': [{'args': {'period': 5},
+                                                    'name': 'GaussianSqWave'},
+                                                   {'args': {'period': 20},
+                                                    'name': 'GaussianSqWave'}],
+                                          'name': 'Product'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+
+dyn matrix:
+tensor([[-0.2000,  0.0000],
+        [ 0.2000, -0.2000]])
+
+
+Timings: 0.16583538055419922, 1.2932908535003662
+0.00040639918330944374
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+Total Execution Time: 2h 17min 12.8sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 668.28 MB
+Memory Used During Execution: 183.46 MB
+System Memory Utilization: 28.9%
+Process CPU Utilization: 0.0%
+Disk Utilization: 58.49 GB / 72.86 GB
+Disk Space Used During Execution: 0.00 GB
+Network Sent: 930.62 MB
+Network Received: 1432.32 MB
+Network Traffic Sent During Execution: 21.12 MB
+Network Traffic Received During Execution: 33.74 MB
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+062___twotank-set6-old
+
+
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-twotank_test_data-062___twotank-set6-old-2rifbluh:v9
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 14434.4570736, '_step': 200, '_timestamp': 1742780235.326448, '_wandb': {'runtime': 14436}, 'batch_size': 256, 'best_epoch': 191, 'best_test': 0.0014879026457492728, 'best_train': 0.00041716386913321913, 'best_val': 0.0010441785416333005, 'coeff_train': 0, 'epoch': 200, 'lr': 6.25e-05, 'n_epochs': 200, 'test_loss': 0.0014966139824537097, 'time': 14412.394780158997, 'train_loss': 0.00042181071537350745, 'val_loss': 0.0010649401283444604}
+{'args': {'control_dim': 2,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 24,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'exact',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'old',
+          'model_name': 'TwoTank',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'alpha'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'twotank_test_data',
+               'settings': '.\\data_generation\\twotank.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/twotank_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {}, 'name': 'TwoTank'},
+                   'sequence_generator': {'args': [{'args': {'period': 5}, 
+                                                    'name': 'GaussianSqWave'},
+                                                   {'args': {'period': 20},
+                                                    'name': 'GaussianSqWave'}],
+                                          'name': 'Product'}}}
+
+
+mode_rnn: old
+mode_dnn: FFNet
+
+
+Timings: 0.10538411140441895, 0.6515069007873535
+0.0007322592810526783
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+Total Execution Time: 4h 0min 35.5sec
+Total Memory Allocation: 15.84 GB
+Process Memory In Use: 444.77 MB
+Memory Used During Execution: 143.23 MB
+System Memory Utilization: 83.7%
+Process CPU Utilization: 0.0%
+Disk Utilization: 181.67 GB / 237.22 GB
+Disk Space Used During Execution: -0.61 GB
+Network Sent: 1472.17 MB
+Network Received: 3038.37 MB
+Network Traffic Sent During Execution: 59.85 MB
+Network Traffic Received During Execution: 89.08 MB
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
 000___
 
 

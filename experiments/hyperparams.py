@@ -185,7 +185,7 @@ class Hyperparams:
                 "discretisation_mode": "exact",     # FE
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
-                "mode_rnn": "new", 
+                "mode_rnn": "old",                  # old 
                 "mode_dnn": "FFNet",             
             },
 
