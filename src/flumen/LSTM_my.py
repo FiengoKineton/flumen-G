@@ -118,7 +118,7 @@ class LSTM(nn.Module):
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
-            A = dyn_factor * torch.tensor([[0, 1], [-1, mhu]])          # before | self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
+            A = dyn_factor * torch.tensor([[0, 1], [-1, -mhu]])          # before | self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
             # Equilibrium point for VdP: (x*, y*) = (0, 0)
             eq_point = torch.tensor([0, 0])
 
