@@ -174,18 +174,18 @@ class Hyperparams:
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 256,                  # 128
+                "batch_size": 128,                  # 256
                 "lr": 0.001,                        # 0.0005            
-                "n_epochs": 200,  
+                "n_epochs": 250,  
                 "es_patience": 20,              
                 "es_delta": 1e-07,
                 "sched_patience": 10,
                 "sched_factor": 2,
                 "loss": "mse",                  
-                "discretisation_mode": "exact",     # FE
+                "discretisation_mode": "TU",        # FE, exact
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
-                "mode_rnn": "old",                  # old 
+                "mode_rnn": "new",                  # old 
                 "mode_dnn": "FFNet",             
             },
 
