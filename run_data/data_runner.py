@@ -12,8 +12,9 @@ test4 = "run_data/csv_files/sweep_test4.csv"            # comment | vdp sweep_co
 test5 = "run_data/csv_files/sweep_test5.csv"            # comment | twotank sweep_config_test_3
 test6 = "run_data/csv_files/sweep_test6.csv"            # comment | vdp sweep_config_test_4
 
-finals = "run_data/csv_files/Finals_vdp.csv"            # comment | FINAL COMPARISON for vdp/fhn
-csv_path = finals
+vdp_fin = "run_data/csv_files/Finals_vdp.csv"           # comment | FINAL COMPARISON for vdp
+fhn_fin = "run_data/csv_files/Finals_fhn.csv"           # comment | FINAL COMPARISON for fhn
+csv_path = fhn_fin
 
 
 # Define your scripts and optional args

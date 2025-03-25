@@ -68,7 +68,7 @@ sweeps = {
 }
 
 
-name_set = sets['set_6']
+name_set = sets['set_4']
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['new']
