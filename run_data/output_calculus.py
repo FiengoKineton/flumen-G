@@ -28,7 +28,7 @@ class CalcValues:
             if loc is None:                             self.display_final_comparison__mean()
 
         if plot:
-            for param in ["val_loss", "best_val", "test_loss", "train_loss", "time"]: 
+            for param in ["val_loss", "best_val", "test_loss", "train_loss", "epoch"]: 
                 self.plot_metric_across_datasets(self.datasets, param)
 
 

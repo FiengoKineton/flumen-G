@@ -102,6 +102,8 @@ class GRU(nn.Module):
 
     def get_dyn_matrix(self): 
         """
+        Dynamics are located in semble/semble/dynamics.py 
+        -------------------------------------------------
         Computes the linearized dynamics matrix A and equilibrium points for different systems based on self.data.
         Returns:
             A (torch.Tensor): Linearized system dynamics matrix.
@@ -120,6 +122,7 @@ class GRU(nn.Module):
             tau = self.data["dynamics"]["args"]["tau"]
             a = self.data["dynamics"]["args"]["a"]
             b = self.data["dynamics"]["args"]["b"]
+            v_fact = 1
             
             # Solve equilibrium equations
             # w* = (v* + a) / b
@@ -127,13 +130,16 @@ class GRU(nn.Module):
             from scipy.optimize import fsolve
             
             def fhn_equilibrium(v):
-                return v - v**3 / 3 - (v + a) / b  # R * I_ext not considered
+                return v - v**3 - (v - a) / b  
 
             v_star = fsolve(fhn_equilibrium, 0)[0]
-            w_star = (v_star + a) / b
+            w_star = (v_star - a) / b
             
-            A = dyn_factor * torch.tensor([[1 - v_star**2, -1], [1 / tau, -b / tau]])
+            A = dyn_factor * torch.tensor([[v_fact*(1 - 3*v_star**2), -v_fact], [1 / tau, -b / tau]])
             eq_point = torch.tensor([v_star, w_star])
+
+            # A: [[7.1408, -10.0000], [0.2500, -0.3500]]
+            # eq_point: [0.3087, 0.4348]
 
         elif model_name == "GreenshieldsTraffic":
             v0 = self.data["dynamics"]["args"]["v0"]
@@ -141,11 +147,23 @@ class GRU(nn.Module):
             A = dyn_factor * torch.tensor([[-v0 / n]])
             eq_point = torch.tensor([n])  # Equilibrium at max density
 
-        elif model_name in ["HodgkinHuxleyFFE", "HodgkinHuxleyFS"]:
-            # HH model equilibrium is at resting potential (V*, n*, m*, h*)
-            # This is complex, so a placeholder value is used
-            A = dyn_factor * torch.tensor([[-1, 1], [-1, 0]])  # Placeholder
-            eq_point = torch.tensor([0, 0])  # Should be the HH resting potential
+        elif model_name == "HodgkinHuxleyFS":
+            # HHFS has 4 states: [V, n, m, h]
+            # We'll use a plausible resting state and a 4x4 zero Jacobian as placeholder
+            eq_point = torch.tensor([-0.7, 0.2, 0.05, 0.6])  # Approx resting state in normalized units
+            A = dyn_factor * torch.zeros((4, 4))
+
+        elif model_name == "HodgkinHuxleyFFE":
+            # HHFFE has 10 states: 2 RSA neurons (5 vars each)
+            # Resting point is a zero vector as placeholder
+            eq_point = torch.zeros(10)
+            A = dyn_factor * torch.zeros((10, 10))
+
+            """elif model_name in ["HodgkinHuxleyFFE", "HodgkinHuxleyFS"]:
+                # HH model equilibrium is at resting potential (V*, n*, m*, h*)
+                # This is complex, so a placeholder value is used
+                A = dyn_factor * torch.tensor([[-1, 1], [-1, 0]])  # Placeholder
+                eq_point = torch.tensor([0, 0])  # Should be the HH resting potential"""
 
         elif model_name == "LinearSys":
             A = dyn_factor * torch.tensor(self.data["dynamics"]["args"]["a"])
@@ -153,9 +171,19 @@ class GRU(nn.Module):
 
         elif model_name == "TwoTank":
             # Placeholder values for resistances (R1, R2) and capacitances (C1, C2)
-            R1, R2, C1, C2 = 1, 1, 1, 1  # These should be properly defined
-            A = dyn_factor * torch.tensor([[-1 / (R1 * C1), 0], [1 / (R1 * C2), -1 / (R2 * C2)]])
-            eq_point = torch.tensor([0, 0])  # At rest with no input
+            ###R1, R2, C1, C2 = 1, 1, 1, 1  # These should be properly defined
+            ###A = dyn_factor * torch.tensor([[-1 / (R1 * C1), 0], [1 / (R1 * C2), -1 / (R2 * C2)]])
+            
+            c1 = self.data["dynamics"]["args"].get("c1", 0.08)
+            c2 = self.data["dynamics"]["args"].get("c2", 0.04)
+            epsilon = 1e-3
+            h1_star, h2_star = epsilon, epsilon
+
+            A = dyn_factor * torch.tensor([
+                [-c2 / (2 * torch.sqrt(h1_star)), 0.0],
+                [ c2 / (2 * torch.sqrt(h1_star)), -c2 / (2 * torch.sqrt(h2_star))]
+            ])
+            eq_point = torch.tensor([h1_star, h2_star])  # At rest with no input
 
         else:
             raise ValueError(f"Unknown model name: {model_name}")
@@ -223,18 +251,23 @@ def discretisation_FE(x_prev, A, tau, I):
 
     transform_matrix = I + tau * A
     x_prev = x_prev.squeeze(0).unsqueeze(1)  
+    x_next = torch.bmm(x_prev, transform_matrix)
 
-    return torch.bmm(x_prev, transform_matrix).permute(1, 0, 2)
+    return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 def discretisation_BE(x_prev, A, tau, I):
     batch_size = tau.shape[0]
     tau = tau.view(batch_size, 1, 1)
+    A_neg = I - tau * A
+    x_prev = x_prev.squeeze(0).unsqueeze(2)
 
-    inv_matrix = torch.inverse(I - tau * A)
-    x_prev = x_prev.squeeze(0).unsqueeze(1)  
+    x_next = torch.linalg.solve(A_neg, x_prev)
 
-    return torch.bmm(x_prev, inv_matrix).permute(1, 0, 2)
+    """inv_matrix = torch.inverse(A_neg)
+    x_next = torch.bmm(x_prev, inv_matrix)"""
+
+    return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 def discretisation_TU(x_prev, A, tau, I):
@@ -243,12 +276,16 @@ def discretisation_TU(x_prev, A, tau, I):
 
     A_pos = I + (tau / 2) * A
     A_neg = I - (tau / 2) * A
-    A_neg_inv = torch.inverse(A_neg)  
+    x_prev = x_prev.squeeze(0).unsqueeze(2)
 
+    v = torch.linalg.solve(A_neg, x_prev)
+    x_next = torch.bmm(A_pos, v)
+
+    """A_neg_inv = torch.inverse(A_neg)  
     transform_matrix = torch.bmm(A_pos, A_neg_inv)
+    x_next = torch.bmm(x_prev, transform_matrix)"""
 
-    x_prev = x_prev.squeeze(0).unsqueeze(1)  
-    return torch.bmm(x_prev, transform_matrix).permute(1, 0, 2)
+    return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 def discretisation_RK4(x_prev, A, tau, I):
@@ -273,7 +310,7 @@ def discretisation_RK4(x_prev, A, tau, I):
 
     x_next = x_prev + (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
 
-    return x_next.permute(1, 0, 2)
+    return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 def discretisation_exact(x_prev, A, tau, I):
@@ -285,9 +322,9 @@ def discretisation_exact(x_prev, A, tau, I):
     tau = tau.view(batch_size, 1, 1)
 
     exp_matrix = torch.matrix_exp(tau * A)
-
     x_prev = x_prev.squeeze(0).unsqueeze(1)
-    return torch.bmm(x_prev, exp_matrix).permute(1, 0, 2)
+    x_next = torch.bmm(x_prev, exp_matrix)
+    return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 # ---------------- x_update_mode -------------------------------------------- #
