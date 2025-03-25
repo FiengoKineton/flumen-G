@@ -29,6 +29,7 @@ class CausalFlowModel(nn.Module):
         self.state_dim = state_dim
         self.control_dim = control_dim
         self.output_dim = output_dim
+        self.use_batch_norm = use_batch_norm
 
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth  
@@ -36,7 +37,6 @@ class CausalFlowModel(nn.Module):
         self.encoder_depth = encoder_depth
         self.decoder_size = decoder_size
         self.decoder_depth = decoder_depth
-        self.use_batch_norm = use_batch_norm
 
 
         self.mode_rnn = mode_rnn                            # {"new", "old", "gru"} | if new then h0_stack, else h0
@@ -218,6 +218,7 @@ class CausalFlowModel(nn.Module):
                     (self.decoder_size * self.u_dnn_isz),
                     use_batch_norm=self.use_batch_norm
                 )
+
 
     # ----------------------------------------------------------------------- #
     def mode_rnn_new(self, x, deltas, rnn_input):

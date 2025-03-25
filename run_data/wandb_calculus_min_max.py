@@ -13,7 +13,6 @@ table = [
     'control_rnn_size', 
     'batch_size', 
     'lr',
-    'loss',
     ]
 
 

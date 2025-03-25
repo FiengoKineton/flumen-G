@@ -124,7 +124,7 @@ class Hyperparams:
             },            
             
             'hyperparams___set_4': {
-                "control_rnn_size": 22,         # 24 for 'old'   
+                "control_rnn_size": 22,             # 24 for 'old'   
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
                 "encoder_depth": 2,  
@@ -138,11 +138,11 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 2,
                 "loss": "mse",                  
-                "discretisation_mode": "TU",    
+                "discretisation_mode": "exact",     # or TU  
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
                 "mode_rnn": "new", 
-                "mode_dnn": "FFNet"             # FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder 
+                "mode_dnn": "FFNet"                 # FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder 
             },
 
             'hyperparams___set_5': {
@@ -327,7 +327,7 @@ class Hyperparams:
                 'method': 'grid',     
                 'metric': {'name': 'best_val', 'goal': 'minimize'},
                 'parameters': {
-                    "control_rnn_size": {'values': [20, 24]},         
+                    "control_rnn_size": {'values': [24]},           # 20     
                     "control_rnn_depth": {'values': [1]},        
                     "encoder_size": {'values': [2]},  
                     "encoder_depth": {'values': [2]},   

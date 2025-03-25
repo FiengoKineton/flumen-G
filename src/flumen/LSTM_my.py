@@ -100,6 +100,7 @@ class LSTM(nn.Module):
             outputs[:, t, :].copy_(z[-1])  # In-place assignment
             coefficients[:, t, :].copy_(coeff)  ###############
 
+        #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         return torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False), (z, c_z), coefficients    ###############
 
 
@@ -125,7 +126,7 @@ class LSTM(nn.Module):
             tau = self.data["dynamics"]["args"]["tau"]
             a = self.data["dynamics"]["args"]["a"]
             b = self.data["dynamics"]["args"]["b"]
-            v_fact = 50
+            v_fact = 1
             
             # Solve equilibrium equations
             # w* = (v* + a) / b
@@ -133,13 +134,16 @@ class LSTM(nn.Module):
             from scipy.optimize import fsolve
             
             def fhn_equilibrium(v):
-                return v - v**3 - (v - a) / b  # R * I_ext not considered
+                return v - v**3 - (v - a) / b  
 
             v_star = fsolve(fhn_equilibrium, 0)[0]
             w_star = (v_star - a) / b
             
             A = dyn_factor * torch.tensor([[v_fact*(1 - 3*v_star**2), -v_fact], [1 / tau, -b / tau]])
             eq_point = torch.tensor([v_star, w_star])
+
+            # A: [[7.1408, -10.0000], [0.2500, -0.3500]]
+            # eq_point: [0.3087, 0.4348]
 
         elif model_name == "GreenshieldsTraffic":
             v0 = self.data["dynamics"]["args"]["v0"]
@@ -252,8 +256,9 @@ def discretisation_FE(x_prev, A, tau, I):
 
     transform_matrix = I + tau * A
     x_prev = x_prev.squeeze(0).unsqueeze(1)  
+    x_next = torch.bmm(x_prev, transform_matrix)
 
-    return torch.bmm(x_prev, transform_matrix).permute(1, 0, 2)
+    return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 def discretisation_BE(x_prev, A, tau, I):
@@ -267,7 +272,7 @@ def discretisation_BE(x_prev, A, tau, I):
     """inv_matrix = torch.inverse(A_neg)
     x_next = torch.bmm(x_prev, inv_matrix)"""
 
-    return x_next.squeeze(2).unsqueeze(0)
+    return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 def discretisation_TU(x_prev, A, tau, I):
@@ -285,7 +290,7 @@ def discretisation_TU(x_prev, A, tau, I):
     transform_matrix = torch.bmm(A_pos, A_neg_inv)
     x_next = torch.bmm(x_prev, transform_matrix)"""
 
-    return x_next.squeeze(2).unsqueeze(0)  #permute(1, 0, 2)
+    return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 def discretisation_RK4(x_prev, A, tau, I):
@@ -310,7 +315,7 @@ def discretisation_RK4(x_prev, A, tau, I):
 
     x_next = x_prev + (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
 
-    return x_next.permute(1, 0, 2)
+    return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 def discretisation_exact(x_prev, A, tau, I):
@@ -322,9 +327,9 @@ def discretisation_exact(x_prev, A, tau, I):
     tau = tau.view(batch_size, 1, 1)
 
     exp_matrix = torch.matrix_exp(tau * A)
-
     x_prev = x_prev.squeeze(0).unsqueeze(1)
-    return torch.bmm(x_prev, exp_matrix).permute(1, 0, 2)
+    x_next = torch.bmm(x_prev, exp_matrix)
+    return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 # ---------------- x_update_mode -------------------------------------------- #

@@ -1,4 +1,4 @@
-import torch, wandb
+import torch, wandb, sys
 
 
 # ------------------------------------------------- #
@@ -40,7 +40,7 @@ def prep_inputs(x0, y, u, lengths, device):
 
 def validate(data, loss_fn, model, device):
     vl = 0.
-    total_samples, coeffs_sum = 0, 0    ###############
+    #total_samples, coeffs_sum = 0, 0    ###############
 
     with torch.no_grad():
         for example in data:
