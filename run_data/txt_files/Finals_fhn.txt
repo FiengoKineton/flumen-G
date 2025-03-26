@@ -111,7 +111,18 @@ Timings: 0.05832076072692871, 0.6095075607299805
 8.773213576166695e-06
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 8h 3min 43.0sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 640.59 MB
+Memory Used During Execution: 155.91 MB
+System Memory Utilization: 49.8%
+Process CPU Utilization: 0.0%
+Disk Utilization: 58.68 GB / 72.86 GB
+Disk Space Used During Execution: 0.01 GB
+Network Sent: 258.12 MB
+Network Received: 438.32 MB
+Network Traffic Sent During Execution: 87.30 MB
+Network Traffic Received During Execution: 107.51 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -249,7 +260,18 @@ Timings: 0.16135787963867188, 1.2347538471221924
 7.525129800002035e-06
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 10h 51min 32.9sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 655.04 MB
+Memory Used During Execution: 170.40 MB
+System Memory Utilization: 46.4%
+Process CPU Utilization: 0.0%
+Disk Utilization: 58.69 GB / 72.86 GB
+Disk Space Used During Execution: 0.02 GB
+Network Sent: 275.54 MB
+Network Received: 468.22 MB
+Network Traffic Sent During Execution: 104.97 MB
+Network Traffic Received During Execution: 137.66 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
