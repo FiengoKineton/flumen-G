@@ -4,6 +4,7 @@ from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 import yaml 
 from pathlib import Path
 from pprint import pprint
+import torch.nn.functional as F
 
 
 """
@@ -116,12 +117,12 @@ class LSTM(nn.Module):
         """
         model_name = self.model_name
         dyn_factor = self.data["control_delta"]
-        B = 0
+        B = torch.tensor([[0], [0]])
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
             A = dyn_factor * torch.tensor([[0, 1], [-1, mhu]])          # before | self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
-            B = dyn_factor * torch.tensor([0, 1])
+            B = dyn_factor * torch.tensor([[0], [1]])
 
             # Equilibrium point for VdP: (x*, y*) = (0, 0)
             eq_point = torch.tensor([[0], [0]])
@@ -177,6 +178,7 @@ class LSTM(nn.Module):
 
         elif model_name == "LinearSys":
             A = dyn_factor * torch.tensor(self.data["dynamics"]["args"]["a"])
+            B = dyn_factor * torch.tensor([[0], [1]])
             eq_point = torch.zeros(A.shape[0])  # Equilibrium at x* = 0
 
         elif model_name == "TwoTank":
@@ -198,6 +200,9 @@ class LSTM(nn.Module):
         else:
             raise ValueError(f"Unknown model name: {model_name}")
         
+        eigs = torch.linalg.eigvals(A)
+        if torch.any(torch.real(eigs) > 0): print("Unstable A matrix.\n\n")
+
         #print(A.shape[0])
         return A, B, eq_point
 

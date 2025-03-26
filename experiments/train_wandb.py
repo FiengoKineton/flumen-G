@@ -19,9 +19,20 @@ import psutil
 """
 COMMANDs:
 
+--VDP-------------------------------
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
 python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
 
+--FHN-------------------------------
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/fhn.yaml fhn_test_data
+python experiments/train_wandb.py data/fhn_test_data.pkl fhn_test 
+
+--linsys----------------------------
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/linsys.yaml linsys_test_data
+python experiments/train_wandb.py data/linsys_test_data.pkl linsys_test 
+
+
+--general---------------------------
 python experiments/train_wandb.py data/{model_name}_test_data.pkl {run_name} 
 {model_name}: [vdp, fhn, twotank, linsys, hhfs, hhffe, greenshields]
 """

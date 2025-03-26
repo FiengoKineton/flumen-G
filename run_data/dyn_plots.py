@@ -6,7 +6,7 @@ import argparse
 
 
 class Dynamics: 
-    def __init__(self, mhu=1, k=50, both=False):
+    def __init__(self, mhu=1, k=50, both=False, stab=False):
         self.t_span = (0, 150)
         self.t_eval = np.linspace(*self.t_span, 1000)
         self.u_array = self.generate_random_input(self.t_eval, step_size=2.0)
@@ -28,7 +28,10 @@ class Dynamics:
 
         self.init_config()
         self.plot(both)
-        self.stability()
+
+        models = ['vdp', 'fhn']
+        if stab: 
+            for m in models: self.stability(m)
 
 
     @staticmethod
@@ -80,12 +83,10 @@ class Dynamics:
     def init_config(self): 
         # -------------------------------
         # Matrici Linearizzate
-        self.A_vdp_np = self.control_delta*np.array([[0.0, 1.0], [-1.0, self.mu]])
-        self.B_vdp_np = self.control_delta*np.array([0, 1])
+        self.A_vdp_np, self.B_vdp_np = self.vdp_dyn(self.mu)
         self.eq_vdp_np = np.array([0.0, 0.0])
 
-        self.A_fhn_np = self.control_delta*np.array([[self.v_fact * (1 - 3 * self.v_star**2), -self.v_fact], [1 / self.tau, -self.b / self.tau]])
-        self.B_fhn_np = self.control_delta*np.array([self.v_fact, 0])
+        self.A_fhn_np, self.B_fhn_np = self.fhn_dyn(self.v_fact)
         # -------------------------------
         # Simulazione
 
@@ -185,25 +186,31 @@ class Dynamics:
         plt.show()
 
 
-    def stability(self):
+    def stability(self, mode):
         # --- VDP Root Locus Plot ---
-        mu_values = np.arange(-5, 3.5, 0.5)
+        
+        values = np.arange(-3.5, 3.5, 0.5)        
         plt.figure(figsize=(10, 5))
-        for mu in mu_values:
-            A = self.control_delta * np.array([[0.0, 1.0], [-1.0, mu]])
+        for k in values:
+            if mode=='vdp':     A, _ = self.vdp_dyn(k)
+            elif mode=='fhn':   A, _ = self.fhn_dyn(k)
+            
             eigs = np.linalg.eigvals(A)
             for eig in eigs:
                 color = 'red' if np.real(eig) > 0 else 'green'
-                plt.scatter(np.real(eig), np.imag(eig), color=color, label=f"μ={mu}" if mu == mu_values[0] else "")
+                plt.scatter(np.real(eig), np.imag(eig), color=color, label=f"param={k}" if k == values[0] else "")
         plt.axvline(0, color='black', linestyle='--', linewidth=1)
-        plt.title("Root Locus of A_vdp_np as μ varies")
+        
+        if mode=='vdp':     plt.title("Root Locus of A_vdp_np as μ varies")
+        elif mode=='fhn':   plt.title("Root Locus of A_fhn_np as v_star varies")
+
         plt.xlabel("Re(λ)")
         plt.ylabel("Im(λ)")
         plt.grid(True)
         #plt.legend(loc="upper left")
         plt.tight_layout()
 
-        # --- FHN Root Locus Plot ---
+        """# --- FHN Root Locus Plot ---
         v_star_values = np.arange(0, 8.5, 0.5)
         plt.figure(figsize=(10, 5))
         for v_star in v_star_values:
@@ -221,10 +228,22 @@ class Dynamics:
         plt.ylabel("Im(λ)")
         plt.grid(True)
         #plt.legend(loc="upper left")
-        plt.tight_layout()
+        plt.tight_layout()"""
 
         plt.show()
 
+
+    # -------------------------------
+    # dyn matrix
+    def vdp_dyn(self, mhu): 
+        A = self.control_delta*np.array([[0.0, 1.0], [-1.0, mhu]])
+        B = self.control_delta*np.array([0, 1])
+        return A, B
+    
+    def fhn_dyn(self, k): 
+        A = self.control_delta*np.array([[k * (1 - 3 * self.v_star**2), -k], [1 / self.tau, -self.b / self.tau]])
+        B = self.control_delta*np.array([k, 0])
+        return A, B
 
     # -------------------------------
     # Funzione per generare un segnale randomico a gradini
