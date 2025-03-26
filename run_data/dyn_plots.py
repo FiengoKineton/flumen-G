@@ -6,19 +6,19 @@ import argparse
 
 
 class Dynamics: 
-    def __init__(self, both=False):
+    def __init__(self, mhu=1, k=50, both=False):
         self.t_span = (0, 150)
         self.t_eval = np.linspace(*self.t_span, 1000)
         self.u_array = self.generate_random_input(self.t_eval, step_size=2.0)
 
         # -------------------------------
         # Parametri
-        self.mu = -0.001   # 1.0
+        self.mu = mhu       # <0
 
         self.tau = 0.8
         self.a = -0.3
         self.b = 1.4
-        self.v_fact = 2.0
+        self.v_fact = k     # <2.3
 
         self.control_delta = 0.2
 
@@ -26,36 +26,17 @@ class Dynamics:
         self.w_star = (self.v_star - self.a) / self.b
         self.eq_fhn_np = np.array([self.v_star, self.w_star])
 
-        # -------------------------------
-        # Matrici Linearizzate
-        self.A_vdp_np = self.control_delta*np.array([[0.0, 1.0], [-1.0, self.mu]])
-        self.B_vdp_np = self.control_delta*np.array([0, 1])
-        self.eq_vdp_np = np.array([0.0, 0.0])
-
-        self.A_fhn_np = self.control_delta*np.array([[self.v_fact * (1 - 3 * self.v_star**2), -self.v_fact], [1 / self.tau, -self.b / self.tau]])
-        self.B_fhn_np = self.control_delta*np.array([self.v_fact, 0])
-        # -------------------------------
-        # Simulazione
-
-        # Iniziali (piccola perturbazione attorno al punto di equilibrio)
-        x0_vdp = self.eq_vdp_np + np.array([0.1, 0.0])
-        x0_fhn = self.eq_fhn_np + np.array([0.1, 0.0])
-
-        # Simulazioni non lineari
-        self.sol_vdp = solve_ivp(self.van_der_pol, self.t_span, x0_vdp, args=(self.mu,), t_eval=self.t_eval)
-        self.sol_fhn = solve_ivp(self.fitzhugh_nagumo, self.t_span, x0_fhn, args=(self.tau, self.a, self.b, self.v_fact), t_eval=self.t_eval)
-
-        # Simulazioni linearizzate
-        self.sol_lin_vdp = solve_ivp(self.linear_system, self.t_span, x0_vdp, args=(self.A_vdp_np, self.B_vdp_np, self.eq_vdp_np), t_eval=self.t_eval)
-        self.sol_lin_fhn = solve_ivp(self.linear_system, self.t_span, x0_fhn, args=(self.A_fhn_np, self.B_fhn_np, self.eq_fhn_np), t_eval=self.t_eval)
-
-
+        self.init_config()
         self.plot(both)
+        self.stability()
+
 
     @staticmethod
     def parse_arguments():
         parser = argparse.ArgumentParser(description="Run results analysis with optional display and plotting.")
         parser.add_argument("--both", action="store_true", help="Select all metrics across datasets.")
+        parser.add_argument("--mhu", type=float, default=1.0, help="For vdp (float).")
+        parser.add_argument("--k", type=float, default=50, help="For fhn (float).")
         args = parser.parse_args()
         return args
 
@@ -93,6 +74,155 @@ class Dynamics:
         plt.grid()
 
         plt.tight_layout()
+        plt.show()
+
+
+    def init_config(self): 
+        # -------------------------------
+        # Matrici Linearizzate
+        self.A_vdp_np = self.control_delta*np.array([[0.0, 1.0], [-1.0, self.mu]])
+        self.B_vdp_np = self.control_delta*np.array([0, 1])
+        self.eq_vdp_np = np.array([0.0, 0.0])
+
+        self.A_fhn_np = self.control_delta*np.array([[self.v_fact * (1 - 3 * self.v_star**2), -self.v_fact], [1 / self.tau, -self.b / self.tau]])
+        self.B_fhn_np = self.control_delta*np.array([self.v_fact, 0])
+        # -------------------------------
+        # Simulazione
+
+        # Iniziali (piccola perturbazione attorno al punto di equilibrio)
+        x0_vdp = self.eq_vdp_np + np.array([0.1, 0.0])
+        x0_fhn = self.eq_fhn_np + np.array([0.1, 0.0])
+
+        # Simulazioni non lineari
+        self.sol_vdp = solve_ivp(self.van_der_pol, self.t_span, x0_vdp, args=(self.mu,), t_eval=self.t_eval)
+        self.sol_fhn = solve_ivp(self.fitzhugh_nagumo, self.t_span, x0_fhn, args=(self.tau, self.a, self.b, self.v_fact), t_eval=self.t_eval)
+
+        # Simulazioni linearizzate
+        self.sol_lin_vdp = solve_ivp(self.linear_system, self.t_span, x0_vdp, args=(self.A_vdp_np, self.B_vdp_np, self.eq_vdp_np), t_eval=self.t_eval)
+        self.sol_lin_fhn = solve_ivp(self.linear_system, self.t_span, x0_fhn, args=(self.A_fhn_np, self.B_fhn_np, self.eq_fhn_np), t_eval=self.t_eval)
+
+
+    # -------------------------------
+    # stability
+    def _stability(self):
+        # ----------------- VDP -----------------
+        mu_values = np.arange(-5, 3.5, 0.5)
+        unstable_mu = None
+
+        stable_eigs = []
+        unstable_eigs = []
+
+        for mu in mu_values:
+            A = self.control_delta * np.array([[0.0, 1.0], [-1.0, mu]])
+            eigs = np.linalg.eigvals(A)
+            if np.any(np.real(eigs) > 0):
+                if unstable_mu is None:
+                    unstable_mu = mu
+                unstable_eigs.extend(eigs)
+            else:
+                if unstable_mu is None:
+                    stable_eigs.extend(eigs)
+
+        plt.figure(figsize=(10, 5))
+
+        # Plot stable eigenvalues (before first instability)
+        for eig in stable_eigs:
+            plt.scatter(np.real(eig), np.imag(eig), color='green', label=f"Stable (μ < {unstable_mu})" if eig == stable_eigs[0] else "")
+
+        # Plot unstable eigenvalues (from first instability onward)
+        for eig in unstable_eigs:
+            plt.scatter(np.real(eig), np.imag(eig), color='red', label=f"Unstable (μ ≥ {unstable_mu})" if eig == unstable_eigs[0] else "")
+
+        plt.axvline(0, color='black', linestyle='--', linewidth=1)
+        plt.title("Root Locus of A_vdp_np as μ varies")
+        plt.xlabel("Re(λ)")
+        plt.ylabel("Im(λ)")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+
+        # ----------------- FHN -----------------
+        v_star_values = np.arange(-5, 8, 0.5)
+        unstable_vstar = None
+
+        stable_eigs = []
+        unstable_eigs = []
+
+        for v_star in v_star_values:
+            A = self.control_delta * np.array([
+                [self.v_fact * (1 - 3 * v_star**2), -self.v_fact],
+                [1 / self.tau, -self.b / self.tau]
+            ])
+            eigs = np.linalg.eigvals(A)
+            if np.any(np.real(eigs) > 0):
+                if unstable_vstar is None:
+                    unstable_vstar = v_star
+                unstable_eigs.extend(eigs)
+            else:
+                if unstable_vstar is None:
+                    stable_eigs.extend(eigs)
+
+        plt.figure(figsize=(10, 5))
+
+        if stable_eigs:
+            for eig in stable_eigs:
+                plt.scatter(np.real(eig), np.imag(eig), color='green',
+                            label=f"Stable (v* < {unstable_vstar})" if eig == stable_eigs[0] else "")
+
+        if unstable_eigs:
+            for eig in unstable_eigs:
+                plt.scatter(np.real(eig), np.imag(eig), color='red',
+                            label=f"Unstable (v* ≥ {unstable_vstar})" if eig == unstable_eigs[0] else "")
+
+        plt.axvline(0, color='black', linestyle='--', linewidth=1)
+        plt.title("Root Locus of A_fhn_np as v* varies")
+        plt.xlabel("Re(λ)")
+        plt.ylabel("Im(λ)")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+
+        plt.show()
+
+
+    def stability(self):
+        # --- VDP Root Locus Plot ---
+        mu_values = np.arange(-5, 3.5, 0.5)
+        plt.figure(figsize=(10, 5))
+        for mu in mu_values:
+            A = self.control_delta * np.array([[0.0, 1.0], [-1.0, mu]])
+            eigs = np.linalg.eigvals(A)
+            for eig in eigs:
+                color = 'red' if np.real(eig) > 0 else 'green'
+                plt.scatter(np.real(eig), np.imag(eig), color=color, label=f"μ={mu}" if mu == mu_values[0] else "")
+        plt.axvline(0, color='black', linestyle='--', linewidth=1)
+        plt.title("Root Locus of A_vdp_np as μ varies")
+        plt.xlabel("Re(λ)")
+        plt.ylabel("Im(λ)")
+        plt.grid(True)
+        #plt.legend(loc="upper left")
+        plt.tight_layout()
+
+        # --- FHN Root Locus Plot ---
+        v_star_values = np.arange(0, 8.5, 0.5)
+        plt.figure(figsize=(10, 5))
+        for v_star in v_star_values:
+            A = self.control_delta * np.array([
+                [self.v_fact * (1 - 3 * v_star**2), -self.v_fact],
+                [1 / self.tau, -self.b / self.tau]
+            ])
+            eigs = np.linalg.eigvals(A)
+            for eig in eigs:
+                color = 'red' if np.real(eig) > 0 else 'green'
+                plt.scatter(np.real(eig), np.imag(eig), color=color, label=f"v*={v_star}" if v_star == v_star_values[0] else "")
+        plt.axvline(0, color='black', linestyle='--', linewidth=1)
+        plt.title("Root Locus of A_fhn_np as v_star varies")
+        plt.xlabel("Re(λ)")
+        plt.ylabel("Im(λ)")
+        plt.grid(True)
+        #plt.legend(loc="upper left")
+        plt.tight_layout()
+
         plt.show()
 
 
@@ -146,4 +276,4 @@ class Dynamics:
 
 if __name__ == "__main__":
     args = Dynamics.parse_arguments()
-    Dynamics(both=args.both)
+    Dynamics(mhu=args.mhu, k=args.k, both=args.both)

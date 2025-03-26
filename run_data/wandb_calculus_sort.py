@@ -32,8 +32,15 @@ class Sort():
         df = pd.read_csv(file_path)
 
         n = 5 if file_path == file_path_1 else df.shape[0]
-        starting_point = 15 if file_path == file_path_1 else 1
-        end_point = df.shape[0] if file_path!=file_path_7 else df.shape[0]-4
+
+        if file_path==file_path_7:
+            starting_point = 5
+        elif file_path==file_path_1: 
+            starting_point = 15
+        else:
+            starting_point = 1
+        
+        end_point = df.shape[0] 
         id_ranges = [(starting_point, end_point)]
 
         """best = False
