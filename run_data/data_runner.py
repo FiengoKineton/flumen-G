@@ -19,19 +19,20 @@ csv_path = fhn_fin
 
 # Define your scripts and optional args
 scripts_gen = [
-    {"file": "run_data/wandb_get_runs.py", "args": []},
-    {"file": "run_data/wandb_calculus_min_max.py", "args": ["--which", 'val_loss']},                        # ["--loc", "--which"]
+    #{"file": "run_data/wandb_get_runs.py", "args": []},
+    {"file": "run_data/wandb_calculus_min_max.py", "args": ["--which", 'best_val']},                        # ["--loc", "--which"]
     #{"file": "experiments/hyperparams.py", "args": ["--run"]},                                              # ["--run"]
+    {"file": "run_data/dyn_plots.py", "args": []},                                                       # ["--both"]
 ]
 
 scripts_spc = [
-    {"file": "run_data/output_calculus.py", "args": ["--plot", "--display", "--loc", csv_path]},            # ["--plot", "--all", "--display", "--loc"]
+    #{"file": "run_data/output_calculus.py", "args": ["--plot", "--display", "--loc", csv_path]},            # ["--plot", "--all", "--display", "--loc"]
     {"file": "run_data/wandb_calculus_sort.py", "args": ["--loc", csv_path]},                               # ["--loc", "--all"]
-    {"file": "run_data/wandb_calculus_plots.py", "args": ["--loc", csv_path]},                              # ["--all", "--loc"]
+    #{"file": "run_data/wandb_calculus_plots.py", "args": ["--loc", csv_path]},                              # ["--all", "--loc"]
 ]
 
 
-scripts = scripts_spc
+scripts = scripts_gen
 
 print("\ncsv_path:", csv_path, "\nscripts:", scripts, "\n\n")
 

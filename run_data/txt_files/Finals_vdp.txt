@@ -245,10 +245,51 @@ Network Traffic Received During Execution: 25.11 MB
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+vdp__old-set_6-RIGHT (mhu=0.001)
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-nd9dstic:v1
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 19813.108708339, '_step': 60, '_timestamp': 1742946144.1459956, '_wandb': {'runtime': 19814}, 'batch_size': 128, 'best_epoch': 40, 'best_test': 0.03174184993027695, 'best_train': 0.02266753758624117, 'best_val': 0.03402747308451032, 'epoch': 60, 'lr': 0.00025, 'n_epochs': 250, 'test_loss': 0.038184092631415714, 'time': 19767.975720643997, 'train_loss': 0.02236228679656667, 'val_loss': 0.03894898339751221}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 24,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'old',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'alpha'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': -0.001},
+                                'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+
+
+mode_rnn: old 
+mode_dnn: FFNet 
+
+
+vdp mhu: 0.001
+Timings: 0.01528310775756836, 0.5867710113525391
+0.15458590677644274
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
 
@@ -256,10 +297,58 @@ PC ...
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+vdp__new-set_6-RIGHT (mhu=0.001)
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-ffjpgdte:v1
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 31314.49686818, '_step': 59, '_timestamp': 1742955630.3205626, '_wandb': {'runtime': 31315}, 'batch_size': 128, 'best_epoch': 39, 'best_test': 0.05557163219366755, 'best_train': 0.020548227878790053, 'best_val': 0.0573662274650165, 'epoch': 59, 'lr': 0.00025, 'n_epochs': 250, 'test_loss': 0.05149495690351441, 'time': 31290.071779727936, 'train_loss': 0.017903911590418486, 'val_loss': 0.0649241390268481}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 24,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'alpha'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': -0.001},
+                                'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+
+dyn matrix:
+tensor([[ 0.0000,  0.2000],
+        [-0.2000, -0.2000]])
+
+eq_points: tensor([0, 0]) 
+
+vdp mhu: 0.001
+Timings: 0.014707326889038086, 1.1177845001220703
+0.33975476959392076
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
 

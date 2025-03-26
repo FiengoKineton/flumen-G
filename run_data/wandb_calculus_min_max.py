@@ -6,10 +6,10 @@ dir = "run_data/csv_files/wandb_get_runs.csv"
 
 table = [
     'mode_rnn', 
-    'mode_dnn', 
+    #'mode_dnn', 
     'discretisation_mode', 
     'x_update_mode', 
-    'optimiser_mode',
+    #'optimiser_mode',
     'control_rnn_size', 
     'batch_size', 
     'lr',
@@ -44,7 +44,7 @@ class FilterParam:
 
         # Filter and sort
         df_low = df[df[self.which] < self.low_thresh].sort_values(by=self.which)
-        df_high = df[(df[self.which] > self.high_thresh) & (df[self.which] < 1)].sort_values(by=self.which)
+        df_high = df[(df[self.which] > self.high_thresh) & (df[self.which] < 10)].sort_values(by=self.which)
 
         # Output
         print("\n--- Runs with", self.which, "< {} ---\n".format(self.low_thresh))
