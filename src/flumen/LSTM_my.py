@@ -430,3 +430,47 @@ def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):
     lambda_factor = x_norm / (x_norm + h_norm).clamp(0.1, 0.9)
     x_next = lambda_factor * x_mid + (1 - lambda_factor) * W__h_to_x(h[-1])
     return x_next, lambda_factor    ###############
+
+
+def x_update_mode__relu(x_mid, h, alpha_gate, W__h_to_x):
+    """
+    ReLU-based gate: values above 0 are passed, below 0 are zeroed.
+    
+    - The more activated h[-1] is (positively), the more it influences x_next.
+    - Acts like a sparse activation gating — only strongly activated features influence the output.
+    """
+    gate = F.relu(alpha_gate(h[-1]))
+    gate = gate / (gate + 1e-5)  # Normalize for safety, values in (0, 1)
+    x_next = (1 - gate) * x_mid + gate * W__h_to_x(h[-1])
+    return x_next, gate
+
+def x_update_mode__switch(x_mid, h, alpha_gate, W__h_to_x):
+    """
+    Hard switch: Uses a threshold to select between x_mid and transformed input.
+    
+    - If activation > 0 → rely on learned influence.
+    - Else → follow past dynamics.
+
+    This is like a "hard attention" — can simulate decision boundaries.
+    """
+    thresholded = (alpha_gate(h[-1]) > 0).float()  # Binary mask
+    x_next = (1 - thresholded) * x_mid + thresholded * W__h_to_x(h[-1])
+    return x_next, thresholded
+
+def x_update_mode__entropy(x_mid, h, alpha_gate, W__h_to_x):
+    """
+    Gate based on entropy of softmax over hidden state projection.
+    
+    - High entropy → uncertain → favor past (x_mid).
+    - Low entropy → confident → favor W(h).
+
+    This one is smart when you want uncertainty to drive conservatism.
+    """
+    logits = alpha_gate(h[-1])
+    probs = F.softmax(logits, dim=-1)
+    entropy = -torch.sum(probs * torch.log(probs + 1e-8), dim=-1, keepdim=True)  # shape [batch, 1]
+    entropy = torch.sigmoid(entropy)  # squash to (0, 1)
+    
+    gate = 1 - entropy  # High entropy = rely on x_mid
+    x_next = gate * x_mid + (1 - gate) * W__h_to_x(h[-1])
+    return x_next, gate
