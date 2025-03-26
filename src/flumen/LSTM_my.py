@@ -38,7 +38,7 @@ class LSTM(nn.Module):
         self.model_name = model_name
         self.data = self.get_model_data()
 
-        self.A, eq_points = self.get_dyn_matrix()
+        self.A, self.B, eq_points = self.get_dyn_matrix()
         self.I = torch.eye(self.A.shape[0])
         self.dtype = torch.float32
 
@@ -70,7 +70,7 @@ class LSTM(nn.Module):
         device = rnn_input_unpacked.device
 
         z, c_z = hidden_state
-        self.A, self.I, tau = self.A.to(device, dtype=self.dtype), self.I.to(device, dtype=self.dtype), tau.to(device, dtype=self.dtype)
+        self.A, self.B, self.I, tau = self.A.to(device, dtype=self.dtype), self.B.to(device, dtype=self.dtype), self.I.to(device, dtype=self.dtype), tau.to(device, dtype=self.dtype)
 
         outputs = torch.empty(batch_size, seq_len, self.z_size, device=device)  # Preallocate tensor | before: torch.zeros
         coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)  ###############
@@ -92,7 +92,8 @@ class LSTM(nn.Module):
                 h_list.append(h_new)
                 c_list.append(c_new)
 
-            x_mid = self.discretisation_function(x_prev, self.A, tau_t, self.I)             # same as the old one
+            u_dyn = rnn_input_t[:, :1]
+            x_mid = self.discretisation_function(x_prev, (self.A, tau_t, self.I, self.B), u_dyn)             # same as the old one
             h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
             x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)   ###############   
 
@@ -115,12 +116,15 @@ class LSTM(nn.Module):
         """
         model_name = self.model_name
         dyn_factor = self.data["control_delta"]
+        B = 0
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
             A = dyn_factor * torch.tensor([[0, 1], [-1, mhu]])          # before | self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
+            B = dyn_factor * torch.tensor([0, 1])
+
             # Equilibrium point for VdP: (x*, y*) = (0, 0)
-            eq_point = torch.tensor([0, 0])
+            eq_point = torch.tensor([[0], [0]])
 
         elif model_name == "FitzHughNagumo":
             tau = self.data["dynamics"]["args"]["tau"]
@@ -140,6 +144,8 @@ class LSTM(nn.Module):
             w_star = (v_star - a) / b
             
             A = dyn_factor * torch.tensor([[v_fact*(1 - 3*v_star**2), -v_fact], [1 / tau, -b / tau]])
+            B = dyn_factor * torch.tensor([[v_fact], [0]])
+
             eq_point = torch.tensor([v_star, w_star])
 
             # A: [[7.1408, -10.0000], [0.2500, -0.3500]]
@@ -193,7 +199,7 @@ class LSTM(nn.Module):
             raise ValueError(f"Unknown model name: {model_name}")
         
         #print(A.shape[0])
-        return A, eq_point
+        return A, B, eq_point
 
     def get_model_data(self): 
         """
@@ -250,85 +256,124 @@ class LSTMCell(nn.Module):
 
 # ---------------- Discretisation functions --------------------------------- #
 
-def discretisation_FE(x_prev, A, tau, I):
+def discretisation_FE(x_prev, mat, u):
+    A, tau, I, B = mat
     batch_size = tau.shape[0]
-    tau = tau.view(batch_size, 1, 1)
 
-    transform_matrix = I + tau * A
-    x_prev = x_prev.squeeze(0).unsqueeze(1)  
-    x_next = torch.bmm(x_prev, transform_matrix)
+    tau = tau.view(batch_size, 1, 1)
+    u = u.view(batch_size, 1, 1)    # 2, 1).transpose(1, 2)
+    x_prev = x_prev.squeeze(0).unsqueeze(1)
+
+    transform_matrix = I + tau * A 
+    input_matrix = tau * B.unsqueeze(0).expand(batch_size, -1, -1)
+    input_matrix = input_matrix.transpose(1, 2)
+
+    ev_lib = torch.bmm(x_prev, transform_matrix)
+    ev_for = torch.bmm(u, input_matrix)
+
+    x_next = ev_lib + ev_for
 
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
-def discretisation_BE(x_prev, A, tau, I):
+def discretisation_BE(x_prev, mat, u):
+    A, tau, I, B = mat
     batch_size = tau.shape[0]
+
     tau = tau.view(batch_size, 1, 1)
-    A_neg = I - tau * A
+    u = u.view(batch_size, 1, 1)
     x_prev = x_prev.squeeze(0).unsqueeze(2)
 
-    x_next = torch.linalg.solve(A_neg, x_prev)
+    A_neg = I - tau * A
+    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
+    u_effect = torch.bmm(B_exp, u)
+    u_effect_scaled = tau * u_effect
+
+    ev_lib = torch.linalg.solve(A_neg, x_prev)
+    ev_for = torch.linalg.solve(A_neg, u_effect_scaled)
 
     """inv_matrix = torch.inverse(A_neg)
     x_next = torch.bmm(x_prev, inv_matrix)"""
 
+    x_next = ev_lib + ev_for
     return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
 
 
-def discretisation_TU(x_prev, A, tau, I):
+def discretisation_TU(x_prev, mat, u):
+    A, tau, I, B = mat
     batch_size = tau.shape[0]
+
     tau = tau.view(batch_size, 1, 1)
+    u = u.view(batch_size, 1, 1)
+    x_prev = x_prev.squeeze(0).unsqueeze(2)
 
     A_pos = I + (tau / 2) * A
     A_neg = I - (tau / 2) * A
-    x_prev = x_prev.squeeze(0).unsqueeze(2)
 
-    v = torch.linalg.solve(A_neg, x_prev)
-    x_next = torch.bmm(A_pos, v)
+    """v = torch.linalg.solve(A_neg, x_prev)
+    x_next = torch.bmm(A_pos, v)"""
 
-    """A_neg_inv = torch.inverse(A_neg)  
-    transform_matrix = torch.bmm(A_pos, A_neg_inv)
-    x_next = torch.bmm(x_prev, transform_matrix)"""
+    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
+    u_effect = torch.bmm(B_exp, u)
+    u_scaled = tau * u_effect
 
+    rhs = torch.bmm(A_pos, x_prev)  # ev_lib pre-soluzione
+    rhs_total = rhs + u_scaled      # ev_lib + ev_for (prima di risolvere)
+
+
+    x_next = torch.linalg.solve(A_neg, rhs_total)
     return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
 
 
-def discretisation_RK4(x_prev, A, tau, I):
+def discretisation_RK4(x_prev, mat, u):
     """
     Runge-Kutta 4th order (RK4) discretisation.
     Uses the classical RK4 method to approximate x_next.
     """
+    A, tau, _, B = mat
     batch_size = tau.shape[0]
-    tau = tau.view(batch_size, 1, 1)
 
+    tau = tau.view(batch_size, 1, 1)
+    u = u.view(batch_size, 1, 1)
     x_prev = x_prev.squeeze(0).unsqueeze(1)
     A = A.expand(batch_size, -1, -1)
 
-    #print(x_prev.shape) # torch.Size([128, 1, 2])
-    #print(A.shape)      # torch.Size([128, 2, 2])
-    #print(tau.shape)    # torch.Size([128, 1, 1])
+    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
+    Bu = torch.bmm(u, B_exp.transpose(1, 2))  # [batch, 1, state]
 
-    k1 = torch.bmm(x_prev, A)
-    k2 = torch.bmm(x_prev + 0.5 * tau * k1, A)
-    k3 = torch.bmm(x_prev + 0.5 * tau * k2, A)
-    k4 = torch.bmm(x_prev + tau * k3, A)
+    def f(x): return torch.bmm(x, A) + Bu
 
-    x_next = x_prev + (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+    k1 = f(x_prev)
+    k2 = f(x_prev + 0.5 * tau * k1)
+    k3 = f(x_prev + 0.5 * tau * k2)
+    k4 = f(x_prev + tau * k3)
 
+    ev_lib = x_prev
+    ev_for = (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+
+    x_next = ev_lib + ev_for
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
-def discretisation_exact(x_prev, A, tau, I):
+def discretisation_exact(x_prev, mat, u):
     """
     Exact discretisation: x_next = exp(tau * A) * x_prev
     Uses the matrix exponential function from PyTorch.
     """
+    A, tau, _, B = mat
     batch_size = tau.shape[0]
+
     tau = tau.view(batch_size, 1, 1)
+    u = u.view(batch_size, 1, 1)
+    x_prev = x_prev.squeeze(0).unsqueeze(1)
 
     exp_matrix = torch.matrix_exp(tau * A)
-    x_prev = x_prev.squeeze(0).unsqueeze(1)
-    x_next = torch.bmm(x_prev, exp_matrix)
+    ev_lib = torch.bmm(x_prev, exp_matrix)
+
+    B_exp = B.T.unsqueeze(0).expand(batch_size, -1, -1)
+    ev_for = torch.bmm(u, tau * B_exp)
+
+    x_next = ev_lib + ev_for
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 

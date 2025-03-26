@@ -44,7 +44,7 @@ class DataVisualizer:
         and extracting relevant data.
         """
         self.data = pd.read_csv(csv_file)
-        print(self.data.shape[0])
+        print("len:", self.data.shape[0])
         
         # Convert summary and config columns from string to dictionary
         self.data['summary'] = self.data['summary'].apply(ast.literal_eval)

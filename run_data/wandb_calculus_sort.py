@@ -8,6 +8,14 @@ import pandas as pd
 import argparse
 import ast
 
+weights = {
+    "best_val": 0.45e4,
+    "best_test": 0.25e4,
+    "best_train": 0.15e4, 
+    "epoch": 0.015, 
+}
+
+
 class Sort(): 
     def __init__(self, loc=None, all=False):
         # Example usage
@@ -17,6 +25,7 @@ class Sort():
         file_path_4 = "run_data/csv_files/sweep_test2.csv"
         file_path_5 = "run_data/csv_files/models.csv"
         file_path_6 = "run_data/csv_files/sweep_test3.csv"
+        file_path_7 = "run_data/csv_files/Finals_fhn.csv"
 
 
         file_path = file_path_6 if loc is None else loc
@@ -24,7 +33,7 @@ class Sort():
 
         n = 5 if file_path == file_path_1 else df.shape[0]
         starting_point = 15 if file_path == file_path_1 else 1
-        end_point = df.shape[0]
+        end_point = df.shape[0] if file_path!=file_path_7 else df.shape[0]-4
         id_ranges = [(starting_point, end_point)]
 
         """best = False
@@ -37,6 +46,8 @@ class Sort():
         print("\n---------------------------------------\nOrder by min:\n---------------------------------------")
         name = ['val_loss', 'best_val', 'best_test', 'best_train', 'epoch'] if all else ['best_val', 'epoch']
         for name in name:   self.filter_top_n_by_metric(file_path, n, id_ranges, name, best)
+
+        self.sort_by_weighted_score(file_path, n, id_ranges)
 
 
     @staticmethod
@@ -86,6 +97,53 @@ class Sort():
         print(f"\n\nTop {n} results by {metric}:")
         print(df_output.to_string(index=False))
         
+        return df_output
+
+
+    def sort_by_weighted_score(self, file_path, n, id_ranges):
+        # Read CSV file
+        df = pd.read_csv(file_path, index_col=0)
+
+        # Convert summary column from string to dictionary
+        df['summary'] = df['summary'].apply(ast.literal_eval)
+
+        # Extract required metrics
+        df['best_val'] = df['summary'].apply(lambda x: x.get('best_val', float('inf')))
+        df['best_test'] = df['summary'].apply(lambda x: x.get('best_test', float('inf')))
+        df['best_train'] = df['summary'].apply(lambda x: x.get('best_train', float('inf')))
+        df['epoch'] = df['summary'].apply(lambda x: x.get('epoch', float('inf')))
+
+        # Extract ID number and filter
+        df.reset_index(inplace=True)
+        df.rename(columns={'index': 'ID_number'}, inplace=True)
+
+        valid_ids = set()
+        for r in id_ranges:
+            if isinstance(r, tuple):
+                valid_ids.update(set(range(r[0], r[1] + 1)))
+            else:
+                valid_ids.add(r)
+
+        df = df[df['ID_number'].isin(valid_ids)]
+
+        # Calculate weighted score
+        df['weighted_score'] = (
+            df['best_val'] * weights.get('best_val', 0) +
+            df['best_test'] * weights.get('best_test', 0) +
+            df['best_train'] * weights.get('best_train', 0) + 
+            df['epoch'] * weights.get('epoch', 0)
+        )
+
+        # Select top n by lowest score
+        df = df.nsmallest(n, 'weighted_score')
+
+        # Format output
+        df_output = df[['name', 'best_val', 'best_test', 'best_train', 'epoch', 'weighted_score', 'ID_number']]
+        df_output.columns = ['', 'best_val', 'best_test', 'best_train', 'epoch', 'score', '']
+
+        print(f"\n\nTop {n} results by weighted score:")
+        print(df_output.to_string(index=False))
+
         return df_output
 
 

@@ -26,13 +26,13 @@ scripts_gen = [
 ]
 
 scripts_spc = [
-    #{"file": "run_data/output_calculus.py", "args": ["--plot", "--display", "--loc", csv_path]},            # ["--plot", "--all", "--display", "--loc"]
+    {"file": "run_data/output_calculus.py", "args": ["--plot", "--display", "--loc", csv_path]},            # ["--plot", "--all", "--display", "--loc"]
     {"file": "run_data/wandb_calculus_sort.py", "args": ["--loc", csv_path]},                               # ["--loc", "--all"]
-    #{"file": "run_data/wandb_calculus_plots.py", "args": ["--loc", csv_path]},                              # ["--all", "--loc"]
+    {"file": "run_data/wandb_calculus_plots.py", "args": ["--loc", csv_path]},                              # ["--all", "--loc"]
 ]
 
 
-scripts = scripts_gen
+scripts = scripts_spc
 
 print("\ncsv_path:", csv_path, "\nscripts:", scripts, "\n\n")
 

@@ -138,7 +138,7 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 2,
                 "loss": "mse",                  
-                "discretisation_mode": "exact",     # or TU  
+                "discretisation_mode": "TU",     # or TU  
                 "optimiser_mode": "adam",       
                 "x_update_mode": "alpha",
                 "mode_rnn": "new", 
