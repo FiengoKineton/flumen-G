@@ -193,11 +193,7 @@ class Hyperparams:
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
 
             'hyperparams___vdp': {
-
-            },
-
-            'hyperparams___fhn': {
-                "control_rnn_size": 22,             # 24 for 'old'   
+                "control_rnn_size": 22,  
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
                 "encoder_depth": 2,  
@@ -211,11 +207,33 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 2,
                 "loss": "mse",                  
-                "discretisation_mode": "BE",     # or TU  
+                "discretisation_mode": "BE",
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
-                "mode_dnn": "FFNet"                 # FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder 
+                "mode_dnn": "FFNet"
+            },
+
+            'hyperparams___fhn': {
+                "control_rnn_size": 22,  
+                "control_rnn_depth": 1,         
+                "encoder_size": 2,   
+                "encoder_depth": 2,  
+                "decoder_size": 2,  
+                "decoder_depth": 2,  
+                "batch_size": 126,  
+                "lr": 0.001,                    
+                "n_epochs": 200,  
+                "es_patience": 20,              
+                "es_delta": 1e-07,
+                "sched_patience": 10,
+                "sched_factor": 2,
+                "loss": "mse",                  
+                "discretisation_mode": "BE", 
+                "optimiser_mode": "adam",       
+                "x_update_mode": "entropy",
+                "mode_rnn": "new", 
+                "mode_dnn": "FFNet"
             },
 
             'hyperparams___linsys': {

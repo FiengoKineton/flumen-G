@@ -27,7 +27,7 @@ class Dynamics:
 
 
         # -------------------------------
-        term_time = [50] # [1, 12, 28, 80, 150]
+        term_time = [1, 12, 28, 80, 150]
         for t in term_time:
             self.t_span = (0, t) 
             self.t_eval = np.linspace(*self.t_span, 1000)

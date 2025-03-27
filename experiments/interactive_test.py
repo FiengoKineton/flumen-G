@@ -106,7 +106,7 @@ def main():
 
         y = y[:, tuple(bool(v) for v in sampler._dyn.mask)]
         sq_error = np.square(y - y_pred)
-        print(np.mean(sq_error))
+        print("\nMSE (mean square error):", np.mean(sq_error))
 
         # **Clear previous plots and remove insets & connections**
         for ax_ in ax1:
@@ -126,7 +126,8 @@ def main():
         prev_markings.clear()
 
         # **Plot y_true vs y_pred**
-        for k, ax_ in enumerate(ax1[:model.state_dim]):
+        n = model.state_dim if model.state_dim==2 else 1
+        for k, ax_ in enumerate(ax1[:n]):
             ax_.plot(t, y_pred[:, k], c='orange', label='Model output')
             ax_.plot(t, y[:, k], 'b--', label='True state')
             ax_.set_ylabel(f"$x_{k+1}$")
@@ -143,6 +144,8 @@ def main():
         ax2[0].legend()
         ax2[0].grid()
 
+        #""" Comment this out if state_dim!=2
+        # ----------------------------------------------- #
         ax2[1].plot(t, y[:, 1] - y_pred[:, 1], label=r"$\Delta x_2$", color='blue')
         ax2[1].set_ylabel("Delta x2")
         ax2[1].set_xlabel("$t$")
@@ -181,6 +184,7 @@ def main():
             
             prev_insets.append(inset)  # Store inset reference
             prev_markings.extend(lines)  # Store connection line references
+        #"""
 
         fig1.tight_layout()
         fig2.tight_layout()
