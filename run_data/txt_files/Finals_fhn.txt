@@ -885,10 +885,73 @@ missing
 fhn_004--TU_B-switch
 
 
-PC ...
+(base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py  --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-fhn_test_data-fhn_004--set_4-switch-av0zp5j3:v7
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 54097.665182561, '_step': 176, '_timestamp': 1743056336.4294715, '_wandb': {'runtime': 54099}, 'batch_size': 256, 'best_epoch': 156, 'best_test': 0.00025065654995160003, 'best_train': 6.56580117816032e-05, 'best_val': 0.0001848009737841494, 'epoch': 176, 'lr': 3.125e-05, 'n_epochs': 200, 'test_loss': 0.0002674208311645998, 'time': 54076.59716677666, 'train_loss': 6.208364651875423e-05, 'val_loss': 0.00021131308312760663}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 22,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'FitzHughNagumo',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'switch'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'fhn_test_data',
+               'settings': 'data_generation/fhn.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/fhn_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'a': -0.3, 'b': 1.4, 'tau': 0.8},
+                                'name': 'FitzHughNagumo'},
+                   'sequence_generator': {'args': {'mean': -0.7,
+                                                   'period': 8,
+                                                   'std': 0.5},
+                                          'name': 'LogNormalSqWave'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+/home/giuseppe/Desktop/KTH/Thesis/flumen-G/src/flumen/LSTM_my.py:144: RuntimeWarning: The iteration is not making good progress, as measured by the 
+  improvement from the last ten iterations.
+  v_star = fsolve(fhn_equilibrium, 0)[0]
+
+dyn matrix:
+tensor([[ 0.1428, -0.2000],
+        [ 0.2500, -0.3500]], dtype=torch.float64)
+
+eq_points: tensor([0.3087, 0.4348], dtype=torch.float64) 
+
+fhn fact: 1
+Timings: 0.05626726150512695, 0.9476797580718994
+0.00034405525821999054
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 15h 1min 38.7sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 653.67 MB
+Memory Used During Execution: 169.07 MB
+System Memory Utilization: 50.9%
+Process CPU Utilization: 0.0%
+Disk Utilization: 58.73 GB / 72.86 GB
+Disk Space Used During Execution: 0.02 GB
+Network Sent: 523.13 MB
+Network Received: 812.20 MB
+Network Traffic Sent During Execution: 169.32 MB
+Network Traffic Received During Execution: 248.71 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -896,10 +959,73 @@ PC ...
 fhn_004--TU_B-relu
 
 
-PC ...
+(base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py  --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-fhn_test_data-fhn_004--set_4-relu-ooabqkbn:v9
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 61938.466371656, '_step': 200, '_timestamp': 1743064596.8657565, '_wandb': {'runtime': 61939}, 'batch_size': 256, 'best_epoch': 196, 'best_test': 0.00013955442886981473, 'best_train': 6.060635513629102e-05, 'best_val': 5.781460100706681e-05, 'epoch': 200, 'lr': 3.125e-05, 'n_epochs': 200, 'test_loss': 0.00013139348868662637, 'time': 61896.32263469696, 'train_loss': 6.075877873196365e-05, 'val_loss': 6.069673213460192e-05}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 22,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'FitzHughNagumo',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'relu'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'fhn_test_data',
+               'settings': 'data_generation/fhn.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/fhn_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'a': -0.3, 'b': 1.4, 'tau': 0.8},
+                                'name': 'FitzHughNagumo'},
+                   'sequence_generator': {'args': {'mean': -0.7,
+                                                   'period': 8,
+                                                   'std': 0.5},
+                                          'name': 'LogNormalSqWave'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+/home/giuseppe/Desktop/KTH/Thesis/flumen-G/src/flumen/LSTM_my.py:144: RuntimeWarning: The iteration is not making good progress, as measured by the 
+  improvement from the last ten iterations.
+  v_star = fsolve(fhn_equilibrium, 0)[0]
+
+dyn matrix:
+tensor([[ 0.1428, -0.2000],
+        [ 0.2500, -0.3500]], dtype=torch.float64)
+
+eq_points: tensor([0.3087, 0.4348], dtype=torch.float64) 
+
+fhn fact: 1
+Timings: 0.054609060287475586, 0.999089241027832
+8.26909416778348e-06
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 17h 12min 19.5sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 657.70 MB
+Memory Used During Execution: 172.88 MB
+System Memory Utilization: 49.0%
+Process CPU Utilization: 0.0%
+Disk Utilization: 58.80 GB / 72.86 GB
+Disk Space Used During Execution: 0.09 GB
+Network Sent: 544.75 MB
+Network Received: 862.37 MB
+Network Traffic Sent During Execution: 189.28 MB
+Network Traffic Received During Execution: 296.93 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -907,10 +1033,73 @@ PC ...
 fhn_004--TU_B-entropy
 
 
-PC ...
+(base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py  --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-fhn_test_data-fhn_004--set_4-entropy-4l1dv5jk:v9
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 63793.89246278, '_step': 200, '_timestamp': 1743066482.6488616, '_wandb': {'runtime': 63795}, 'batch_size': 256, 'best_epoch': 194, 'best_test': 0.00010101292980380094, 'best_train': 6.738858845844668e-05, 'best_val': 4.9862479045259533e-05, 'epoch': 200, 'lr': 3.125e-05, 'n_epochs': 200, 'test_loss': 9.83189983116972e-05, 'time': 63744.562915086746, 'train_loss': 6.873572008197171e-05, 'val_loss': 5.195357670118028e-05}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 22,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'FitzHughNagumo',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'fhn_test_data',
+               'settings': 'data_generation/fhn.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/fhn_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'a': -0.3, 'b': 1.4, 'tau': 0.8},
+                                'name': 'FitzHughNagumo'},
+                   'sequence_generator': {'args': {'mean': -0.7,
+                                                   'period': 8,
+                                                   'std': 0.5},
+                                          'name': 'LogNormalSqWave'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+/home/giuseppe/Desktop/KTH/Thesis/flumen-G/src/flumen/LSTM_my.py:144: RuntimeWarning: The iteration is not making good progress, as measured by the 
+  improvement from the last ten iterations.
+  v_star = fsolve(fhn_equilibrium, 0)[0]
+
+dyn matrix:
+tensor([[ 0.1428, -0.2000],
+        [ 0.2500, -0.3500]], dtype=torch.float64)
+
+eq_points: tensor([0.3087, 0.4348], dtype=torch.float64) 
+
+fhn fact: 1
+Timings: 0.04740166664123535, 0.957054853439331
+8.703585941721967e-06
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 17h 43min 15.0sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 658.52 MB
+Memory Used During Execution: 173.67 MB
+System Memory Utilization: 47.2%
+Process CPU Utilization: 0.0%
+Disk Utilization: 58.80 GB / 72.86 GB
+Disk Space Used During Execution: 0.09 GB
+Network Sent: 548.78 MB
+Network Received: 869.13 MB
+Network Traffic Sent During Execution: 193.11 MB
+Network Traffic Received During Execution: 303.50 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -918,7 +1107,59 @@ PC ...
 fhn_004--FE_B-entropy
 
 
-PC ...
+(base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py  --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-fhn_test_data-fhn_005--FE_B-entropy-mdwb7ne4:v4
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 19039.3903712, '_step': 114, '_timestamp': 1743036780.4304729, '_wandb': {'runtime': 19040}, 'batch_size': 256, 'best_epoch': 94, 'best_test': 9.181545829051174e-05, 'best_train': 6.222921773242935e-05, 'best_val': 7.64232260053177e-05, 'epoch': 114, 'lr': 0.000125, 'n_epochs': 200, 'test_loss': 7.502025857775152e-05, 'time': 19017.12532901764, 'train_loss': 4.41266193344123e-05, 'val_loss': 9.82436752110516e-05}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 22,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'FE',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'FitzHughNagumo',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'fhn_test_data',
+               'settings': '.\\data_generation\\fhn.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/fhn_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'a': -0.3, 'b': 1.4, 'tau': 0.8},
+                                'name': 'FitzHughNagumo'},
+                   'sequence_generator': {'args': {'mean': -0.7,
+                                                   'period': 8,
+                                                   'std': 0.5},
+                                          'name': 'LogNormalSqWave'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+/home/giuseppe/Desktop/KTH/Thesis/flumen-G/src/flumen/LSTM_my.py:144: RuntimeWarning: The iteration is not making good progress, as measured by the 
+  improvement from the last ten iterations.
+  v_star = fsolve(fhn_equilibrium, 0)[0]
+
+dyn matrix:
+tensor([[ 0.1428, -0.2000],
+        [ 0.2500, -0.3500]], dtype=torch.float64)
+
+eq_points: tensor([0.3087, 0.4348], dtype=torch.float64) 
+
+fhn fact: 1
+Timings: 0.0682520866394043, 0.9451525211334229
+8.47709566451859e-06
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
 Total Execution Time: 5h 17min 20.4sec
@@ -940,7 +1181,59 @@ Network Traffic Received During Execution: 61.43 MB
 fhn_004--exact_B-entropy
 
 
-PC ...
+(base) giuseppe@giuseppe-HP-EliteBook-x360-1030-G2:~/Desktop/KTH/Thesis/flumen-G$ python experiments/interactive_test.py  --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-fhn_test_data-fhn_005--exact_B-entropy-i8rrgvab:v8
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 29754.853839, '_step': 197, '_timestamp': 1743047548.616901, '_wandb': {'runtime': 29757}, 'batch_size': 256, 'best_epoch': 177, 'best_test': 5.766663622353008e-05, 'best_train': 3.0195125729829e-05, 'best_val': 4.590548712712916e-05, 'epoch': 197, 'lr': 3.90625e-06, 'n_epochs': 200, 'test_loss': 5.677855551766697e-05, 'time': 29714.116681337357, 'train_loss': 2.9960809335630315e-05, 'val_loss': 4.6808181593860354e-05}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 22,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'exact',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'FitzHughNagumo',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'fhn_test_data',
+               'settings': '.\\data_generation\\fhn.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/fhn_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'a': -0.3, 'b': 1.4, 'tau': 0.8},
+                                'name': 'FitzHughNagumo'},
+                   'sequence_generator': {'args': {'mean': -0.7,
+                                                   'period': 8,
+                                                   'std': 0.5},
+                                          'name': 'LogNormalSqWave'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+/home/giuseppe/Desktop/KTH/Thesis/flumen-G/src/flumen/LSTM_my.py:144: RuntimeWarning: The iteration is not making good progress, as measured by the 
+  improvement from the last ten iterations.
+  v_star = fsolve(fhn_equilibrium, 0)[0]
+
+dyn matrix:
+tensor([[ 0.1428, -0.2000],
+        [ 0.2500, -0.3500]], dtype=torch.float64)
+
+eq_points: tensor([0.3087, 0.4348], dtype=torch.float64) 
+
+fhn fact: 1
+Timings: 0.05595684051513672, 1.0504209995269775
+4.828926153745219e-06
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
 Total Execution Time: 8h 15min 55.9sec
