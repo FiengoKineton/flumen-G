@@ -14,7 +14,7 @@ test6 = "run_data/csv_files/sweep_test6.csv"            # comment | vdp sweep_co
 
 vdp_fin = "run_data/csv_files/Finals_vdp.csv"           # comment | FINAL COMPARISON for vdp
 fhn_fin = "run_data/csv_files/Finals_fhn.csv"           # comment | FINAL COMPARISON for fhn
-csv_path = fhn_fin
+csv_path = vdp_fin
 
 
 # Define your scripts and optional args

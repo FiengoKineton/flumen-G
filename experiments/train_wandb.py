@@ -71,13 +71,14 @@ sweeps = {
     'test3': 'sweep_config_test_3',
     'new': 'sweep_config_test_4_new', 
     'old': 'sweep_config_test_4_old',
+    'vdp': 'sweep_config_vdp',
 }
 
 
-name_set = sets['fhn_set']
+name_set = sets['vdp_set']
 hyperparams = hp_manager.get_hyperparams(name_set)
 
-name_sweep = sweeps['new']
+name_sweep = sweeps['vdp']
 sweep_config = hp_manager.get_sweep(name_sweep)
 num_sweeps = 8
 SWEEP = False

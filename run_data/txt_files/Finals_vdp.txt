@@ -378,40 +378,222 @@ Network Traffic Received During Execution: 113.90 MB
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+vdp_005--BE_B-256-entropy
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G>python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-chcp11qk:v4
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 39341.135149752, '_step': 121, '_timestamp': 1743110381.7542768, '_wandb': {'runtime': 39416}, 'batch_size': 256, 'best_epoch': 116, 'best_test': 0.03980417468119413, 'best_train': 0.009760848099463863, 'best_val': 0.043167366180568933, 'epoch': 121, 'lr': 0.000125, 'n_epochs': 200, 'test_loss': 0.03810086753219366, 'time': 39321.57431912422, 'train_loss': 0.00980516202551754, 'val_loss': 0.04467936820583418}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 22,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'BE',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+dyn matrix:
+tensor([[ 0.0000,  0.2000],
+        [-0.2000,  0.2000]])
+
+input matrix:
+tensor([[0.0000],
+        [0.2000]])
+
+eq_points: tensor([[0],
+        [0]])
+
+
+vdp mhu: 1.0
+Timings: 0.03819775581359863, 1.707970142364502
+
+MSE (mean square error): 0.0343101291384209
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+missing
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+vdp_005--BE_B-126-entropy-18
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G>python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-ezct5fzt:v1
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 28396.904935878, '_step': 45, '_timestamp': 1743099516.1139898, '_wandb': {'runtime': 28398}, 'batch_size': 126, 'best_epoch': 25, 'best_test': 0.053748063248349354, 'best_train': 0.02203613237846487, 'best_val': 0.04931485059205443, 'epoch': 45, 'lr': 0.0005, 'n_epochs': 200, 'test_loss': 0.047868705907603726, 'time': 28356.688901901245, 'train_loss': 0.013006396606215276, 'val_loss': 0.0605569944891613}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 18,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'BE',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+dyn matrix:
+tensor([[ 0.0000,  0.2000],
+        [-0.2000,  0.2000]])
+
+input matrix:
+tensor([[0.0000],
+        [0.2000]])
+
+eq_points: tensor([[0],
+        [0]])
+
+
+vdp mhu: 1.0
+Timings: 0.020111083984375, 0.9147868156433105
+
+MSE (mean square error): 0.21855011221140827
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
 
+Total Execution Time: 7h 53min 18.0sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 647.43 MB
+Memory Used During Execution: 162.79 MB
+System Memory Utilization: 49.1%
+Process CPU Utilization: 0.0%
+Disk Utilization: 59.07 GB / 72.86 GB
+Disk Space Used During Execution: 0.26 GB
+Network Sent: 672.79 MB
+Network Received: 1288.44 MB
+Network Traffic Sent During Execution: 107.81 MB
+Network Traffic Received During Execution: 389.77 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+vdp_005--exact_B-entropy
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_005--BE_B-exact-vnv7ka6n:v3
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 30868.802875179, '_step': 73, '_timestamp': 1743103984.6789374, '_wandb': {'runtime': 30870}, 'batch_size': 256, 'best_epoch': 53, 'best_test': 0.035558891657274216, 'best_train': 0.01637718313814778, 'best_val': 0.037642860086634755, 'epoch': 73, 'lr': 0.00025, 'n_epochs': 200, 'test_loss': 0.034320139326155186, 'time': 30809.84898877144, 'train_loss': 0.011976932028406544, 'val_loss': 0.03965486912056804}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 22,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'exact',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': '/home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/vdp_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
+
+
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+dyn matrix:
+tensor([[ 0.0000,  0.2000],
+        [-0.2000,  0.2000]])
+
+input matrix:
+tensor([[0.0000],
+        [0.2000]])
+
+eq_points: tensor([[0],
+        [0]])
+
+
+vdp mhu: 1.0
+Timings: 0.016119956970214844, 1.3693158626556396
+
+MSE (mean square error): 0.002983571860152968
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 8h 34min 29.8sec
+Total Memory Allocation: 15.04 GB
+Process Memory In Use: 657.29 MB
+Memory Used During Execution: 172.45 MB
+System Memory Utilization: 50.4%
+Process CPU Utilization: 0.0%
+Disk Utilization: 59.07 GB / 72.86 GB
+Disk Space Used During Execution: 0.26 GB
+Network Sent: 687.18 MB
+Network Received: 1310.54 MB
+Network Traffic Sent During Execution: 115.49 MB
+Network Traffic Received During Execution: 403.18 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+vdp_005--BE_B-126-entropy-22
 
 
 PC ...

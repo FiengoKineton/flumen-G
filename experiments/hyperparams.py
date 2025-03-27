@@ -191,7 +191,6 @@ class Hyperparams:
 
 
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
-
             'hyperparams___vdp': {
                 "control_rnn_size": 22,  
                 "control_rnn_depth": 1,         
@@ -431,6 +430,32 @@ class Hyperparams:
                     "optimiser_mode": {'values': ["adam"]},       
                     "x_update_mode": {'values': ["alpha"]},
                     "mode_rnn": {'values': ["old"]},   
+                    'mode_dnn': {'values': ["FFNet"]},  
+                }
+            },
+
+            'sweep_config_vdp': {
+                'method': 'grid',     
+                'metric': {'name': 'best_val', 'goal': 'minimize'},
+                'parameters': {
+                    "control_rnn_size": {'values': [22, 22, 22, 22, 32]},         
+                    "control_rnn_depth": {'values': [1]},        
+                    "encoder_size": {'values': [2]},  
+                    "encoder_depth": {'values': [2]},   
+                    "decoder_size": {'values': [2]}, 
+                    "decoder_depth": {'values': [2]},  
+                    "batch_size": {'values': [128]},  
+                    "lr": {'values': [0.001]},                     
+                    "n_epochs": {'values': [250]},  
+                    "es_patience": {'values': [20]},              
+                    "es_delta": {'values': [1e-7]},
+                    "sched_patience": {'values': [10]},
+                    "sched_factor": {'values': [2]},
+                    "loss": {'values': ["mse"]},                  
+                    "discretisation_mode": {'values': ["BE"]},    
+                    "optimiser_mode": {'values': ["adam"]},       
+                    "x_update_mode": {'values': ["entropy"]},
+                    "mode_rnn": {'values': ["new"]},   
                     'mode_dnn': {'values': ["FFNet"]},  
                 }
             },

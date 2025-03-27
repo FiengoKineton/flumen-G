@@ -144,47 +144,48 @@ def main():
         ax2[0].legend()
         ax2[0].grid()
 
-        #""" Comment this out if state_dim!=2
-        # ----------------------------------------------- #
-        ax2[1].plot(t, y[:, 1] - y_pred[:, 1], label=r"$\Delta x_2$", color='blue')
-        ax2[1].set_ylabel("Delta x2")
-        ax2[1].set_xlabel("$t$")
-        ax2[1].legend()
-        ax2[1].grid()
+        if n==2:
+            #""" Comment this out if state_dim!=2
+            # ----------------------------------------------- #
+            ax2[1].plot(t, y[:, 1] - y_pred[:, 1], label=r"$\Delta x_2$", color='blue')
+            ax2[1].set_ylabel("Delta x2")
+            ax2[1].set_xlabel("$t$")
+            ax2[1].legend()
+            ax2[1].grid()
 
-        # **Plot Coefficients Evolution**   ###############
-        if mode_rnn!="old":
-            ax3[0].plot(t, coeffs[:, 0], label=r"$\alpha_1$", color='purple')
-            ax3[0].set_ylabel("Coefficient 1")
-            ax3[0].legend()
-            ax3[0].grid()
+            # **Plot Coefficients Evolution**   ###############
+            if mode_rnn!="old":
+                ax3[0].plot(t, coeffs[:, 0], label=r"$\alpha_1$", color='purple')
+                ax3[0].set_ylabel("Coefficient 1")
+                ax3[0].legend()
+                ax3[0].grid()
 
-            ax3[1].plot(t, coeffs[:, 1], label=r"$\alpha_2$", color='green')
-            ax3[1].set_ylabel("Coefficient 2")
-            ax3[1].set_xlabel("$t$")
-            ax3[1].legend()
-            ax3[1].grid()
+                ax3[1].plot(t, coeffs[:, 1], label=r"$\alpha_2$", color='green')
+                ax3[1].set_ylabel("Coefficient 2")
+                ax3[1].set_xlabel("$t$")
+                ax3[1].legend()
+                ax3[1].grid()
 
-        # **Zoomed-in Insets for Initial Conditions (first 5% of data)**
-        for i, ax in enumerate(ax2):
-            inset = inset_axes(ax, width="30%", height="30%", loc="lower right", borderpad=1)
-            inset.plot(t, y[:, i] - y_pred[:, i], color='black')
+            # **Zoomed-in Insets for Initial Conditions (first 5% of data)**
+            for i, ax in enumerate(ax2):
+                inset = inset_axes(ax, width="30%", height="30%", loc="lower right", borderpad=1)
+                inset.plot(t, y[:, i] - y_pred[:, i], color='black')
 
-            # Focus the inset on the first part of the curve
-            inset_xlim = (t[0], t[int(len(t) * 0.05)])
-            inset_ylim = (np.min(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1,
-                        np.max(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1)
+                # Focus the inset on the first part of the curve
+                inset_xlim = (t[0], t[int(len(t) * 0.05)])
+                inset_ylim = (np.min(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1,
+                            np.max(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1)
 
-            inset.set_xlim(inset_xlim)
-            inset.set_ylim(inset_ylim)
-            inset.grid()
+                inset.set_xlim(inset_xlim)
+                inset.set_ylim(inset_ylim)
+                inset.grid()
 
-            # Connect inset to the main plot and store references
-            lines = mark_inset(ax, inset, loc1=2, loc2=4, fc="none", ec="0.5")
-            
-            prev_insets.append(inset)  # Store inset reference
-            prev_markings.extend(lines)  # Store connection line references
-        #"""
+                # Connect inset to the main plot and store references
+                lines = mark_inset(ax, inset, loc1=2, loc2=4, fc="none", ec="0.5")
+                
+                prev_insets.append(inset)  # Store inset reference
+                prev_markings.extend(lines)  # Store connection line references
+            #"""
 
         fig1.tight_layout()
         fig2.tight_layout()
