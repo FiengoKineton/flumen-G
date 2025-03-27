@@ -6,12 +6,12 @@ import argparse
 
 
 class Dynamics: 
-    def __init__(self, mhu=1, k=50, c=-1, both=False, stab=False):
+    def __init__(self, mhu=1, k=50, c=-1, both=False, stab=False, method="FE"):
         # -------------------------------
         # Parametri
         self.mu = mhu       # <0
-
-        self.c = c
+        self.step_size = 2.0
+        self.c = c          # for linsys
 
         self.tau = 0.8
         self.a = -0.3
@@ -23,14 +23,15 @@ class Dynamics:
         self.v_star = fsolve(self.fhn_equilibrium, 0)[0]
         self.w_star = (self.v_star - self.a) / self.b
         self.eq_fhn_np = np.array([self.v_star, self.w_star])
+        self.method = method
 
 
         # -------------------------------
-        term_time = [1, 12, 28, 80, 150]
+        term_time = [50] # [1, 12, 28, 80, 150]
         for t in term_time:
             self.t_span = (0, t) 
             self.t_eval = np.linspace(*self.t_span, 1000)
-            self.u_array = self.generate_random_input(self.t_eval, step_size=2.0)
+            self.u_array = self.generate_random_input(self.t_eval, step_size=self.step_size)
 
             self.init_config()
             self.plot(both)
@@ -48,6 +49,7 @@ class Dynamics:
         parser.add_argument("--mhu", type=float, default=1.0, help="For vdp (float).")
         parser.add_argument("--k", type=float, default=50, help="For fhn (float).")
         parser.add_argument("--c", type=float, default=50, help="For linsys (float).")
+        parser.add_argument("--method", type=str, default="TU", help="For linsys (string).")
         args = parser.parse_args()
         return args
 
@@ -204,18 +206,56 @@ class Dynamics:
         return [dv, dw]
 
     # -------------------------------
+    # Equilibrio FitzHugh-Nagumo
+    def fhn_equilibrium(self, v):
+        return v - v**3 - (v - self.a) / self.b
+
+    # -------------------------------
     # Dinamica Linearizzata (generica)
     def linear_system(self, t, x, A, B, eq):
         u = np.interp(t, self.t_eval, self.u_array)
         return A @ (x - eq) + B * u
 
-    # -------------------------------
-    # Equilibrio FitzHugh-Nagumo
-    def fhn_equilibrium(self, v):
-        return v - v**3 - (v - self.a) / self.b
+
+    def _linear_system(self, t, x, A, B, eq):
+        u = np.interp(t, self.t_eval, self.u_array)
+        h = self.step_size
+        method = self.method
+
+        if method == "TU":  # Tustin (bilinear)
+            I = np.eye(A.shape[0])
+            Ad = np.linalg.inv(I - 0.5 * h * A) @ (I + 0.5 * h * A)
+            Bd = np.linalg.inv(I - 0.5 * h * A) @ (h * B)
+            return Ad @ (x - eq) + Bd * u
+
+        elif method == "FE":  # Forward Euler
+            return (x - eq) + h * (A @ (x - eq) + B * u)
+
+        elif method == "BE":  # Backward Euler (implicit)
+            I = np.eye(A.shape[0])
+            Ad = np.linalg.inv(I - h * A)
+            Bd = h * Ad @ B
+            return Ad @ (x - eq) + Bd * u
+
+        elif method == "exact":  # Matrix exponential solution
+            from scipy.linalg import expm
+            Ad = expm(A * h)
+            Bd = np.linalg.solve(A, (Ad - np.eye(A.shape[0]))) @ B if np.linalg.matrix_rank(A) == A.shape[0] else h * B
+            return Ad @ (x - eq) + Bd * u
+
+        elif method == "RK4":  # Runge-Kutta 4
+            def f(x_): return A @ (x_ - eq) + B * u
+            k1 = f(x)
+            k2 = f(x + 0.5 * h * k1)
+            k3 = f(x + 0.5 * h * k2)
+            k4 = f(x + h * k3)
+            return x - eq + (h / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+
+        else:
+            raise ValueError(f"Unknown method: {method}")
 
 
 
 if __name__ == "__main__":
     args = Dynamics.parse_arguments()
-    Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab)
+    Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab, method=args.method)

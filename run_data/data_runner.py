@@ -32,7 +32,7 @@ scripts_spc = [
 ]
 
 
-scripts = scripts_gen
+scripts = scripts_spc
 
 print("\ncsv_path:", csv_path, "\nscripts:", scripts, "\n\n")
 

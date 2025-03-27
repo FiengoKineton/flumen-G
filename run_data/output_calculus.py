@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
-import csv, ast
+import csv, ast, itertools
 
 
 class CalcValues:
@@ -28,7 +28,7 @@ class CalcValues:
             if loc is None:                             self.display_final_comparison__mean()
 
         if plot:
-            for param in ["val_loss", "best_val", "test_loss", "train_loss", "epoch"]: 
+            for param in ["best_val", "best_test", "epoch"]: 
                 self.plot_metric_across_datasets(self.datasets, param)
 
 
@@ -225,11 +225,12 @@ class CalcValues:
 
     def get_from_csv(self, loc):
         results = []
+        n = 4 if loc=="run_data/csv_files/Finals_fhn.csv" else 0
 
         with open(loc, mode='r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
 
-            for row in reader:
+            for row in itertools.islice(reader, n, None):#reader:
                 try:
                     summary = ast.literal_eval(row['summary'])
                     name = row.get('name', 'unknown_run')
