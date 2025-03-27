@@ -55,22 +55,13 @@ from hyperparams import Hyperparams
 hp_manager = Hyperparams()
 
 sets = {
-    'set_1': 'hyperparams___set_1', 
-    'set_2': 'hyperparams___set_2',
-    'set_3': 'hyperparams___set_3',
     'set_4': 'hyperparams___set_4',
-    'set_5': 'hyperparams___set_5',
     'set_6': 'hyperparams___set_6',
-    'run_037': 'hyperparams___run_037',
-    'radiant_sweep_4': 'hyperparams___radiant_sweep_4',
-    'swift_sweep_1': 'hyperparams___swift_sweep_1',
-    'opt_best_1': 'hyperparams___opt_best_1', 
-    'opt_best_2': 'hyperparams___opt_best_2',
-    'opt_bayes_1': 'hyperparams___opt_bayes_1',
-    'opt_balanced_1': 'hyperparams___opt_balanced_1',
-    'opt_balanced_2': 'hyperparams___opt_balanced_2',
-    'opt_balanced_3': 'hyperparams___opt_balanced_3',
-    'opt_balanced_4': 'hyperparams___opt_balanced_4',
+    'vdp_set': 'hyperparams___vdp',         # in progress
+    'fhn_set': 'hyperparams___fhn',         # FOUND
+    'linsys_set': 'hyperparams___linsys',   # to look for
+    'twotank_set': 'hyperparams___twotank', # to look for
+    'hhfs_set': 'hyperparams___hhfs',       # to look for
 }
 
 sweeps = {
