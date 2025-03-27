@@ -882,7 +882,7 @@ missing
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+fhn_004--TU_B-switch
 
 
 PC ...
@@ -893,7 +893,7 @@ PC ...
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+fhn_004--TU_B-relu
 
 
 PC ...
@@ -904,7 +904,7 @@ PC ...
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+fhn_004--TU_B-entropy
 
 
 PC ...
@@ -915,24 +915,46 @@ PC ...
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+fhn_004--FE_B-entropy
 
 
 PC ...
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 5h 17min 20.4sec
+Total Memory Allocation: 15.84 GB
+Process Memory In Use: 444.95 MB
+Memory Used During Execution: 143.44 MB
+System Memory Utilization: 88.1%
+Process CPU Utilization: 0.0%
+Disk Utilization: 187.04 GB / 237.22 GB
+Disk Space Used During Execution: 0.00 GB
+Network Sent: 1803.20 MB
+Network Received: 2577.43 MB
+Network Traffic Sent During Execution: 153.51 MB
+Network Traffic Received During Execution: 61.43 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+fhn_004--exact_B-entropy
 
 
 PC ...
 
 ===== SYSTEM PERFORMANCE SUMMARY =====      
-
+Total Execution Time: 8h 15min 55.9sec
+Total Memory Allocation: 15.84 GB
+Process Memory In Use: 443.02 MB
+Memory Used During Execution: 141.59 MB
+System Memory Utilization: 81.8%
+Process CPU Utilization: 0.0%
+Disk Utilization: 187.05 GB / 237.22 GB
+Disk Space Used During Execution: 0.01 GB
+Network Sent: 1832.69 MB
+Network Received: 2598.37 MB
+Network Traffic Sent During Execution: 182.75 MB
+Network Traffic Received During Execution: 82.16 MB
 ====================================== 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------

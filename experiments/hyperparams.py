@@ -138,9 +138,9 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 2,
                 "loss": "mse",                  
-                "discretisation_mode": "FE",     # or TU  
+                "discretisation_mode": "exact",     # or TU  
                 "optimiser_mode": "adam",       
-                "x_update_mode": "alpha",
+                "x_update_mode": "entropy",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet"                 # FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder 
             },

@@ -117,7 +117,7 @@ class LSTM(nn.Module):
         """
         model_name = self.model_name
         dyn_factor = self.data["control_delta"]
-        B = torch.tensor([[0], [0]])
+        B = 0
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
@@ -200,9 +200,6 @@ class LSTM(nn.Module):
         else:
             raise ValueError(f"Unknown model name: {model_name}")
         
-        eigs = torch.linalg.eigvals(A)
-        if torch.any(torch.real(eigs) > 0): print("Unstable A matrix.\n\n")
-
         #print(A.shape[0])
         return A, B, eq_point
 
