@@ -381,7 +381,7 @@ def discretisation_exact(x_prev, mat, u):
 
 # ---------------- x_update_mode -------------------------------------------- #
 
-def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):
+def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):      # GOOD results, balanced
     """
     Alpha-based update rule (Sigmoid function, bounded between 0 and 1).
     
@@ -397,7 +397,7 @@ def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):
     x_next = (1 - alpha) * x_mid + alpha * W__h_to_x(h[-1])
     return x_next, alpha    ###############
 
-def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):
+def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):       # good but beta can get negative
     """
     Beta-based update rule (Tanh function, bounded between -1 and 1).
     
@@ -414,7 +414,7 @@ def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):
     x_next = beta * x_mid + (1 - beta) * W__h_to_x(h[-1])
     return x_next, beta ###############
 
-def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):
+def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):      # not that efficient
     """
     Lambda-based update rule (Adaptive scaling, bounded between ~0.1 and 0.9).
     
@@ -434,7 +434,7 @@ def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):
     return x_next, lambda_factor    ###############
 
 
-def x_update_mode__relu(x_mid, h, alpha_gate, W__h_to_x):
+def x_update_mode__relu(x_mid, h, alpha_gate, W__h_to_x):       # coeff super small
     """
     ReLU-based gate: values above 0 are passed, below 0 are zeroed.
     
@@ -446,7 +446,7 @@ def x_update_mode__relu(x_mid, h, alpha_gate, W__h_to_x):
     x_next = (1 - gate) * x_mid + gate * W__h_to_x(h[-1])
     return x_next, gate
 
-def x_update_mode__switch(x_mid, h, alpha_gate, W__h_to_x):
+def x_update_mode__switch(x_mid, h, alpha_gate, W__h_to_x):     # coeff either 0 or 1
     """
     Hard switch: Uses a threshold to select between x_mid and transformed input.
     
@@ -459,7 +459,7 @@ def x_update_mode__switch(x_mid, h, alpha_gate, W__h_to_x):
     x_next = (1 - thresholded) * x_mid + thresholded * W__h_to_x(h[-1])
     return x_next, thresholded
 
-def x_update_mode__entropy(x_mid, h, alpha_gate, W__h_to_x):
+def x_update_mode__entropy(x_mid, h, alpha_gate, W__h_to_x):    # GOOD
     """
     Gate based on entropy of softmax over hidden state projection.
     
