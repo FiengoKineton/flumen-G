@@ -45,9 +45,11 @@ class LSTM(nn.Module):
 
 
         ###pprint(self.data)
-        print("\ndyn matrix:")
-        pprint(self.A)
-        print("\neq_points:", eq_points, "\n")
+        print("dyn matrix:")
+        pprint(self.A)       
+        print("\ninput matrix:")
+        pprint(self.B)
+        print("\neq_points:", eq_points, "\n\n")
         ###sys.exit()
     
     # -------------------------------------------
@@ -131,7 +133,7 @@ class LSTM(nn.Module):
             tau = self.data["dynamics"]["args"]["tau"]
             a = self.data["dynamics"]["args"]["a"]
             b = self.data["dynamics"]["args"]["b"]
-            v_fact = 1
+            v_fact = 50
             
             # Solve equilibrium equations
             # w* = (v* + a) / b
@@ -161,8 +163,22 @@ class LSTM(nn.Module):
         elif model_name == "HodgkinHuxleyFS":
             # HHFS has 4 states: [V, n, m, h]
             # We'll use a plausible resting state and a 4x4 zero Jacobian as placeholder
-            eq_point = torch.tensor([-0.7, 0.2, 0.05, 0.6])  # Approx resting state in normalized units
-            A = dyn_factor * torch.zeros((4, 4))
+            eq_point = torch.tensor([-0.7, 0.0032035, 0.00070115, 0.99988])  # Normalized units
+
+            # Linearized system matrices at the equilibrium point
+            A = dyn_factor * torch.tensor([
+                [-3.0000e+00, -5.2600e-05,  1.9819e-02,  4.6326e-06],
+                [ 5.5440e+00, -9.0943e+01,  0.0000e+00,  0.0000e+00],
+                [ 2.4460e+01,  0.0000e+00, -1.5075e+03,  0.0000e+00],
+                [-2.1701e-01,  0.0000e+00,  0.0000e+00, -7.0857e+01]
+            ])
+
+            B = dyn_factor * torch.tensor([
+                [2.0],
+                [0.0],
+                [0.0],
+                [0.0]
+            ])
 
         elif model_name == "HodgkinHuxleyFFE":
             # HHFFE has 10 states: 2 RSA neurons (5 vars each)

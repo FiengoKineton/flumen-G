@@ -130,7 +130,7 @@ class Hyperparams:
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 256,  
+                "batch_size": 126,  
                 "lr": 0.001,                    
                 "n_epochs": 200,  
                 "es_patience": 20,              

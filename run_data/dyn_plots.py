@@ -10,7 +10,7 @@ class Dynamics:
         # -------------------------------
         # Parametri
         self.mu = mhu       # <0
-        self.step_size = 2.0
+        self.step_size = 1.0
         self.c = c          # for linsys
 
         self.tau = 0.8
@@ -46,9 +46,9 @@ class Dynamics:
         parser = argparse.ArgumentParser(description="Run results analysis with optional display and plotting.")
         parser.add_argument("--both", action="store_true", help="Select both Nonlinear and Linearised models.")
         parser.add_argument("--stab", action="store_true", help="Plot the RootLocus.")
-        parser.add_argument("--mhu", type=float, default=1.0, help="For vdp (float).")
-        parser.add_argument("--k", type=float, default=50, help="For fhn (float).")
-        parser.add_argument("--c", type=float, default=50, help="For linsys (float).")
+        parser.add_argument("--mhu", type=float, default=-1.0, help="For vdp (float).")
+        parser.add_argument("--k", type=float, default=2, help="For fhn (float).")
+        parser.add_argument("--c", type=float, default=-1, help="For linsys (float).")
         parser.add_argument("--method", type=str, default="TU", help="For linsys (string).")
         args = parser.parse_args()
         return args

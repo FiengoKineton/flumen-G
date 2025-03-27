@@ -31,6 +31,10 @@ python experiments/train_wandb.py data/fhn_test_data.pkl fhn_test
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/linsys.yaml linsys_test_data
 python experiments/train_wandb.py data/linsys_test_data.pkl linsys_test 
 
+--HHfs------------------------------
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/hhfs.yaml hhfs_test_data
+python experiments/train_wandb.py data/hhfs_test_data.pkl hhfs_test 
+
 
 --general---------------------------
 python experiments/train_wandb.py data/{model_name}_test_data.pkl {run_name} 
