@@ -43,7 +43,7 @@ class LSTM(nn.Module):
         self.I = torch.eye(self.A.shape[0])
         self.dtype = torch.float32
 
-        self.B = torch.tensor([[0], [0]])
+        #self.B = torch.tensor([[0], [0]])
         ###pprint(self.data)
         print("dyn matrix:")
         pprint(self.A)       
@@ -124,7 +124,7 @@ class LSTM(nn.Module):
         """
         model_name = self.model_name
         dyn_factor = self.data["control_delta"]
-        B = 0
+        B = torch.tensor([[0], [0]])
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
@@ -221,7 +221,6 @@ class LSTM(nn.Module):
         else:
             raise ValueError(f"Unknown model name: {model_name}")
         
-        if B==0: B = torch.tensor([[0], [0]])
         #print(A.shape[0])
         return A, B, eq_point
 
