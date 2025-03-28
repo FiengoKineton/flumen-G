@@ -184,3 +184,5 @@ artifacts/
 !DT_comparison/*.csv
 !DT_comparison/*.png
 !DT_comparison/*.py
+
+!run_data/pkl_files/*.pkl
