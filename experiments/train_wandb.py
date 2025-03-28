@@ -15,6 +15,10 @@ import time
 import wandb
 import psutil
 
+import random
+import os
+import numpy as np
+
 # --------------------------------------------------------------------------- #
 """
 COMMANDs:
@@ -166,10 +170,31 @@ def get_loss(which):
 # --------------------------------------------------------------------------- #
 
 
+# ------ GLOBAL SEED SETTER FOR REPRODUCIBILITY ----------------------------- #
+def set_seed(seed=42):
+    """
+    Sets global random seeds across Python, NumPy, PyTorch, and CUDA to ensure 
+    full reproducibility of training runs. This controls all sources of 
+    randomness such as weight initialization, data shuffling, dropout, 
+    and GPU behavior.
+
+    Args:
+        seed (int): The seed value to use (default is 42).
+    """
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+# --------------------------------------------------------------------------- #
+
+
 # ------ Run Processing ----------------------------------------------------- #
 def main(sweep):
     initial_metrics = get_initial_metrics()     # Execution Performance Summary
-
+    set_seed(42)                                # usefull?
 
     ap = ArgumentParser()
 

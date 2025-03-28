@@ -64,8 +64,13 @@ class LSTM(nn.Module):
 
     # -------------------------------------------
         self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
-        self.W__h_to_x = nn.Linear(self.hidden_size, self.state_dim, bias=bias)   # Mapping function
+        torch.nn.init.xavier_uniform_(self.alpha_gate.weight)
+        if bias: torch.nn.init.constant_(self.alpha_gate.bias, 0.0)
 
+        self.W__h_to_x = nn.Linear(self.hidden_size, self.state_dim, bias=bias)   # Mapping function
+        torch.nn.init.xavier_uniform_(self.W__h_to_x.weight)
+        if bias: torch.nn.init.constant_(self.W__h_to_x.bias, 0.0)
+        
 
     def forward(self, rnn_input: PackedSequence, hidden_state, tau):
         rnn_input_unpacked, lengths = pad_packed_sequence(rnn_input, batch_first=self.batch_first)
@@ -257,7 +262,10 @@ class LSTMCell(nn.Module):
     def __init__(self, input_size: int, hidden_size: int, bias: bool=True):
         super(LSTMCell, self).__init__()
         self.hidden_size = hidden_size
+
         self.WU = nn.Linear(input_size + hidden_size, 4 * hidden_size, bias=bias)
+        torch.nn.init.xavier_uniform_(self.WU.weight)
+        if bias: torch.nn.init.constant_(self.WU.bias, 0.0)
 
     def forward(self, u, h, c):
         gates = self.WU(torch.cat((u, h), dim=1))  # Single matrix multiplication
