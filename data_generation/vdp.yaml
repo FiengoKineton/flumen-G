@@ -3,7 +3,7 @@ dynamics:
   args:
     damping: 1.0
 sequence_generator:
-  name: GaussianSqWave
+  name: SinusoidalSequence
   args:
-    period: 5
-control_delta: 0.2
+    max_freq: 2.0
+control_delta: 0.05

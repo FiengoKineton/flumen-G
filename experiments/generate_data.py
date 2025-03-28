@@ -69,9 +69,9 @@ def generate(args, trajectory_sampler: TrajectorySampler, postprocess=[]):
     if args.data_split[0] + args.data_split[1] >= 100:
         raise Exception("Invalid data split.")
 
-    n_val = int(args.n_trajectories * (args.data_split[0] / 100.))
-    n_test = int(args.n_trajectories * (args.data_split[1] / 100.))
-    n_train = args.n_trajectories - n_val - n_test
+    n_val = int(args.n_trajectories * (args.data_split[0] / 100.))  # 20%
+    n_test = int(args.n_trajectories * (args.data_split[1] / 100.)) # 20%
+    n_train = args.n_trajectories - n_val - n_test                  # 60%
 
     def get_example():
         x0, t, y, u = trajectory_sampler.get_example(args.time_horizon,

@@ -193,7 +193,7 @@ class TrajectoryDataset(Dataset):
         # print("\nu_sz: ", u_sz)         # output | 75
 
         u_seq = torch.zeros_like(u)
-        u_seq[0:u_sz] = u[u_start_idx:(u_end_idx + 1)]
+        u_seq[0:u_sz] = u[u_start_idx:(u_end_idx + 1)]  # extract a segment from u and put it at the beginning of u_seq, while padding the rest of u_seq with zeros
 
         deltas = torch.ones((u_seq.shape[0], 1))
         t_u_end = init_time + delta * u_end_idx

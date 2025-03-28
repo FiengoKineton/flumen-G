@@ -52,6 +52,7 @@ def get_postprocess(dynamics: str):
     return []
 
 
+# maybe in here the input is calculuated?
 def rejection_sampling_single_neuron(data):
     for (k, y) in enumerate(data.state):
         p = y[:, 0].flatten()
