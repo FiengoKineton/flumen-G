@@ -15,7 +15,7 @@ test6 = "run_data/csv_files/sweep_test6.csv"            # comment | vdp sweep_co
 vdp_fin = "run_data/csv_files/Finals_vdp.csv"           # comment | FINAL COMPARISON for vdp
 fhn_fin = "run_data/csv_files/Finals_fhn.csv"           # comment | FINAL COMPARISON for fhn
 default = "run_data/csv_files/Default_code.csv"         # comment | original RNN architecture
-csv_path = vdp_fin
+csv_path = default
 
 
 # Define your scripts and optional args
