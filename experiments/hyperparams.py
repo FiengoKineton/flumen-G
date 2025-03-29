@@ -191,21 +191,21 @@ class Hyperparams:
 
 
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
-            # for GaussianSqWave
-            '_hyperparams___vdp': {
-                "control_rnn_size": 22,  
+            # for GaussianSqWave - dataset 3
+            'hyperparams___vdp': {
+                "control_rnn_size": 48,         # 22,  
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 126,  
-                "lr": 0.0003,                   # 0.001,                    
+                "batch_size": 96,               # 126,  
+                "lr": 0.001,                    # 0.0003,                    
                 "n_epochs": 200,  
                 "es_patience": 25,              # 20,          
                 "es_delta": 1e-07,
-                "sched_patience": 8,            # 10,
-                "sched_factor": 2,
+                "sched_patience": 10,           # 8,
+                "sched_factor": 3,              # 2,
                 "loss": "mse",                  
                 "discretisation_mode": "BE",
                 "optimiser_mode": "adam",       
@@ -214,8 +214,9 @@ class Hyperparams:
                 "mode_dnn": "FFNet"
             },
 
+
             # for SinusoidalSequence
-            'hyperparams___vdp': {
+            '_hyperparams___vdp': {
                 "control_rnn_size": 48,  
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
