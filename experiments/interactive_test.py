@@ -106,7 +106,7 @@ def main():
 
         y = y[:, tuple(bool(v) for v in sampler._dyn.mask)]
         sq_error = np.square(y - y_pred)
-        print("\nMSE (mean square error):", np.mean(sq_error))
+        print("MSE (mean square error):", np.mean(sq_error), "\n")
 
         # **Clear previous plots and remove insets & connections**
         for ax_ in ax1:
