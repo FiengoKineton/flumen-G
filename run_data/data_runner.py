@@ -15,7 +15,8 @@ test6 = "run_data/csv_files/sweep_test6.csv"            # comment | vdp sweep_co
 vdp_fin = "run_data/csv_files/Finals_vdp.csv"           # comment | FINAL COMPARISON for vdp
 fhn_fin = "run_data/csv_files/Finals_fhn.csv"           # comment | FINAL COMPARISON for fhn
 default = "run_data/csv_files/Default_code.csv"         # comment | original RNN architecture
-csv_path = default
+table = "run_data/csv_files/table.csv"                  # comment | for LateX tables
+csv_path = vdp_fin
 
 
 # Define your scripts and optional args
@@ -27,7 +28,7 @@ scripts_gen = [
 ]
 
 scripts_spc = [
-    #{"file": "run_data/output_calculus.py", "args": ["--plot", "--display", "--loc", csv_path]},            # ["--plot", "--all", "--display", "--loc"]
+    {"file": "run_data/output_calculus.py", "args": ["--plot", "--display", "--loc", csv_path]},            # ["--plot", "--all", "--display", "--loc"]
     {"file": "run_data/wandb_calculus_sort.py", "args": ["--loc", csv_path]},                               # ["--loc", "--all"]
     {"file": "run_data/wandb_calculus_plots.py", "args": ["--loc", csv_path]},                              # ["--all", "--loc"]
 ]

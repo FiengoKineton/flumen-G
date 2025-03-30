@@ -85,7 +85,7 @@ def main():
         fig4, ax4 = plt.subplots(1, 2)
         fig4.canvas.mpl_connect('close_event', on_close_window)
 
-        fig5, ax5 = plt.subplots()
+        fig5, ax5 = plt.subplots(1, 1)
         fig5.canvas.mpl_connect('close_event', on_close_window)
 
 
@@ -127,7 +127,7 @@ def main():
             for ax_ in ax3: ax_.cla()  ###############
         if others: 
             for ax_ in ax4: ax_.cla()
-            ax5.cla()
+            for ax_ in ax5: ax_.cla()
             
 
         # **Remove previous insets and connection lines**
@@ -201,20 +201,19 @@ def main():
                 prev_markings.extend(lines)  # Store connection line references
             #"""
 
+            if others: 
+                fig4, ax4 = plt.subplots(1, 2)
+                ax4[0].hist(coeffs[:, 0], bins=30, color="purple", alpha=0.7)
+                ax4[0].set_title("γ₁ distribution")
+                ax4[1].hist(coeffs[:, 1], bins=30, color="green", alpha=0.7)
+                ax4[1].set_title("γ₂ distribution")
 
-        if others: 
-            fig4, ax4 = plt.subplots(1, 2)
-            ax4[0].hist(coeffs[:, 0], bins=30, color="purple", alpha=0.7)
-            ax4[0].set_title("γ₁ distribution")
-            ax4[1].hist(coeffs[:, 1], bins=30, color="green", alpha=0.7)
-            ax4[1].set_title("γ₂ distribution")
-
-            fig5, ax5 = plt.subplots()
-            sc = ax5.scatter(coeffs[:, 0], coeffs[:, 1], c=t, cmap="viridis", s=10)
-            plt.colorbar(sc, ax=ax5, label="Time")
-            ax5.set_xlabel("γ₁")
-            ax5.set_ylabel("γ₂")
-            ax5.set_title("Phase plot: γ₁ vs γ₂")
+                fig5, ax5 = plt.subplots()
+                sc = ax5.scatter(coeffs[:, 0], coeffs[:, 1], c=t, cmap="viridis", s=10)
+                plt.colorbar(sc, ax=ax5, label="Time")
+                ax5.set_xlabel("γ₁")
+                ax5.set_ylabel("γ₂")
+                ax5.set_title("Phase plot: γ₁ vs γ₂")
 
 
         fig1.tight_layout()
