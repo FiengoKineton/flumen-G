@@ -5,6 +5,7 @@ import yaml
 from pathlib import Path
 from pprint import pprint
 import torch.nn.functional as F
+import numpy as np
 
 
 """
@@ -38,23 +39,24 @@ class LSTM(nn.Module):
     # -------------------------------------------
         self.model_name = model_name
         self.data = self.get_model_data()
-
-        self.A, self.B, eq_points = self.get_dyn_matrix()
-        self.I = torch.eye(self.A.shape[0])
         self.dtype = torch.float32
 
-        #self.B = torch.tensor([[0], [0]])
+        self.param = self.get_dyn_matrix()
+        self.I = torch.eye(self.state_dim, dtype=self.dtype)
+
+        """#self.B = torch.tensor([[0], [0]])
         ###pprint(self.data)
         print("dyn matrix:")
         pprint(self.A)       
         print("\ninput matrix:")
         pprint(self.B)
         print("\neq_points:", eq_points, "\n\n")
-        ###sys.exit()
+        ###sys.exit()"""
     
     # -------------------------------------------
         self.discretisation_function = globals().get(f"discretisation_{discretisation_mode}")
         self.x_update_function = globals().get(f"x_update_mode__{x_update_mode}")
+        self.linearisation_function = globals().get(f"linearisation_{self.model_name}")         # lpv__
 
     # -------------------------------------------
         self.lstm_cells = nn.ModuleList([
@@ -78,7 +80,8 @@ class LSTM(nn.Module):
         device = rnn_input_unpacked.device
 
         z, c_z = hidden_state
-        self.A, self.B, self.I, tau = self.A.to(device, dtype=self.dtype), self.B.to(device, dtype=self.dtype), self.I.to(device, dtype=self.dtype), tau.to(device, dtype=self.dtype)
+        #self.A, self.B = self.A.to(device, dtype=self.dtype), self.B.to(device, dtype=self.dtype)
+        self.I, tau = self.I.to(device, dtype=self.dtype), tau.to(device, dtype=self.dtype)
 
         outputs = torch.empty(batch_size, seq_len, self.z_size, device=device)  # Preallocate tensor | before: torch.zeros
         coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)  ###############
@@ -101,13 +104,15 @@ class LSTM(nn.Module):
                 c_list.append(c_new)
 
             u_dyn = rnn_input_t[:, :1]
-            x_mid = self.discretisation_function(x_prev, (self.A, tau_t, self.I, self.B), u_dyn)             # same as the old one
+            A_matrix, B_matrix, f_eq = self.linearisation_function(self.param, x_prev, u_dyn)
+            x_mid = self.discretisation_function(x_prev, (A_matrix, tau_t, self.I, B_matrix, f_eq), u_dyn)            
+
             h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
-            x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)   ###############   
+            x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)      
 
             z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)            # same as the old one
             outputs[:, t, :].copy_(z[-1])  # In-place assignment
-            coefficients[:, t, :].copy_(coeff)  ###############
+            coefficients[:, t, :].copy_(coeff)  
 
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         return torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False), (z, c_z), coefficients    ###############
@@ -128,101 +133,102 @@ class LSTM(nn.Module):
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
-            A = dyn_factor * torch.tensor([[0, 1], [-1, mhu]])          # before | self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
-            B = dyn_factor * torch.tensor([[0], [1]])
+            x_eq, u_eq = torch.tensor([[0.0], [0.0]], dtype=self.dtype), torch.tensor([[0.0]], dtype=self.dtype)
 
-            # Equilibrium point for VdP: (x*, y*) = (0, 0)
-            eq_point = torch.tensor([[0], [0]])
+            param = {
+                'dyn_factor': dyn_factor,
+                'dtype': self.dtype,
+                'mhu': mhu,  
+                'x1_eq': 0.0, 
+                'x2_eq': 0.0, 
+                'u_eq': 0.0,
+            }
+            
+            def A(x, u): 
+                x_sample = x[0, 0]  # [2]
+                u_sample = u[0]     # [1]
+
+                x1 = x_sample[0] - x_eq[0, 0]
+                x2 = x_sample[1] - x_eq[1, 0]
+                u = u_sample[0] - u_eq[0, 0]
+
+                a = torch.tensor([[0.0, 1.0],
+                                [-1.0 - 2 * mhu * x1 * x2,
+                                mhu * (1 - x1**2)]], dtype=self.dtype)
+                return dyn_factor * a
+
+            def B(x, u):
+                x_sample = x[0, 0]
+                u_sample = u[0] 
+
+                x1 = x_sample[0] - x_eq[0, 0]
+                x2 = x_sample[1] - x_eq[1, 0]
+                u = u_sample[0] - u_eq[0, 0]
+                
+                b =  torch.tensor([[0.0], [1.0]], dtype=self.dtype)
+                return dyn_factor * b
+
 
         elif model_name == "FitzHughNagumo":
             tau = self.data["dynamics"]["args"]["tau"]
             a = self.data["dynamics"]["args"]["a"]
             b = self.data["dynamics"]["args"]["b"]
             v_fact = 50
-            
-            # Solve equilibrium equations
-            # w* = (v* + a) / b
-            # v* - v*^3 / 3 - (v* + a)/b = 0 (solve numerically)
+
             from scipy.optimize import fsolve
-            
+
+            # Solve for v* such that dv/dt = 0 and dw/dt = 0
             def fhn_equilibrium(v):
-                return v - v**3 - (v - a) / b  
+                w = (v - a) / b
+                return v - v**3 - w
 
             v_star = fsolve(fhn_equilibrium, 0)[0]
             w_star = (v_star - a) / b
-            
-            A = dyn_factor * torch.tensor([[v_fact*(1 - 3*v_star**2), -v_fact], [1 / tau, -b / tau]])
-            B = dyn_factor * torch.tensor([[v_fact], [0]])
+            u_star = w_star - (v_star - v_star**3)  # from dv = 0 → u* = w* - v* + v*^3
 
-            eq_point = torch.tensor([v_star, w_star])
+            param = {
+                'dyn_factor': dyn_factor,
+                'dtype': self.dtype,
+                'tau': tau, 
+                'a': a, 
+                'b': b, 
+                'v_fact': v_fact, 
+                'x1_eq': v_star, 
+                'x2_eq': w_star, 
+                'u_eq': u_star,
+            }
 
-            # A: [[7.1408, -10.0000], [0.2500, -0.3500]]
-            # eq_point: [0.3087, 0.4348]
+            x_eq = torch.tensor([[v_star], [w_star]], dtype=self.dtype)
+            u_eq = torch.tensor([[u_star]], dtype=self.dtype)
 
-        elif model_name == "GreenshieldsTraffic":
-            v0 = self.data["dynamics"]["args"]["v0"]
-            n = self.data["dynamics"]["args"]["n"]
-            A = dyn_factor * torch.tensor([[-v0 / n]])
-            eq_point = torch.tensor([n])  # Equilibrium at max density
+            def A(x, u):
+                x_sample = x[0, 0]
+                u_sample = u[0]
 
-        elif model_name == "HodgkinHuxleyFS":
-            # HHFS has 4 states: [V, n, m, h]
-            # We'll use a plausible resting state and a 4x4 zero Jacobian as placeholder
-            eq_point = torch.tensor([-0.7, 0.0032035, 0.00070115, 0.99988])  # Normalized units
+                v = x_sample[0] - x_eq[0, 0]
+                w = x_sample[1] - x_eq[1, 0]
+                u_val = u_sample[0] - u_eq[0, 0]
 
-            # Linearized system matrices at the equilibrium point
-            A = dyn_factor * torch.tensor([
-                [-3.0000e+00, -5.2600e-05,  1.9819e-02,  4.6326e-06],
-                [ 5.5440e+00, -9.0943e+01,  0.0000e+00,  0.0000e+00],
-                [ 2.4460e+01,  0.0000e+00, -1.5075e+03,  0.0000e+00],
-                [-2.1701e-01,  0.0000e+00,  0.0000e+00, -7.0857e+01]
-            ])
+                df_dv = v_fact * (1 - 3 * v**2)
+                df_dw = -v_fact
+                dg_dv = 1 / tau
+                dg_dw = -b / tau
 
-            B = dyn_factor * torch.tensor([
-                [2.0],
-                [0.0],
-                [0.0],
-                [0.0]
-            ])
+                a = torch.tensor([[df_dv, df_dw],
+                                [dg_dv, dg_dw]], dtype=self.dtype)
+                return dyn_factor * a
 
-        elif model_name == "HodgkinHuxleyFFE":
-            # HHFFE has 10 states: 2 RSA neurons (5 vars each)
-            # Resting point is a zero vector as placeholder
-            eq_point = torch.zeros(10)
-            A = dyn_factor * torch.zeros((10, 10))
+            def B(x, u):
+                # input affects only dv/dt
+                b = torch.tensor([[v_fact], [0.0]], dtype=self.dtype)
+                return dyn_factor * b
 
-            """elif model_name in ["HodgkinHuxleyFFE", "HodgkinHuxleyFS"]:
-                # HH model equilibrium is at resting potential (V*, n*, m*, h*)
-                # This is complex, so a placeholder value is used
-                A = dyn_factor * torch.tensor([[-1, 1], [-1, 0]])  # Placeholder
-                eq_point = torch.tensor([0, 0])  # Should be the HH resting potential"""
-
-        elif model_name == "LinearSys":
-            A = dyn_factor * torch.tensor(self.data["dynamics"]["args"]["a"])
-            B = dyn_factor * torch.tensor([[0], [1]])
-            eq_point = torch.zeros(A.shape[0])  # Equilibrium at x* = 0
-
-        elif model_name == "TwoTank":
-            # Placeholder values for resistances (R1, R2) and capacitances (C1, C2)
-            ###R1, R2, C1, C2 = 1, 1, 1, 1  # These should be properly defined
-            ###A = dyn_factor * torch.tensor([[-1 / (R1 * C1), 0], [1 / (R1 * C2), -1 / (R2 * C2)]])
-            
-            c1 = self.data["dynamics"]["args"].get("c1", 0.08)
-            c2 = self.data["dynamics"]["args"].get("c2", 0.04)
-            epsilon = 1e-3
-            h1_star, h2_star = epsilon, epsilon
-
-            A = dyn_factor * torch.tensor([
-                [-c2 / (2 * torch.sqrt(h1_star)), 0.0],
-                [ c2 / (2 * torch.sqrt(h1_star)), -c2 / (2 * torch.sqrt(h2_star))]
-            ])
-            eq_point = torch.tensor([h1_star, h2_star])  # At rest with no input
 
         else:
             raise ValueError(f"Unknown model name: {model_name}")
         
         #print(A.shape[0])
-        return A, B, eq_point
+        return param
 
     def get_model_data(self): 
         """
@@ -255,7 +261,6 @@ class LSTM(nn.Module):
         return model_data
 
 
-
 # ---------------- LSTMCell ------------------------------------------------- #
 
 class LSTMCell(nn.Module):
@@ -280,10 +285,143 @@ class LSTMCell(nn.Module):
         return h, c
 
 
+# --------------------------------------------------------------------------- #
+# ---------------- Linearisation functions ---------------------------------- #
+# --------------------------------------------------------------------------- #
+
+def linearisation_VanDerPol(param, x, u): 
+    x1_eq = param['x1_eq']
+    x2_eq = param['x2_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    mhu = param['mhu']
+
+    x_sample = x[0, 0]
+    u_sample = u[0]
+
+    x1 = x_sample[0] - x1_eq
+    x2 = x_sample[1] - x2_eq
+    u = u_sample[0] - u_eq
+
+    A = dyn_factor* torch.tensor([[0.0, 1.0],
+                        [-1.0 - 2 * mhu * x1 * x2,
+                        mhu * (1 - x1**2)]], 
+                        dtype=dtype)
+    
+    B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
+
+    f_eq = dyn_factor * torch.tensor([
+        x2_eq,
+        -x1_eq + mhu * (1 - x1_eq**2) * x2_eq + u_eq
+    ], dtype=dtype)
+
+    return A, B, f_eq
+
+
+def linearisation_FitzHughNagumo(param, x, u): 
+    x1_eq = param['x1_eq']
+    x2_eq = param['x2_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    tau = param['tau']
+    a = param['a']
+    b = param['b']
+    v_fact = param['v_fact']
+
+    x_sample = x[0, 0]
+    u_sample = u[0]
+
+    x1 = x_sample[0] - x1_eq
+    x2 = x_sample[1] - x2_eq
+    u = u_sample[0] - u_eq
+
+    x_sample = x[0, 0]
+    u_sample = u[0]
+
+    v = x_sample[0] - x1_eq
+    w = x_sample[1] - x2_eq
+    u_val = u_sample[0] - u_eq
+
+    df_dv = v_fact * (1 - 3 * v**2)
+    df_dw = -v_fact
+    dg_dv = 1 / tau
+    dg_dw = -b / tau
+
+    A = dyn_factor * torch.tensor([[df_dv, df_dw],
+                    [dg_dv, dg_dw]], dtype=dtype)
+
+    B = dyn_factor * torch.tensor([[v_fact], [0.0]], dtype=dtype)
+
+    f_eq = dyn_factor * torch.tensor([
+        v_fact * (x1_eq - x1_eq**3 - x2_eq + u_eq),
+        (x1_eq - a - b * x2_eq) / tau
+    ], dtype=dtype)
+
+    return A, B, f_eq
+
+
+# ─────────────────────────────────────────────────────────────────────────── #
+# ---------------- Linearisation LPV functions ------------------------------ #
+# ─────────────────────────────────────────────────────────────────────────── #
+
+def jacobian_vdp(x, mu, dtype=torch.float32):
+    """
+    Compute the Jacobian A at a point x for Van der Pol dynamics.
+    x: torch.tensor([x1, x2])
+    """
+    x1, x2 = x[0], x[1]
+    A = torch.tensor([
+        [0.0, 1.0],
+        [-1.0 - 2 * mu * x1 * x2, mu * (1 - x1**2)]
+    ], dtype=dtype)
+    return A
+
+def compute_weighted_A(x_target, mu, radius=0.2, dtype=torch.float32, epsilon=1e-4):
+    """
+    Estimate A(x_target) using LPV weighted Jacobians.
+    """
+    # Define 8 direction vectors (circle-like)
+    angles = np.linspace(0, 2 * np.pi, 9)[:-1]
+    deltas = torch.tensor([[np.cos(a), np.sin(a)] for a in angles], dtype=dtype)
+
+    # Generate sample points around the origin
+    x_eq = torch.tensor([0.0, 0.0], dtype=dtype)
+    sampled_points = x_eq + radius * deltas  # [8, 2]
+
+    # Compute A_i for each sampled point
+    A_list = [jacobian_vdp(xi, mu, dtype=dtype) for xi in sampled_points]
+
+    # Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
+    distances = torch.norm(x_target - sampled_points, dim=1)  # [8]
+    weights = 1.0 / (distances**2 + epsilon)  # [8]
+    weights = weights / weights.sum()  # normalize
+
+    # Compute weighted sum: A(x) = sum_i A_i * w_i
+    A_weighted = sum(w * A for w, A in zip(weights, A_list))
+
+    return A_weighted
+
+def compute_weighted_B(x_target, dyn_factor=1.0, dtype=torch.float32):
+    """
+    Van der Pol B(x) is constant, but we define it for generality
+    """
+    return dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
+
+def linearisation_lpv__VanDerPol(x, mu=1, radius=0.2, dyn_factor=1.0, dtype=torch.float32):
+    A = compute_weighted_A(x, mu, radius=radius, dtype=dtype)
+    B = compute_weighted_B(x, dyn_factor=dyn_factor, dtype=dtype)
+    return 0.2*A, 0.2*B
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════ #
 # ---------------- Discretisation functions --------------------------------- #
+# ═══════════════════════════════════════════════════════════════════════════ #
 
 def discretisation_FE(x_prev, mat, u):
-    A, tau, I, B = mat
+    A, tau, I, B, f_eq = mat
     batch_size = tau.shape[0]
 
     tau = tau.view(batch_size, 1, 1)
@@ -294,26 +432,33 @@ def discretisation_FE(x_prev, mat, u):
     input_matrix = tau * B.unsqueeze(0).expand(batch_size, -1, -1)
     input_matrix = input_matrix.transpose(1, 2)
 
+    #B_exp = B.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
+    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
+
     ev_lib = torch.bmm(x_prev, transform_matrix)
     ev_for = torch.bmm(u, input_matrix)
+    f_eq_term = tau * f_eq_exp
 
-    x_next = ev_lib + ev_for
+    x_next = ev_lib + ev_for + f_eq_term
 
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 def discretisation_BE(x_prev, mat, u):
-    A, tau, I, B = mat
+    A, tau, I, B, f_eq = mat
     batch_size = tau.shape[0]
 
     tau = tau.view(batch_size, 1, 1)
     u = u.view(batch_size, 1, 1)
     x_prev = x_prev.squeeze(0).unsqueeze(2)
+    f_eq = f_eq.view(-1, 1)
 
     A_neg = I - tau * A
     B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
+    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
+
     u_effect = torch.bmm(B_exp, u)
-    u_effect_scaled = tau * u_effect
+    u_effect_scaled = tau * (u_effect + f_eq_exp)
 
     ev_lib = torch.linalg.solve(A_neg, x_prev)
     ev_for = torch.linalg.solve(A_neg, u_effect_scaled)
@@ -326,7 +471,7 @@ def discretisation_BE(x_prev, mat, u):
 
 
 def discretisation_TU(x_prev, mat, u):
-    A, tau, I, B = mat
+    A, tau, I, B, f_eq = mat
     batch_size = tau.shape[0]
 
     tau = tau.view(batch_size, 1, 1)
@@ -340,15 +485,12 @@ def discretisation_TU(x_prev, mat, u):
     x_next = torch.bmm(A_pos, v)"""
 
     B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
-    u_effect = torch.bmm(B_exp, u)
-    u_scaled = tau * u_effect
+    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
 
-    rhs = torch.bmm(A_pos, x_prev)  # ev_lib pre-soluzione
-    rhs_total = rhs + u_scaled      # ev_lib + ev_for (prima di risolvere)
+    rhs = torch.bmm(A_pos, x_prev) + tau * (torch.bmm(B_exp, u) + f_eq_exp)
 
-
-    x_next = torch.linalg.solve(A_neg, rhs_total)
-    return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
+    x_next = torch.linalg.solve(A_neg, rhs)
+    return x_next.squeeze(2).unsqueeze(0)
 
 
 def discretisation_RK4(x_prev, mat, u):
@@ -356,7 +498,7 @@ def discretisation_RK4(x_prev, mat, u):
     Runge-Kutta 4th order (RK4) discretisation.
     Uses the classical RK4 method to approximate x_next.
     """
-    A, tau, _, B = mat
+    A, tau, _, B, f_eq = mat
     batch_size = tau.shape[0]
 
     tau = tau.view(batch_size, 1, 1)
@@ -364,29 +506,27 @@ def discretisation_RK4(x_prev, mat, u):
     x_prev = x_prev.squeeze(0).unsqueeze(1)
     A = A.expand(batch_size, -1, -1)
 
-    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
-    Bu = torch.bmm(u, B_exp.transpose(1, 2))  # [batch, 1, state]
+    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
+    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
 
-    def f(x): return torch.bmm(x, A) + Bu
+    def f(x): return torch.bmm(x, A) + torch.bmm(u, B_exp) + f_eq_exp
 
     k1 = f(x_prev)
     k2 = f(x_prev + 0.5 * tau * k1)
     k3 = f(x_prev + 0.5 * tau * k2)
     k4 = f(x_prev + tau * k3)
 
-    ev_lib = x_prev
-    ev_for = (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+    x_next = x_prev + (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
 
-    x_next = ev_lib + ev_for
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
-def discretisation_exact(x_prev, mat, u):
+def _discretisation_exact(x_prev, mat, u):   # OLD
     """
     Exact discretisation: x_next = exp(tau * A) * x_prev
     Uses the matrix exponential function from PyTorch.
     """
-    A, tau, _, B = mat
+    A, tau, _, B, f_eq = mat
     batch_size = tau.shape[0]
 
     tau = tau.view(batch_size, 1, 1)
@@ -402,8 +542,39 @@ def discretisation_exact(x_prev, mat, u):
     x_next = ev_lib + ev_for
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
+def discretisation_exact(x_prev, mat, u):
+    A, tau, I, B, f_eq = mat
+    batch_size = tau.shape[0]
 
+    tau = tau.view(batch_size, 1, 1)
+    u = u.view(batch_size, 1, 1)
+    x_prev = x_prev.squeeze(0).unsqueeze(1)  # [batch, 1, state]
+
+    # Assuming A is shared (not batched)
+    A_exp = torch.matrix_exp(tau[0, 0] * A)  # [2, 2]
+    exp_matrix = A_exp.unsqueeze(0).expand(batch_size, -1, -1)  # [batch, 2, 2]
+
+    rhs = exp_matrix - I
+    integral_term = torch.linalg.solve(A, rhs)  # [2, 2] result, broadcasted
+
+    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)  # [batch, 2, 1]
+
+    f_eq = f_eq.view(-1, 1)  # [2, 1]
+    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1)  # [batch, 2, 1]
+
+    input_term = torch.bmm(B_exp, u) + f_eq_exp  # [batch, 2, 1]
+
+    x1 = torch.bmm(x_prev, exp_matrix)          # [batch, 1, 2]
+    x2 = torch.bmm(integral_term.expand(batch_size, -1, -1), input_term)  # [batch, 2, 1]
+
+    x_next = x1 + x2.transpose(1, 2)  # [batch, 1, 2] + [batch, 1, 2]
+    return x_next.squeeze(1).unsqueeze(0)  # [1, batch, state]
+
+
+
+# ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈ #
 # ---------------- x_update_mode -------------------------------------------- #
+# ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈ #
 
 def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):      # GOOD results, balanced
     """

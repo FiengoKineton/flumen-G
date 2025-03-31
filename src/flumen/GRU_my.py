@@ -111,18 +111,21 @@ class GRU(nn.Module):
         """
         model_name = self.model_name
         dyn_factor = self.data["control_delta"]
+        B = torch.tensor([[0], [0]])
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
             A = dyn_factor * torch.tensor([[0, 1], [-1, mhu]])          # before | self.A = dyn_factor * torch.tensor([[mhu, -mhu], [1/mhu, 0]])
+            B = dyn_factor * torch.tensor([[0], [1]])
+
             # Equilibrium point for VdP: (x*, y*) = (0, 0)
-            eq_point = torch.tensor([0, 0])
+            eq_point = torch.tensor([[0], [0]])
 
         elif model_name == "FitzHughNagumo":
             tau = self.data["dynamics"]["args"]["tau"]
             a = self.data["dynamics"]["args"]["a"]
             b = self.data["dynamics"]["args"]["b"]
-            v_fact = 1
+            v_fact = 50
             
             # Solve equilibrium equations
             # w* = (v* + a) / b
@@ -136,6 +139,8 @@ class GRU(nn.Module):
             w_star = (v_star - a) / b
             
             A = dyn_factor * torch.tensor([[v_fact*(1 - 3*v_star**2), -v_fact], [1 / tau, -b / tau]])
+            B = dyn_factor * torch.tensor([[v_fact], [0]])
+
             eq_point = torch.tensor([v_star, w_star])
 
             # A: [[7.1408, -10.0000], [0.2500, -0.3500]]
@@ -150,8 +155,22 @@ class GRU(nn.Module):
         elif model_name == "HodgkinHuxleyFS":
             # HHFS has 4 states: [V, n, m, h]
             # We'll use a plausible resting state and a 4x4 zero Jacobian as placeholder
-            eq_point = torch.tensor([-0.7, 0.2, 0.05, 0.6])  # Approx resting state in normalized units
-            A = dyn_factor * torch.zeros((4, 4))
+            eq_point = torch.tensor([-0.7, 0.0032035, 0.00070115, 0.99988])  # Normalized units
+
+            # Linearized system matrices at the equilibrium point
+            A = dyn_factor * torch.tensor([
+                [-3.0000e+00, -5.2600e-05,  1.9819e-02,  4.6326e-06],
+                [ 5.5440e+00, -9.0943e+01,  0.0000e+00,  0.0000e+00],
+                [ 2.4460e+01,  0.0000e+00, -1.5075e+03,  0.0000e+00],
+                [-2.1701e-01,  0.0000e+00,  0.0000e+00, -7.0857e+01]
+            ])
+
+            B = dyn_factor * torch.tensor([
+                [2.0],
+                [0.0],
+                [0.0],
+                [0.0]
+            ])
 
         elif model_name == "HodgkinHuxleyFFE":
             # HHFFE has 10 states: 2 RSA neurons (5 vars each)
@@ -167,6 +186,7 @@ class GRU(nn.Module):
 
         elif model_name == "LinearSys":
             A = dyn_factor * torch.tensor(self.data["dynamics"]["args"]["a"])
+            B = dyn_factor * torch.tensor([[0], [1]])
             eq_point = torch.zeros(A.shape[0])  # Equilibrium at x* = 0
 
         elif model_name == "TwoTank":
@@ -189,7 +209,7 @@ class GRU(nn.Module):
             raise ValueError(f"Unknown model name: {model_name}")
         
         #print(A.shape[0])
-        return A, eq_point
+        return A, B, eq_point
 
     def get_model_data(self): 
         """
@@ -245,91 +265,130 @@ class GRUCell(nn.Module):
 
 # ---------------- Discretisation functions --------------------------------- #
 
-def discretisation_FE(x_prev, A, tau, I):
+def discretisation_FE(x_prev, mat, u):
+    A, tau, I, B = mat
     batch_size = tau.shape[0]
-    tau = tau.view(batch_size, 1, 1)
 
-    transform_matrix = I + tau * A
-    x_prev = x_prev.squeeze(0).unsqueeze(1)  
-    x_next = torch.bmm(x_prev, transform_matrix)
+    tau = tau.view(batch_size, 1, 1)
+    u = u.view(batch_size, 1, 1)    # 2, 1).transpose(1, 2)
+    x_prev = x_prev.squeeze(0).unsqueeze(1)
+
+    transform_matrix = I + tau * A 
+    input_matrix = tau * B.unsqueeze(0).expand(batch_size, -1, -1)
+    input_matrix = input_matrix.transpose(1, 2)
+
+    ev_lib = torch.bmm(x_prev, transform_matrix)
+    ev_for = torch.bmm(u, input_matrix)
+
+    x_next = ev_lib + ev_for
 
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
-def discretisation_BE(x_prev, A, tau, I):
+def discretisation_BE(x_prev, mat, u):
+    A, tau, I, B = mat
     batch_size = tau.shape[0]
+
     tau = tau.view(batch_size, 1, 1)
-    A_neg = I - tau * A
+    u = u.view(batch_size, 1, 1)
     x_prev = x_prev.squeeze(0).unsqueeze(2)
 
-    x_next = torch.linalg.solve(A_neg, x_prev)
+    A_neg = I - tau * A
+    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
+    u_effect = torch.bmm(B_exp, u)
+    u_effect_scaled = tau * u_effect
+
+    ev_lib = torch.linalg.solve(A_neg, x_prev)
+    ev_for = torch.linalg.solve(A_neg, u_effect_scaled)
 
     """inv_matrix = torch.inverse(A_neg)
     x_next = torch.bmm(x_prev, inv_matrix)"""
 
+    x_next = ev_lib + ev_for
     return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
 
 
-def discretisation_TU(x_prev, A, tau, I):
+def discretisation_TU(x_prev, mat, u):
+    A, tau, I, B = mat
     batch_size = tau.shape[0]
+
     tau = tau.view(batch_size, 1, 1)
+    u = u.view(batch_size, 1, 1)
+    x_prev = x_prev.squeeze(0).unsqueeze(2)
 
     A_pos = I + (tau / 2) * A
     A_neg = I - (tau / 2) * A
-    x_prev = x_prev.squeeze(0).unsqueeze(2)
 
-    v = torch.linalg.solve(A_neg, x_prev)
-    x_next = torch.bmm(A_pos, v)
+    """v = torch.linalg.solve(A_neg, x_prev)
+    x_next = torch.bmm(A_pos, v)"""
 
-    """A_neg_inv = torch.inverse(A_neg)  
-    transform_matrix = torch.bmm(A_pos, A_neg_inv)
-    x_next = torch.bmm(x_prev, transform_matrix)"""
+    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
+    u_effect = torch.bmm(B_exp, u)
+    u_scaled = tau * u_effect
 
+    rhs = torch.bmm(A_pos, x_prev)  # ev_lib pre-soluzione
+    rhs_total = rhs + u_scaled      # ev_lib + ev_for (prima di risolvere)
+
+
+    x_next = torch.linalg.solve(A_neg, rhs_total)
     return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
 
 
-def discretisation_RK4(x_prev, A, tau, I):
+def discretisation_RK4(x_prev, mat, u):
     """
     Runge-Kutta 4th order (RK4) discretisation.
     Uses the classical RK4 method to approximate x_next.
     """
+    A, tau, _, B = mat
     batch_size = tau.shape[0]
-    tau = tau.view(batch_size, 1, 1)
 
+    tau = tau.view(batch_size, 1, 1)
+    u = u.view(batch_size, 1, 1)
     x_prev = x_prev.squeeze(0).unsqueeze(1)
     A = A.expand(batch_size, -1, -1)
 
-    #print(x_prev.shape) # torch.Size([128, 1, 2])
-    #print(A.shape)      # torch.Size([128, 2, 2])
-    #print(tau.shape)    # torch.Size([128, 1, 1])
+    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
+    Bu = torch.bmm(u, B_exp.transpose(1, 2))  # [batch, 1, state]
 
-    k1 = torch.bmm(x_prev, A)
-    k2 = torch.bmm(x_prev + 0.5 * tau * k1, A)
-    k3 = torch.bmm(x_prev + 0.5 * tau * k2, A)
-    k4 = torch.bmm(x_prev + tau * k3, A)
+    def f(x): return torch.bmm(x, A) + Bu
 
-    x_next = x_prev + (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+    k1 = f(x_prev)
+    k2 = f(x_prev + 0.5 * tau * k1)
+    k3 = f(x_prev + 0.5 * tau * k2)
+    k4 = f(x_prev + tau * k3)
 
+    ev_lib = x_prev
+    ev_for = (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+
+    x_next = ev_lib + ev_for
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
-def discretisation_exact(x_prev, A, tau, I):
+def discretisation_exact(x_prev, mat, u):
     """
     Exact discretisation: x_next = exp(tau * A) * x_prev
     Uses the matrix exponential function from PyTorch.
     """
+    A, tau, _, B = mat
     batch_size = tau.shape[0]
+
     tau = tau.view(batch_size, 1, 1)
+    u = u.view(batch_size, 1, 1)
+    x_prev = x_prev.squeeze(0).unsqueeze(1)
 
     exp_matrix = torch.matrix_exp(tau * A)
-    x_prev = x_prev.squeeze(0).unsqueeze(1)
-    x_next = torch.bmm(x_prev, exp_matrix)
+    ev_lib = torch.bmm(x_prev, exp_matrix)
+
+    B_exp = B.T.unsqueeze(0).expand(batch_size, -1, -1)
+    ev_for = torch.bmm(u, tau * B_exp)
+
+    x_next = ev_lib + ev_for
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 
 # ---------------- x_update_mode -------------------------------------------- #
 
-def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):
+def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):      # GOOD results, balanced
     """
     Alpha-based update rule (Sigmoid function, bounded between 0 and 1).
     
@@ -345,7 +404,7 @@ def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):
     x_next = (1 - alpha) * x_mid + alpha * W__h_to_x(h[-1])
     return x_next, alpha    ###############
 
-def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):
+def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):       # good but beta can get negative
     """
     Beta-based update rule (Tanh function, bounded between -1 and 1).
     
@@ -362,7 +421,7 @@ def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):
     x_next = beta * x_mid + (1 - beta) * W__h_to_x(h[-1])
     return x_next, beta ###############
 
-def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):
+def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):      # not that efficient
     """
     Lambda-based update rule (Adaptive scaling, bounded between ~0.1 and 0.9).
     
@@ -380,3 +439,47 @@ def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):
     lambda_factor = x_norm / (x_norm + h_norm).clamp(0.1, 0.9)
     x_next = lambda_factor * x_mid + (1 - lambda_factor) * W__h_to_x(h[-1])
     return x_next, lambda_factor    ###############
+
+
+def x_update_mode__relu(x_mid, h, alpha_gate, W__h_to_x):       # coeff super small
+    """
+    ReLU-based gate: values above 0 are passed, below 0 are zeroed.
+    
+    - The more activated h[-1] is (positively), the more it influences x_next.
+    - Acts like a sparse activation gating — only strongly activated features influence the output.
+    """
+    gate = F.relu(alpha_gate(h[-1]))
+    gate = gate / (gate + 1e-5)  # Normalize for safety, values in (0, 1)
+    x_next = (1 - gate) * x_mid + gate * W__h_to_x(h[-1])
+    return x_next, gate
+
+def x_update_mode__switch(x_mid, h, alpha_gate, W__h_to_x):     # coeff either 0 or 1
+    """
+    Hard switch: Uses a threshold to select between x_mid and transformed input.
+    
+    - If activation > 0 → rely on learned influence.
+    - Else → follow past dynamics.
+
+    This is like a "hard attention" — can simulate decision boundaries.
+    """
+    thresholded = (alpha_gate(h[-1]) > 0).float()  # Binary mask
+    x_next = (1 - thresholded) * x_mid + thresholded * W__h_to_x(h[-1])
+    return x_next, thresholded
+
+def x_update_mode__entropy(x_mid, h, alpha_gate, W__h_to_x):    # GOOD
+    """
+    Gate based on entropy of softmax over hidden state projection.
+    
+    - High entropy → uncertain → favor past (x_mid).
+    - Low entropy → confident → favor W(h).
+
+    This one is smart when you want uncertainty to drive conservatism.
+    """
+    logits = alpha_gate(h[-1])
+    probs = F.softmax(logits, dim=-1)
+    entropy = -torch.sum(probs * torch.log(probs + 1e-8), dim=-1, keepdim=True)  # shape [batch, 1]
+    entropy = torch.sigmoid(entropy)  # squash to (0, 1)
+    
+    gate = 1 - entropy  # High entropy = rely on x_mid
+    x_next = gate * x_mid + (1 - gate) * W__h_to_x(h[-1])
+    return x_next, gate

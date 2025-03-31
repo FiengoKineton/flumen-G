@@ -24,7 +24,7 @@ scripts_gen = [
     #{"file": "run_data/wandb_get_runs.py", "args": []},
     #{"file": "run_data/wandb_calculus_min_max.py", "args": ["--which", 'best_val']},                        # ["--loc", "--which"]
     #{"file": "experiments/hyperparams.py", "args": ["--run"]},                                              # ["--run"]
-    {"file": "run_data/dyn_plots.py", "args": ["--both", "--mhu", "-0.01", "--k", "1.0"]},                  # ["--both", "--k", "--mhu"]
+    {"file": "scr/flumen/others/dyn_plots.py", "args": ["--both", "--mhu", "-0.01", "--k", "1.0"]},                  # ["--both", "--k", "--mhu"]
 ]
 
 scripts_spc = [
