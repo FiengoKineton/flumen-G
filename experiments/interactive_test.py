@@ -31,7 +31,7 @@ def main():
     args = parse_args()
 
     num_times = 2           # default 2
-    others = True
+    others = False
 
 
     if args.wandb:
@@ -127,7 +127,7 @@ def main():
             for ax_ in ax3: ax_.cla()  ###############
         if others: 
             for ax_ in ax4: ax_.cla()
-            for ax_ in ax5: ax_.cla()
+            ax5.cla()
             
 
         # **Remove previous insets and connection lines**

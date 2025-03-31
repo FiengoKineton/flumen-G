@@ -195,7 +195,7 @@ def set_seed(seed=42):
 # ------ Run Processing ----------------------------------------------------- #
 def main(sweep):
     initial_metrics = get_initial_metrics()     # Execution Performance Summary
-    set_seed(42)                                # usefull?
+    #set_seed(42)                                # usefull?
 
     ap = ArgumentParser()
 
