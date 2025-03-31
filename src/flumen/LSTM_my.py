@@ -388,9 +388,6 @@ def discretisation_FE(x_prev, mat, u):
     ev_for = torch.bmm(u, input_matrix)
     f_eq_term = tau * f_eq_exp
 
-    print(f_eq_term.shape)
-    print(ev_lib.shape)
-
     x_next = ev_lib + ev_for + f_eq_term
 
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
