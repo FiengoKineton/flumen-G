@@ -129,11 +129,9 @@ class LSTM(nn.Module):
         """
         model_name = self.model_name
         dyn_factor = self.data["control_delta"]
-        B = torch.tensor([[0], [0]])
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
-            x_eq, u_eq = torch.tensor([[0.0], [0.0]], dtype=self.dtype), torch.tensor([[0.0]], dtype=self.dtype)
 
             param = {
                 'dyn_factor': dyn_factor,
@@ -144,29 +142,6 @@ class LSTM(nn.Module):
                 'u_eq': 0.0,
             }
             
-            def A(x, u): 
-                x_sample = x[0, 0]  # [2]
-                u_sample = u[0]     # [1]
-
-                x1 = x_sample[0] - x_eq[0, 0]
-                x2 = x_sample[1] - x_eq[1, 0]
-                u = u_sample[0] - u_eq[0, 0]
-
-                a = torch.tensor([[0.0, 1.0],
-                                [-1.0 - 2 * mhu * x1 * x2,
-                                mhu * (1 - x1**2)]], dtype=self.dtype)
-                return dyn_factor * a
-
-            def B(x, u):
-                x_sample = x[0, 0]
-                u_sample = u[0] 
-
-                x1 = x_sample[0] - x_eq[0, 0]
-                x2 = x_sample[1] - x_eq[1, 0]
-                u = u_sample[0] - u_eq[0, 0]
-                
-                b =  torch.tensor([[0.0], [1.0]], dtype=self.dtype)
-                return dyn_factor * b
 
 
         elif model_name == "FitzHughNagumo":
@@ -197,32 +172,6 @@ class LSTM(nn.Module):
                 'x2_eq': w_star, 
                 'u_eq': u_star,
             }
-
-            x_eq = torch.tensor([[v_star], [w_star]], dtype=self.dtype)
-            u_eq = torch.tensor([[u_star]], dtype=self.dtype)
-
-            def A(x, u):
-                x_sample = x[0, 0]
-                u_sample = u[0]
-
-                v = x_sample[0] - x_eq[0, 0]
-                w = x_sample[1] - x_eq[1, 0]
-                u_val = u_sample[0] - u_eq[0, 0]
-
-                df_dv = v_fact * (1 - 3 * v**2)
-                df_dw = -v_fact
-                dg_dv = 1 / tau
-                dg_dw = -b / tau
-
-                a = torch.tensor([[df_dv, df_dw],
-                                [dg_dv, dg_dw]], dtype=self.dtype)
-                return dyn_factor * a
-
-            def B(x, u):
-                # input affects only dv/dt
-                b = torch.tensor([[v_fact], [0.0]], dtype=self.dtype)
-                return dyn_factor * b
-
 
         else:
             raise ValueError(f"Unknown model name: {model_name}")
