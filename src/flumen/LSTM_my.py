@@ -382,11 +382,14 @@ def discretisation_FE(x_prev, mat, u):
     input_matrix = input_matrix.transpose(1, 2)
 
     #B_exp = B.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
-    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
+    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
 
     ev_lib = torch.bmm(x_prev, transform_matrix)
     ev_for = torch.bmm(u, input_matrix)
     f_eq_term = tau * f_eq_exp
+
+    print(f_eq_term.shape)
+    print(ev_lib.shape)
 
     x_next = ev_lib + ev_for + f_eq_term
 
@@ -434,7 +437,7 @@ def discretisation_TU(x_prev, mat, u):
     x_next = torch.bmm(A_pos, v)"""
 
     B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
-    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
+    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
 
     rhs = torch.bmm(A_pos, x_prev) + tau * (torch.bmm(B_exp, u) + f_eq_exp)
 
@@ -469,27 +472,6 @@ def discretisation_RK4(x_prev, mat, u):
 
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
-
-def _discretisation_exact(x_prev, mat, u):   # OLD
-    """
-    Exact discretisation: x_next = exp(tau * A) * x_prev
-    Uses the matrix exponential function from PyTorch.
-    """
-    A, tau, _, B, f_eq = mat
-    batch_size = tau.shape[0]
-
-    tau = tau.view(batch_size, 1, 1)
-    u = u.view(batch_size, 1, 1)
-    x_prev = x_prev.squeeze(0).unsqueeze(1)
-
-    exp_matrix = torch.matrix_exp(tau * A)
-    ev_lib = torch.bmm(x_prev, exp_matrix)
-
-    B_exp = B.T.unsqueeze(0).expand(batch_size, -1, -1)
-    ev_for = torch.bmm(u, tau * B_exp)
-
-    x_next = ev_lib + ev_for
-    return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
 def discretisation_exact(x_prev, mat, u):
     A, tau, I, B, f_eq = mat
