@@ -24,7 +24,7 @@ class CausalFlowModel(nn.Module):
                  mode_rnn='new',
                  mode_dnn='FFNet',
                  use_batch_norm=False, 
-                 linearisation_mode=True):
+                 linearisation_mode=False):
         super(CausalFlowModel, self).__init__()
 
         self.state_dim = state_dim

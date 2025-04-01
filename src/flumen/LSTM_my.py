@@ -62,6 +62,7 @@ class LSTM(nn.Module):
         print("'lin_mode':", self.linearisation_function)
         print("'dis_mode':", self.discretisation_function)
         print("'upt_mode':", self.x_update_function)
+        print("\n")
 
     # -------------------------------------------
         self.lstm_cells = nn.ModuleList([
@@ -71,18 +72,16 @@ class LSTM(nn.Module):
 
 
     # -------------------------------------------
-        # Dropout layer per regolarizzare la rete tra i layer interni della LSTM
-        # Viene attivato solo se: c'è più di un layer e il dropout è > 0.0
-        # Aiuta a prevenire l'overfitting spegnendo casualmente dei neuroni a ogni forward pass
-        self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else None
+        """Dropout layer per regolarizzare la rete tra i layer interni della LSTM
+        Viene attivato solo se: c'è più di un layer e il dropout è > 0.0
+        Aiuta a prevenire l'overfitting spegnendo casualmente dei neuroni a ogni forward pass"""
+        #self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else None
 
 
-        # LayerNorm applicato separatamente a ogni layer della LSTM
-        # Stabilizza la distribuzione delle attivazioni (h_new), normalizzandole rispetto ai feature di ogni step
-        # Questo migliora la convergenza e riduce l'effetto di vanishing/exploding gradient
-        self.ln_layers = nn.ModuleList([
-            nn.LayerNorm(self.hidden_size) for _ in range(num_layers)
-        ])
+        """LayerNorm applicato separatamente a ogni layer della LSTM
+         Stabilizza la distribuzione delle attivazioni (h_new), normalizzandole rispetto ai feature di ogni step
+        Questo migliora la convergenza e riduce l'effetto di vanishing/exploding gradient"""
+        #self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)])
 
     # -------------------------------------------
         self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
@@ -123,12 +122,8 @@ class LSTM(nn.Module):
             for layer, cell in enumerate(self.lstm_cells):
                 h_new, c_new = cell(u_t, h[layer], c[layer])
 
-                # Normalizza h_new
-                h_new = self.ln_layers[layer](h_new)
-
-                # Applica dropout *solo* se non è l'ultimo layer
-                if self.dropout_layer is not None and layer < self.num_layers - 1:
-                    h_new = self.dropout_layer(h_new)
+                # h_new = self.ln_layers[layer](h_new)
+                # if self.dropout_layer is not None and layer < self.num_layers - 1: h_new = self.dropout_layer(h_new)
 
                 h_list.append(h_new)
                 c_list.append(c_new)
