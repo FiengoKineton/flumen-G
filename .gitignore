@@ -164,7 +164,7 @@ cython_debug/
 outputs/
 .png
 *.eps
-*.pdf
+.pdf
 .csv
 .DS_Store
 

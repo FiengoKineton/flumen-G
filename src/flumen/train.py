@@ -46,7 +46,7 @@ def validate(data, loss_fn, model, device):
         for example in data:
             x0, y, u, deltas = prep_inputs(*example, device)
 
-            y_pred, _ = model(x0, u, deltas) ###############
+            y_pred, *_ = model(x0, u, deltas) ###############
             vl += loss_fn(y, y_pred).item()
 
             ###batch_size = y_pred.shape[0]    ###############
@@ -80,7 +80,7 @@ def train_step(example, loss_fn, model, optimiser, device):
 
     optimiser.zero_grad()
 
-    y_pred, _ = model(x0, u, deltas)    ###############
+    y_pred, *_ = model(x0, u, deltas)    ###############
     loss = model.state_dim * loss_fn(y, y_pred)       
 
     loss.backward()

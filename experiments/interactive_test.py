@@ -30,7 +30,7 @@ def main():
     plt.ion()  # Enable interactive mode
     args = parse_args()
 
-    num_times = 2           # default 2
+    num_times = 2           # default 2 | multiplied by the time_span
     others = False
 
 
@@ -53,6 +53,7 @@ def main():
     if "dyn_matrix" in metadata["args"] and not isinstance(metadata["args"]["dyn_matrix"], torch.Tensor):
         metadata["args"]["dyn_matrix"] = torch.tensor(metadata["args"]["dyn_matrix"])
 
+    #metadata["args"]["mode_rnn"] = 'old'
     pprint(metadata)
 
     mode_rnn = metadata.get("args", {}).get("mode_rnn", "new")  # ["args"]["mode_rnn"]
@@ -202,13 +203,11 @@ def main():
             #"""
 
             if others: 
-                fig4, ax4 = plt.subplots(1, 2)
                 ax4[0].hist(coeffs[:, 0], bins=30, color="purple", alpha=0.7)
                 ax4[0].set_title("γ₁ distribution")
                 ax4[1].hist(coeffs[:, 1], bins=30, color="green", alpha=0.7)
                 ax4[1].set_title("γ₂ distribution")
 
-                fig5, ax5 = plt.subplots()
                 sc = ax5.scatter(coeffs[:, 0], coeffs[:, 1], c=t, cmap="viridis", s=10)
                 plt.colorbar(sc, ax=ax5, label="Time")
                 ax5.set_xlabel("γ₁")

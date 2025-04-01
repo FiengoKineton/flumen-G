@@ -56,7 +56,11 @@ class LSTM(nn.Module):
     # -------------------------------------------
         self.discretisation_function = globals().get(f"discretisation_{discretisation_mode}")
         self.x_update_function = globals().get(f"x_update_mode__{x_update_mode}")
-        self.linearisation_function = globals().get(f"linearisation_{self.model_name}")         # lpv__
+        self.linearisation_function = globals().get(f"linearisation_lpv__{self.model_name}")         # lpv__
+
+        print("'lin_mode':", self.linearisation_function)
+        print("'dis_mode':", self.discretisation_function)
+        print("'upt_mode':", self.x_update_function)
 
     # -------------------------------------------
         self.lstm_cells = nn.ModuleList([
@@ -84,7 +88,9 @@ class LSTM(nn.Module):
         self.I, tau = self.I.to(device, dtype=self.dtype), tau.to(device, dtype=self.dtype)
 
         outputs = torch.empty(batch_size, seq_len, self.z_size, device=device)  # Preallocate tensor | before: torch.zeros
-        coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)  ###############
+        coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)  
+        matrices = torch.empty(seq_len, self.state_dim, self.state_dim, device=device)
+
 
         for t in range(seq_len):
             rnn_input_t = rnn_input_unpacked[:, t, :]
@@ -113,9 +119,11 @@ class LSTM(nn.Module):
             z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)            # same as the old one
             outputs[:, t, :].copy_(z[-1])  # In-place assignment
             coefficients[:, t, :].copy_(coeff)  
+            matrices[t, :, :].copy_(A_matrix)
 
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
-        return torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False), (z, c_z), coefficients    ###############
+        out = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
+        return out, (z, c_z), coefficients, matrices
 
 
     def get_dyn_matrix(self): 
@@ -315,32 +323,44 @@ def linearisation_FitzHughNagumo(param, x, u):
 # ---------------- Linearisation LPV functions ------------------------------ #
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def jacobian_vdp(x, mu, dtype=torch.float32):
-    """
-    Compute the Jacobian A at a point x for Van der Pol dynamics.
-    x: torch.tensor([x1, x2])
-    """
-    x1, x2 = x[0], x[1]
-    A = torch.tensor([
-        [0.0, 1.0],
-        [-1.0 - 2 * mu * x1 * x2, mu * (1 - x1**2)]
-    ], dtype=dtype)
-    return A
+def linearisation_lpv__VanDerPol(param, x, u, radius=0.2, epsilon=1e-4):
+    x1_eq = param['x1_eq']
+    x2_eq = param['x2_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    mhu = param['mhu']
 
-def compute_weighted_A(x_target, mu, radius=0.2, dtype=torch.float32, epsilon=1e-4):
-    """
-    Estimate A(x_target) using LPV weighted Jacobians.
-    """
+    x_target = x[0, 0]
+    u_target = u[0]
+
+    # ----------------------------------------------
+    B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
+
+    f_eq = dyn_factor * torch.tensor([
+        x2_eq,
+        -x1_eq + mhu * (1 - x1_eq**2) * x2_eq + u_eq
+    ], dtype=dtype)
+
+    # ----------------------------------------------
+    def jacobian_vdp(x):
+        x1, x2 = x[0], x[1]
+        A = dyn_factor * torch.tensor([
+            [0.0, 1.0],
+            [-1.0 - 2 * mhu * x1 * x2, mhu * (1 - x1**2)]
+        ], dtype=dtype)
+        return A
+    
     # Define 8 direction vectors (circle-like)
     angles = np.linspace(0, 2 * np.pi, 9)[:-1]
     deltas = torch.tensor([[np.cos(a), np.sin(a)] for a in angles], dtype=dtype)
 
     # Generate sample points around the origin
-    x_eq = torch.tensor([0.0, 0.0], dtype=dtype)
+    x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
     sampled_points = x_eq + radius * deltas  # [8, 2]
 
     # Compute A_i for each sampled point
-    A_list = [jacobian_vdp(xi, mu, dtype=dtype) for xi in sampled_points]
+    A_list = [jacobian_vdp(xi) for xi in sampled_points]
 
     # Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
     distances = torch.norm(x_target - sampled_points, dim=1)  # [8]
@@ -348,20 +368,65 @@ def compute_weighted_A(x_target, mu, radius=0.2, dtype=torch.float32, epsilon=1e
     weights = weights / weights.sum()  # normalize
 
     # Compute weighted sum: A(x) = sum_i A_i * w_i
-    A_weighted = sum(w * A for w, A in zip(weights, A_list))
+    A = sum(w * A for w, A in zip(weights, A_list))
 
-    return A_weighted
+    return A, B, f_eq
 
-def compute_weighted_B(x_target, dyn_factor=1.0, dtype=torch.float32):
-    """
-    Van der Pol B(x) is constant, but we define it for generality
-    """
-    return dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
 
-def linearisation_lpv__VanDerPol(x, mu=1, radius=0.2, dyn_factor=1.0, dtype=torch.float32):
-    A = compute_weighted_A(x, mu, radius=radius, dtype=dtype)
-    B = compute_weighted_B(x, dyn_factor=dyn_factor, dtype=dtype)
-    return 0.2*A, 0.2*B
+def linearisation_lpv__FitzHughNagumo(param, x, u, radius=0.2, epsilon=1e-4):
+    x1_eq = param['x1_eq']
+    x2_eq = param['x2_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    tau = param['tau']
+    a = param['a']
+    b = param['b']
+    v_fact = param['v_fact']
+
+    x_target = x[0, 0]
+    u_target = u[0]
+
+    # ----------------------------------------------
+    B = dyn_factor * torch.tensor([[v_fact], [0.0]], dtype=dtype)
+
+    f_eq = dyn_factor * torch.tensor([
+        v_fact * (x1_eq - x1_eq**3 - x2_eq + u_eq),
+        (x1_eq - a - b * x2_eq) / tau
+    ], dtype=dtype)
+
+    # ----------------------------------------------
+    def jacobian_fhn(x):
+        v, w = x[0], x[1]
+        df_dv = v_fact * (1 - 3 * v**2)
+        df_dw = -v_fact
+        dg_dv = 1 / tau
+        dg_dw = -b / tau
+
+        A = dyn_factor * torch.tensor([[df_dv, df_dw],
+                        [dg_dv, dg_dw]], dtype=dtype)
+        return A
+    
+    # Define 8 direction vectors (circle-like)
+    angles = np.linspace(0, 2 * np.pi, 9)[:-1]
+    deltas = torch.tensor([[np.cos(a), np.sin(a)] for a in angles], dtype=dtype)
+
+    # Generate sample points around the origin
+    x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
+    sampled_points = x_eq + radius * deltas  # [8, 2]
+
+    # Compute A_i for each sampled point
+    A_list = [jacobian_fhn(xi) for xi in sampled_points]
+
+    # Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
+    distances = torch.norm(x_target - sampled_points, dim=1)  # [8]
+    weights = 1.0 / (distances**2 + epsilon)  # [8]
+    weights = weights / weights.sum()  # normalize
+
+    # Compute weighted sum: A(x) = sum_i A_i * w_i
+    A = sum(w * A for w, A in zip(weights, A_list))
+
+    return A, B, f_eq
 
 
 
