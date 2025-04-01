@@ -265,6 +265,7 @@ def main(sweep):
         __x_update_mode = config.x_update_mode
         __mode_rnn = config.mode_rnn
         __mode_dnn = config.mode_dnn
+        __linearisation_mode = config.linearisation_mode
     else:
         __control_rnn_size = wandb.config["control_rnn_size"]
         __control_rnn_depth = wandb.config["control_rnn_depth"]
@@ -285,6 +286,7 @@ def main(sweep):
         __x_update_mode = wandb.config["x_update_mode"]
         __mode_rnn = wandb.config["mode_rnn"]
         __mode_dnn = wandb.config["mode_dnn"]
+        __linearisation_mode = wandb.config["linearisation_mode"]
 
 
     model_args = {
@@ -303,6 +305,7 @@ def main(sweep):
         'mode_rnn': __mode_rnn,
         'mode_dnn': __mode_dnn,
         'use_batch_norm': False,
+        'linearisation_mode': __linearisation_mode
     }
 
     model_metadata = {

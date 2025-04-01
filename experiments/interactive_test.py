@@ -14,6 +14,7 @@ from pathlib import Path
 import sys
 from pprint import pprint
 from time import time
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 def parse_args():
@@ -22,6 +23,7 @@ def parse_args():
     ap.add_argument('--print_info', action='store_true', help="Print training metadata and quit")
     ap.add_argument('--continuous_state', action='store_true')
     ap.add_argument('--wandb', action='store_true')
+    ap.add_argument('--more', action='store_true')
 
     return ap.parse_args()
 
@@ -31,7 +33,7 @@ def main():
     args = parse_args()
 
     num_times = 2           # default 2 | multiplied by the time_span
-    others = False
+    more = args.more
 
 
     if args.wandb:
@@ -82,12 +84,16 @@ def main():
         fig3, ax3 = plt.subplots(2, 1, sharex=True)
         fig3.canvas.mpl_connect('close_event', on_close_window)
 
-    if others and mode_rnn!="old":
-        fig4, ax4 = plt.subplots(1, 2)
+        fig4, ax4 = plt.subplots(2, 1, sharex=True)
         fig4.canvas.mpl_connect('close_event', on_close_window)
 
-        fig5, ax5 = plt.subplots(1, 1)
+    others = True if more and mode_rnn!="old" else False
+    if others:
+        fig5, ax5 = plt.subplots(1, 2)
         fig5.canvas.mpl_connect('close_event', on_close_window)
+
+        fig6, ax6 = plt.subplots(1, 1)
+        fig6.canvas.mpl_connect('close_event', on_close_window)
 
 
     xx = np.linspace(0., 1., model.output_dim)
@@ -106,11 +112,12 @@ def main():
         x0_feed, t_feed, u_feed, deltas_feed = pack_model_inputs(x0, t, u, delta)
 
         with torch.no_grad():
-            y_pred, coeffs = model(x0_feed, u_feed, deltas_feed)    ###############
+            y_pred, coeffs, matrices = model(x0_feed, u_feed, deltas_feed)
 
         y_pred = np.flip(y_pred.numpy(), 0)
-        coeffs = np.flip(coeffs.numpy(), 0) ###############
-        if mode_rnn!="old": coeffs = coeffs[:, -1, :]   ###############
+        coeffs = np.flip(coeffs.numpy(), 0) 
+        matrices = np.flip(matrices.numpy(), 0)     # torch.size([150, 2, 2])
+        if mode_rnn!="old": coeffs = coeffs[:, -1, :] 
         time_predict = time() - time_predict
 
         print(f"Timings: {time_integrate}, {time_predict}")
@@ -126,9 +133,10 @@ def main():
             ax_.cla()
         if mode_rnn!="old": 
             for ax_ in ax3: ax_.cla()  ###############
-        if others: 
             for ax_ in ax4: ax_.cla()
-            ax5.cla()
+        if others: 
+            for ax_ in ax5: ax_.cla()
+            ax6.cla()
             
 
         # **Remove previous insets and connection lines**
@@ -181,6 +189,37 @@ def main():
                 ax3[1].legend()
                 ax3[1].grid()
 
+            
+                eigvals = np.linalg.eigvals(matrices)  # shape: [seq_len, state_dim]
+                eig_real, eig_imag = eigvals.real, eigvals.imag
+                t_vals = np.linspace(0, delta * (eigvals.shape[0] - 1), eigvals.shape[0])
+
+                # Autovalore λ₁
+                sc1 = ax4[0].scatter(eig_real[:, 0], eig_imag[:, 0], c=t_vals, cmap='viridis', s=20)
+                ax4[0].set_xlabel("Re(λ₁)")
+                ax4[0].set_ylabel("Im(λ₁)")
+                ax4[0].set_title("Autovalore λ₁ nel tempo")
+                ax4[0].grid()
+
+                # Posizionamento colorbar a destra di ax4[0]
+                divider1 = make_axes_locatable(ax4[0])
+                cax1 = divider1.append_axes("right", size="5%", pad=0.05)
+                fig4.colorbar(sc1, cax=cax1, label=r"seq_len")
+
+                # Autovalore λ₂
+                sc2 = ax4[1].scatter(eig_real[:, 1], eig_imag[:, 1], c=t_vals, cmap='plasma', s=20)
+                ax4[1].set_xlabel("Re(λ₂)")
+                ax4[1].set_ylabel("Im(λ₂)")
+                ax4[1].set_title("Autovalore λ₂ nel tempo")
+                ax4[1].grid()
+
+                # Posizionamento colorbar a destra di ax4[1]
+                divider2 = make_axes_locatable(ax4[1])
+                cax2 = divider2.append_axes("right", size="5%", pad=0.05)
+                fig4.colorbar(sc2, cax=cax2, label=r"seq_len")
+
+
+
             # **Zoomed-in Insets for Initial Conditions (first 5% of data)**
             for i, ax in enumerate(ax2):
                 inset = inset_axes(ax, width="30%", height="30%", loc="lower right", borderpad=1)
@@ -203,25 +242,29 @@ def main():
             #"""
 
             if others: 
-                ax4[0].hist(coeffs[:, 0], bins=30, color="purple", alpha=0.7)
-                ax4[0].set_title("γ₁ distribution")
-                ax4[1].hist(coeffs[:, 1], bins=30, color="green", alpha=0.7)
-                ax4[1].set_title("γ₂ distribution")
+                ax5[0].hist(coeffs[:, 0], bins=30, color="purple", alpha=0.7)
+                ax5[0].set_title("γ₁ distribution")
+                ax5[1].hist(coeffs[:, 1], bins=30, color="green", alpha=0.7)
+                ax5[1].set_title("γ₂ distribution")
 
-                sc = ax5.scatter(coeffs[:, 0], coeffs[:, 1], c=t, cmap="viridis", s=10)
-                plt.colorbar(sc, ax=ax5, label="Time")
-                ax5.set_xlabel("γ₁")
-                ax5.set_ylabel("γ₂")
-                ax5.set_title("Phase plot: γ₁ vs γ₂")
+                sc = ax6.scatter(coeffs[:, 0], coeffs[:, 1], c=t, cmap="viridis", s=10)
+                ax6.set_xlabel("γ₁")
+                ax6.set_ylabel("γ₂")
+                ax6.set_title("Phase plot: γ₁ vs γ₂")
+                divider3 = make_axes_locatable(ax6)
+                cax3 = divider3.append_axes("right", size="5%", pad=0.05)
+                fig6.colorbar(sc, cax=cax3, label="Time")
 
 
         fig1.tight_layout()
         fig2.tight_layout()
-        if mode_rnn!="old": fig3.tight_layout() ###############
+        if mode_rnn!="old": 
+            fig3.tight_layout()
+            fig4.tight_layout()
 
         if others: 
-            fig4.tight_layout()
             fig5.tight_layout()
+            fig6.tight_layout()
 
         plt.show(block=False)
         plt.pause(0.1)

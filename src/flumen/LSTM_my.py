@@ -21,7 +21,8 @@ python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test
 class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
-                 state_dim=None, discretisation_mode=None, x_update_mode=None, model_name=None): #model_data=None):
+                 state_dim=None, discretisation_mode=None, x_update_mode=None, 
+                 model_name=None, linearisation_mode=None):
         super(LSTM, self).__init__()
 
     # -------------------------------------------
@@ -56,7 +57,7 @@ class LSTM(nn.Module):
     # -------------------------------------------
         self.discretisation_function = globals().get(f"discretisation_{discretisation_mode}")
         self.x_update_function = globals().get(f"x_update_mode__{x_update_mode}")
-        self.linearisation_function = globals().get(f"linearisation_lpv__{self.model_name}")         # lpv__
+        self.linearisation_function = globals().get(f"linearisation_lpv__{self.model_name}") if linearisation_mode else globals().get(f"linearisation_{self.model_name}")
 
         print("'lin_mode':", self.linearisation_function)
         print("'dis_mode':", self.discretisation_function)
@@ -66,6 +67,21 @@ class LSTM(nn.Module):
         self.lstm_cells = nn.ModuleList([
             LSTMCell(input_size + state_dim if layer == 0 else self.hidden_size, self.hidden_size, bias)        # torch.jit.script()    
             for layer in range(num_layers)
+        ])
+
+
+    # -------------------------------------------
+        # Dropout layer per regolarizzare la rete tra i layer interni della LSTM
+        # Viene attivato solo se: c'è più di un layer e il dropout è > 0.0
+        # Aiuta a prevenire l'overfitting spegnendo casualmente dei neuroni a ogni forward pass
+        self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else None
+
+
+        # LayerNorm applicato separatamente a ogni layer della LSTM
+        # Stabilizza la distribuzione delle attivazioni (h_new), normalizzandole rispetto ai feature di ogni step
+        # Questo migliora la convergenza e riduce l'effetto di vanishing/exploding gradient
+        self.ln_layers = nn.ModuleList([
+            nn.LayerNorm(self.hidden_size) for _ in range(num_layers)
         ])
 
     # -------------------------------------------
@@ -106,6 +122,14 @@ class LSTM(nn.Module):
             h_list, c_list = [], []
             for layer, cell in enumerate(self.lstm_cells):
                 h_new, c_new = cell(u_t, h[layer], c[layer])
+
+                # Normalizza h_new
+                h_new = self.ln_layers[layer](h_new)
+
+                # Applica dropout *solo* se non è l'ultimo layer
+                if self.dropout_layer is not None and layer < self.num_layers - 1:
+                    h_new = self.dropout_layer(h_new)
+
                 h_list.append(h_new)
                 c_list.append(c_new)
 
@@ -150,8 +174,6 @@ class LSTM(nn.Module):
                 'u_eq': 0.0,
             }
             
-
-
         elif model_name == "FitzHughNagumo":
             tau = self.data["dynamics"]["args"]["tau"]
             a = self.data["dynamics"]["args"]["a"]
@@ -457,7 +479,6 @@ def discretisation_FE(x_prev, mat, u):
 
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
 
-
 def discretisation_BE(x_prev, mat, u):
     A, tau, I, B, f_eq = mat
     batch_size = tau.shape[0]
@@ -482,7 +503,6 @@ def discretisation_BE(x_prev, mat, u):
 
     x_next = ev_lib + ev_for
     return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
-
 
 def discretisation_TU(x_prev, mat, u):
     A, tau, I, B, f_eq = mat
@@ -533,7 +553,6 @@ def discretisation_RK4(x_prev, mat, u):
     x_next = x_prev + (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
 
     return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
-
 
 def discretisation_exact(x_prev, mat, u):
     A, tau, I, B, f_eq = mat

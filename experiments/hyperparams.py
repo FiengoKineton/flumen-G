@@ -199,19 +199,20 @@ class Hyperparams:
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 96,               # 126,  
-                "lr": 0.001,                    # 0.0003,                    
+                "batch_size": 126,              # 96    | modified these two 
+                "lr": 0.0005,                   # 0.001 | to smooth the loss              
                 "n_epochs": 200,  
                 "es_patience": 25,              # 20,          
                 "es_delta": 1e-07,
                 "sched_patience": 10,           # 8,
                 "sched_factor": 3,              # 2,
                 "loss": "mse",                  
-                "discretisation_mode": "BE",    # or {BE, TU}
+                "discretisation_mode": "TU",    # or {BE, TU}
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
-                "mode_dnn": "FFNet"
+                "mode_dnn": "FFNet", 
+                "linearisation_mode": False,
             },
 
 
