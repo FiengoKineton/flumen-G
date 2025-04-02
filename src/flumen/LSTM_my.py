@@ -386,7 +386,7 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=0.2, epsilon=1e-4):
     # Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
     distances = torch.norm(x_target - sampled_points, dim=1)  # [8]
     #weights = 1.0 / (distances**2 + epsilon)  # [8]
-    weights = np.exp(-distances**2+epsilon)
+    weights = torch.exp(-distances**2+epsilon)
     weights = weights / weights.sum()  # normalize
 
     # Compute weighted sum: A(x) = sum_i A_i * w_i
