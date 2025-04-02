@@ -391,7 +391,7 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=0.2, epsilon=1e-4):
 
     # Compute weighted sum: A(x) = sum_i A_i * w_i
     A = sum(w * A for w, A in zip(weights, A_list))
-    f_eq = sum(w * f_eq for w, A in zip(weights, f_eq_list))
+    f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
 
     return A, B, f_eq
 
