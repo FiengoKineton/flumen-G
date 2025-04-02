@@ -24,7 +24,7 @@ class CausalFlowModel(nn.Module):
                  mode_rnn='new',
                  mode_dnn='FFNet',
                  use_batch_norm=False, 
-                 linearisation_mode=False):
+                 linearisation_mode='lpv'):
         super(CausalFlowModel, self).__init__()
 
         self.state_dim = state_dim
@@ -38,6 +38,11 @@ class CausalFlowModel(nn.Module):
         self.encoder_depth = encoder_depth
         self.decoder_size = decoder_size
         self.decoder_depth = decoder_depth
+
+        if linearisation_mode==None:    linearisation_mode_passed = "default"
+        elif linearisation_mode==False: linearisation_mode_passed = "default"
+        elif linearisation_mode==True:  linearisation_mode_passed = "lpv"
+        else:                           linearisation_mode_passed = linearisation_mode
 
 
         self.mode_rnn = mode_rnn                            # {"new", "old", "gru"} | if new then h0_stack, else h0
@@ -59,7 +64,7 @@ class CausalFlowModel(nn.Module):
                 discretisation_mode=discretisation_mode, 
                 x_update_mode=x_update_mode, 
                 model_name=model_name,
-                linearisation_mode=linearisation_mode
+                linearisation_mode=linearisation_mode_passed
             ) 
         elif self.mode_rnn=='old': 
             self.u_rnn = torch.nn.LSTM(

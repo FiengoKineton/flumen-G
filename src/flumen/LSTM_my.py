@@ -57,7 +57,7 @@ class LSTM(nn.Module):
     # -------------------------------------------
         self.discretisation_function = globals().get(f"discretisation_{discretisation_mode}")
         self.x_update_function = globals().get(f"x_update_mode__{x_update_mode}")
-        self.linearisation_function = globals().get(f"linearisation_lpv__{self.model_name}") if linearisation_mode else globals().get(f"linearisation_{self.model_name}")
+        self.linearisation_function = globals().get(f"linearisation_lpv__{self.model_name}") if linearisation_mode=="lpv" else globals().get(f"linearisation_{self.model_name}")
 
         print("'lin_mode':", self.linearisation_function)
         print("'dis_mode':", self.discretisation_function)
@@ -354,10 +354,13 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=0.2, epsilon=1e-4):
     # ----------------------------------------------
     B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
 
-    f_eq = dyn_factor * torch.tensor([
-        x2_eq,
-        -x1_eq + mhu * (1 - x1_eq**2) * x2_eq + u_eq
-    ], dtype=dtype)
+    def f_eq_vdp(x): 
+        x1, x2 = x[0], x[1]
+        f_eq = dyn_factor * torch.tensor([
+            x2,
+            -x1 + mhu * (1 - x1**2) * x2 + u_eq
+        ], dtype=dtype)
+        return f_eq
 
     # ----------------------------------------------
     def jacobian_vdp(x):
@@ -378,14 +381,17 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=0.2, epsilon=1e-4):
 
     # Compute A_i for each sampled point
     A_list = [jacobian_vdp(xi) for xi in sampled_points]
+    f_eq_list = [f_eq_vdp(xi) for xi in sampled_points]
 
     # Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
     distances = torch.norm(x_target - sampled_points, dim=1)  # [8]
-    weights = 1.0 / (distances**2 + epsilon)  # [8]
+    #weights = 1.0 / (distances**2 + epsilon)  # [8]
+    weights = np.exp(-distances**2+epsilon)
     weights = weights / weights.sum()  # normalize
 
     # Compute weighted sum: A(x) = sum_i A_i * w_i
     A = sum(w * A for w, A in zip(weights, A_list))
+    f_eq = sum(w * f_eq for w, A in zip(weights, f_eq_list))
 
     return A, B, f_eq
 
