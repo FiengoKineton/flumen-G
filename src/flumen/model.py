@@ -24,7 +24,7 @@ class CausalFlowModel(nn.Module):
                  mode_rnn='new',
                  mode_dnn='FFNet',
                  use_batch_norm=False, 
-                 linearisation_mode='lpv'):
+                 linearisation_mode=None):
         super(CausalFlowModel, self).__init__()
 
         self.state_dim = state_dim
@@ -39,8 +39,8 @@ class CausalFlowModel(nn.Module):
         self.decoder_size = decoder_size
         self.decoder_depth = decoder_depth
 
-        if linearisation_mode==None:    linearisation_mode_passed = "default"
-        elif linearisation_mode==False: linearisation_mode_passed = "default"
+        if linearisation_mode==None:    linearisation_mode_passed = "static"
+        elif linearisation_mode==False: linearisation_mode_passed = "current"
         elif linearisation_mode==True:  linearisation_mode_passed = "lpv"
         else:                           linearisation_mode_passed = linearisation_mode
 

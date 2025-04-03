@@ -42,22 +42,20 @@ class LSTM(nn.Module):
         self.data = self.get_model_data()
         self.dtype = torch.float32
 
-        self.param = self.get_dyn_matrix()
+        self.param = self.get_dyn_matrix_params()
         self.I = torch.eye(self.state_dim, dtype=self.dtype)
-
-        """#self.B = torch.tensor([[0], [0]])
-        ###pprint(self.data)
-        print("dyn matrix:")
-        pprint(self.A)       
-        print("\ninput matrix:")
-        pprint(self.B)
-        print("\neq_points:", eq_points, "\n\n")
-        ###sys.exit()"""
     
     # -------------------------------------------
         self.discretisation_function = globals().get(f"discretisation_{discretisation_mode}")
         self.x_update_function = globals().get(f"x_update_mode__{x_update_mode}")
-        self.linearisation_function = globals().get(f"linearisation_lpv__{self.model_name}") if linearisation_mode=="lpv" else globals().get(f"linearisation_{self.model_name}")
+
+        if linearisation_mode=='static': 
+            self.linearisation_function = globals().get(f"linearisation_static__{self.model_name}")
+        elif linearisation_mode=='current': 
+            self.linearisation_function = globals().get(f"linearisation_curr__{self.model_name}")
+        elif linearisation_mode=='lpv': 
+            self.linearisation_function = globals().get(f"linearisation_lpv__{self.model_name}")
+
 
         print("'lin_mode':", self.linearisation_function)
         print("'dis_mode':", self.discretisation_function)
@@ -70,18 +68,17 @@ class LSTM(nn.Module):
             for layer in range(num_layers)
         ])
 
-
     # -------------------------------------------
         """Dropout layer per regolarizzare la rete tra i layer interni della LSTM
         Viene attivato solo se: c'è più di un layer e il dropout è > 0.0
         Aiuta a prevenire l'overfitting spegnendo casualmente dei neuroni a ogni forward pass"""
-        #self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else None
+        ### self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else None
 
 
         """LayerNorm applicato separatamente a ogni layer della LSTM
          Stabilizza la distribuzione delle attivazioni (h_new), normalizzandole rispetto ai feature di ogni step
         Questo migliora la convergenza e riduce l'effetto di vanishing/exploding gradient"""
-        #self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)])
+        ### self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)])
 
     # -------------------------------------------
         self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
@@ -115,15 +112,15 @@ class LSTM(nn.Module):
             h, c = z[:, :, self.state_dim:], c_z[:, :, self.state_dim:]
 
             # Generalized fix: Ensure proper tensor shape for single and multi-layer cases
-            x_in = x_prev.squeeze(0) if x_prev.dim() == 2 else x_prev[-1]  # Take last layer if multi-layer
+            x_in = x_prev.squeeze(0) ### if x_prev.dim() == 2 else x_prev[-1]  # Take last layer if multi-layer
             u_t = torch.cat((x_in, rnn_input_t), dim=1)
 
             h_list, c_list = [], []
             for layer, cell in enumerate(self.lstm_cells):
                 h_new, c_new = cell(u_t, h[layer], c[layer])
 
-                # h_new = self.ln_layers[layer](h_new)
-                # if self.dropout_layer is not None and layer < self.num_layers - 1: h_new = self.dropout_layer(h_new)
+                ### h_new = self.ln_layers[layer](h_new)
+                ### if self.dropout_layer is not None and layer < self.num_layers - 1: h_new = self.dropout_layer(h_new)
 
                 h_list.append(h_new)
                 c_list.append(c_new)
@@ -145,7 +142,7 @@ class LSTM(nn.Module):
         return out, (z, c_z), coefficients, matrices
 
 
-    def get_dyn_matrix(self): 
+    def get_dyn_matrix_params(self): 
         """
         Dynamics are located in semble/semble/dynamics.py 
         -------------------------------------------------
@@ -259,11 +256,71 @@ class LSTMCell(nn.Module):
         return h, c
 
 
+
 # --------------------------------------------------------------------------- #
-# ---------------- Linearisation functions ---------------------------------- #
+# ---------------- Linearisation static ------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def linearisation_VanDerPol(param, x, u): 
+def linearisation_static__VanDerPol(param, x, u): 
+    x1_eq = param['x1_eq']
+    x2_eq = param['x2_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    mhu = param['mhu']
+
+    A = dyn_factor* torch.tensor([[0.0, 1.0],
+                        [-1.0 - 2 * mhu * x1_eq * x2_eq,
+                        mhu * (1 - x1_eq**2)]], 
+                        dtype=dtype)
+    
+    B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
+
+    f_eq = dyn_factor * torch.tensor([
+        x2_eq,
+        -x1_eq + mhu * (1 - x1_eq**2) * x2_eq + u_eq
+    ], dtype=dtype)
+
+    return A, B, f_eq
+
+def linearisation_static__FitzHughNagumo(param, x, u): 
+    x1_eq = param['x1_eq']
+    x2_eq = param['x2_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    tau = param['tau']
+    a = param['a']
+    b = param['b']
+    v_fact = param['v_fact']
+
+    v = x1_eq
+    w = x2_eq
+    u_val = u_eq
+
+    df_dv = v_fact * (1 - 3 * v**2)
+    df_dw = -v_fact
+    dg_dv = 1 / tau
+    dg_dw = -b / tau
+
+    A = dyn_factor * torch.tensor([[df_dv, df_dw],
+                    [dg_dv, dg_dw]], dtype=dtype)
+
+    B = dyn_factor * torch.tensor([[v_fact], [0.0]], dtype=dtype)
+
+    f_eq = dyn_factor * torch.tensor([
+        v_fact * (x1_eq - x1_eq**3 - x2_eq + u_eq),
+        (x1_eq - a - b * x2_eq) / tau
+    ], dtype=dtype)
+
+    return A, B, f_eq
+
+
+# ─────────────────────────────────────────────────────────────────────────── #
+# ---------------- Linearisation functions ---------------------------------- #
+# ─────────────────────────────────────────────────────────────────────────── #
+
+def linearisation_curr__VanDerPol(param, x, u): 
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -292,8 +349,7 @@ def linearisation_VanDerPol(param, x, u):
 
     return A, B, f_eq
 
-
-def linearisation_FitzHughNagumo(param, x, u): 
+def linearisation_curr__FitzHughNagumo(param, x, u): 
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -386,7 +442,7 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=0.2, epsilon=1e-4):
     # Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
     distances = torch.norm(x_target - sampled_points, dim=1)  # [8]
     #weights = 1.0 / (distances**2 + epsilon)  # [8]
-    weights = torch.exp(-distances**2+epsilon)
+    weights = torch.exp(-(distances**2+epsilon))
     weights = weights / weights.sum()  # normalize
 
     # Compute weighted sum: A(x) = sum_i A_i * w_i
@@ -394,7 +450,6 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=0.2, epsilon=1e-4):
     f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
 
     return A, B, f_eq
-
 
 def linearisation_lpv__FitzHughNagumo(param, x, u, radius=0.2, epsilon=1e-4):
     x1_eq = param['x1_eq']
@@ -413,10 +468,13 @@ def linearisation_lpv__FitzHughNagumo(param, x, u, radius=0.2, epsilon=1e-4):
     # ----------------------------------------------
     B = dyn_factor * torch.tensor([[v_fact], [0.0]], dtype=dtype)
 
-    f_eq = dyn_factor * torch.tensor([
-        v_fact * (x1_eq - x1_eq**3 - x2_eq + u_eq),
-        (x1_eq - a - b * x2_eq) / tau
-    ], dtype=dtype)
+    def f_eq_fhn(x): 
+        v, w = x[0], x[1]
+        f_eq = dyn_factor * torch.tensor([
+            v_fact * (v - v**3 - w + u_eq),
+            (v - a - b * w) / tau
+        ], dtype=dtype)
+        return f_eq
 
     # ----------------------------------------------
     def jacobian_fhn(x):
@@ -440,17 +498,19 @@ def linearisation_lpv__FitzHughNagumo(param, x, u, radius=0.2, epsilon=1e-4):
 
     # Compute A_i for each sampled point
     A_list = [jacobian_fhn(xi) for xi in sampled_points]
+    f_eq_list = [f_eq_fhn(xi) for xi in sampled_points]
 
     # Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
     distances = torch.norm(x_target - sampled_points, dim=1)  # [8]
-    weights = 1.0 / (distances**2 + epsilon)  # [8]
+    #weights = 1.0 / (distances**2 + epsilon)  # [8]
+    weights = torch.exp(-(distances**2+epsilon))
     weights = weights / weights.sum()  # normalize
 
     # Compute weighted sum: A(x) = sum_i A_i * w_i
     A = sum(w * A for w, A in zip(weights, A_list))
+    f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
 
     return A, B, f_eq
-
 
 
 # ═══════════════════════════════════════════════════════════════════════════ #

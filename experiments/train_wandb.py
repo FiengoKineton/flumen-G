@@ -23,7 +23,7 @@ import numpy as np
 """
 COMMANDs:
 
---VDP-------------------------------    vdp_test-data3
+--VDP-------------------------------    vdp_test3-data3
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
 python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
 
