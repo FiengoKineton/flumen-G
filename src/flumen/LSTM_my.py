@@ -396,7 +396,7 @@ def linearisation_curr__FitzHughNagumo(param, x, u):
 # ---------------- Linearisation LPV functions ------------------------------ #
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def linearisation_lpv__VanDerPol(param, x, u, radius=3, epsilon=1e-4):
+def linearisation_lpv__VanDerPol(param, x, u, radius=2, epsilon=1e-4):
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -406,7 +406,7 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=3, epsilon=1e-4):
 
     x_target = x[0, 0]
     u_target = u[0]
-
+    
     # ----------------------------------------------
     B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
 
@@ -451,7 +451,7 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=3, epsilon=1e-4):
 
     return A, B, f_eq
 
-def linearisation_lpv__FitzHughNagumo(param, x, u, radius=0.2, epsilon=1e-4):
+def linearisation_lpv__FitzHughNagumo(param, x, u, radius=1, epsilon=1e-4):
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']

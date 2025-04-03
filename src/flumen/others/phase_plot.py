@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
+from scipy.optimize import fsolve
+from control.phaseplot import phase_plot
+
 
 
 class PhasePlot: 
@@ -14,16 +17,24 @@ class PhasePlot:
         # Create grid of initial conditions (polar coordinates → Cartesian)
         self.r_vals = np.linspace(0.05, 2.5, 20)     # distances from origin
         self.angles = np.linspace(0, 2*np.pi, 30)    # directions
+
+        if which: 
+            print("VanDerPol")
+            self.eq = np.array([0.0, 0.0])  
+            print("equilibrium:", self.eq)
+            self.sol = solve_ivp(self.vdp, self.t_span, self.y0, t_eval=self.t_eval)
+        else:       
+            print()
+            self.eq = fsolve(lambda p: self.fhn(0, p), [0.0, 0.0])  # np.array([0.3087, 0.4348])
+            print("equilibrium:", self.eq)
+            self.sol = solve_ivp(self.fhn, self.t_span, self.y0, t_eval=self.t_eval)
+
         self.initial_conds = [
-            [r * np.cos(theta), r * np.sin(theta)]
+            [self.eq[0] + r * np.cos(theta), self.eq[1] + r * np.sin(theta)]
             for r in self.r_vals for theta in self.angles
         ]
 
-
-        if which:   self.sol = solve_ivp(self.vdp, self.t_span, self.y0, t_eval=self.t_eval)
-        else:       self.sol = solve_ivp(self.fhn, self.t_span, self.y0, t_eval=self.t_eval)
-        
-        self.plot_limit_cicle()
+        #self.plot_limit_cicle()
         self.plot_phase_plot(which)
 
 
@@ -35,12 +46,12 @@ class PhasePlot:
         return [dx1, dx2]
 
     # Dinamica FitzHugh-Nagumo
-    def fhn(self, t, x):
+    def fhn(self, t, x, k=50):
         v, w = x
-        tau, a, b, fact = 0.8, -0.3, 1.4, 50
+        tau, a, b = 0.8, -0.3, 1.4
 
-        dv = fact * (v - (v**3) / 3 - w)
-        dw = (v + a - b * w) / tau
+        dv = k * (v - (v**3) - w)
+        dw = (v - a - b * w) / tau
         return [dv, dw]
 
     
@@ -73,16 +84,14 @@ class PhasePlot:
 
 
     def plot_phase_plot(self, which):
-        # Plot
         plt.figure(figsize=(8, 8))
-        for y0 in self.initial_conds:
-            if which: sol = solve_ivp(self.vdp, self.t_span, y0, t_eval=self.t_eval)
-            else:     sol = solve_ivp(self.fhn, self.t_span, y0, t_eval=self.t_eval)
 
+        for y0 in self.initial_conds:
+            sol = solve_ivp(self.vdp if which else self.fhn, self.t_span, y0, t_eval=self.t_eval)
             plt.plot(sol.y[0], sol.y[1], color='royalblue', alpha=0.4, linewidth=0.8)
 
-        # Highlight the equilibrium point
-        plt.plot(0, 0, 'ro', label='Equilibrium (Unstable)')
+        # Plot the correct equilibrium
+        plt.plot(self.eq[0], self.eq[1], 'ro', label='Equilibrium')
 
         plt.title("Phase Portrait & ROA Insight")
         plt.xlabel('$x_1$')
@@ -96,5 +105,5 @@ class PhasePlot:
 
 
 if __name__ == "__main__": 
-    which = True            # if True then VanDerPol
+    which = False            # if True then VanDerPol, elif False then FitzHughNagumo
     PhasePlot(which=which)
