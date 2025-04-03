@@ -1389,10 +1389,10 @@ MSE (mean square error): 0.018224259567258757
 fhn_TEST-1
 
 
-PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-fhn_test_data2-fhn_TEST-2-lc8yovqf:v1
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-fhn_test_data2-fhn_TEST-2-lc8yovqf:v2
 wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
 wandb:   2 of 2 files downloaded.  
-{'_runtime': 21196.7445022, '_step': 42, '_timestamp': 1743647030.324433, '_wandb': {'runtime': 21196}, 'batch_size': 96, 'best_epoch': 38, 'best_test': 0.024542891733636635, 'best_train': 0.016257568284691798, 'best_val': 0.023359107574270593, 'epoch': 42, 'lr': 0.001, 'n_epochs': 200, 'test_loss': 0.02874439321402904, 'time': 21087.959844112396, 'train_loss': 0.014672710601839105, 'val_loss': 0.028175111133826987}
+{'_runtime': 52664.1331101, '_step': 80, '_timestamp': 1743678497.713562, '_wandb': {'runtime': 52783}, 'batch_size': 96, 'best_epoch': 70, 'best_test': 0.026092083701985843, 'best_train': 0.005892325110460025, 'best_val': 0.018260419461598974, 'epoch': 80, 'lr': 0.0001111111111111111, 'n_epochs': 200, 'test_loss': 0.02357019382595484, 'time': 52555.348972797394, 'train_loss': 0.005294197364405374, 'val_loss': 0.01960758154884735}
 {'args': {'control_dim': 1,
           'control_rnn_depth': 1,
           'control_rnn_size': 48,
@@ -1427,7 +1427,7 @@ wandb:   2 of 2 files downloaded.
                                           'name': 'LogNormalSqWave'}}}
 
 
-mode_rnn: new 
+mode_rnn: new
 mode_dnn: FFNet
 
 
@@ -1440,8 +1440,8 @@ C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\src\flumen\LSTM_my.py:182: Run
 
 
 fhn fact: 50
-Timings: 0.2240293025970459, 1.4095828533172607
-MSE (mean square error): 0.006886248761187273 
+Timings: 0.28213071823120117, 1.8674850463867188
+MSE (mean square error): 0.001835219477875207 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
