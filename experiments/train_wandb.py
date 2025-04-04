@@ -11,6 +11,7 @@ from flumen.train import EarlyStopping, train_step, validate
 
 from argparse import ArgumentParser
 import time
+import re
 
 import wandb
 import psutil
@@ -201,7 +202,7 @@ def main(sweep):
 
     ap.add_argument('load_path', type=str, help="Path to trajectory dataset")
 
-    ap.add_argument('name', type=str, help="Name of the experiment.")
+    ap.add_argument('name', type=str, nargs='+', help="Name of the experiment.")
 
     ap.add_argument('--reset_noise',
                     action='store_true',
@@ -229,6 +230,15 @@ def main(sweep):
                         project='g7-fiengo-msc-thesis', 
                         name=sys_args.name,                             
                         config=hyperparams)   
+
+
+        # CHNAGED
+        first_name = sys_args.name[0]
+        full_name = '_'.join(sys_args.name)
+        full_name = re.sub("[^a-zA-Z0-9_-]", '_', full_name)
+    
+        # CHECK THIS OUT !!
+        #run = wandb.init(project='flumen', config=hyperparams, name=full_name)
 
     with data_path.open('rb') as f:
         data = pickle.load(f)
@@ -314,11 +324,13 @@ def main(sweep):
         'data_settings': data["settings"],
         'data_args': data["args"]
     }
-    model_name = f"flow_model-{data_path.stem}-{sys_args.name}-{run.id}"
+    ###model_name = f"flow_model-{data_path.stem}-{sys_args.name}-{run.id}"
+    model_name = f"flumen-{data_path.stem}-{run.id}"
 
     # Prepare for saving the model
     model_save_dir = Path(
-        f"./outputs/{sys_args.name}/{sys_args.name}_{run.id}")
+        ###f"./outputs/{sys_args.name}/{sys_args.name}_{run.id}")
+        f"./outputs/{first_name}/{full_name}_{run.id}")
     model_save_dir.mkdir(parents=True, exist_ok=True)
 
     # Save local copy of metadata

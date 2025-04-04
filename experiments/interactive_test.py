@@ -19,10 +19,11 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def parse_args():
     ap = ArgumentParser()
-    ap.add_argument('path', type=str, help="Path to .pth file")
+    ap.add_argument('path', type=str, help="Path to .pth file" "(or, if run with --wandb, path to a Weights & Biases artifact)")
     ap.add_argument('--print_info', action='store_true', help="Print training metadata and quit")
     ap.add_argument('--continuous_state', action='store_true')
     ap.add_argument('--wandb', action='store_true')
+    ap.add_argument('--time_horizon', type=float, default=None)
     ap.add_argument('--more', action='store_true')
 
     return ap.parse_args()
@@ -32,7 +33,7 @@ def main():
     plt.ion()  # Enable interactive mode
     args = parse_args()
 
-    num_times = 2           # default 2 | multiplied by the time_span
+    num_times = 2 if args.time_horizon is None else 1          # default 2 | multiplied by the time_span
     more = args.more
 
 
@@ -48,7 +49,7 @@ def main():
         model_path = Path(args.path)
 
     with open(model_path / "state_dict.pth", 'rb') as f:
-        state_dict = torch.load(f, weights_only=True)
+        state_dict = torch.load(f, weights_only=True, map_location='cpu')
     with open(model_path / "metadata.yaml", 'r') as f:
         metadata: dict = yaml.load(f, Loader=yaml.FullLoader)
     
@@ -71,8 +72,14 @@ def main():
     sampler.reset_rngs()
     delta = sampler._delta
 
+    if args.continuous_state:
+        xx = np.linspace(0., 1., model.state_dim)
+        n_plots = 2
+    else:
+        n_plots = model.output_dim
+
     # First Figure: y_true vs y_pred + Input
-    fig1, ax1 = plt.subplots(3, 1, sharex=True)
+    fig1, ax1 = plt.subplots(n_plots+1, 1, sharex=True)
     fig1.canvas.mpl_connect('close_event', on_close_window)
 
     # Second Figure: Delta Plots
@@ -96,8 +103,7 @@ def main():
         fig6.canvas.mpl_connect('close_event', on_close_window)
 
 
-    xx = np.linspace(0., 1., model.output_dim)
-    time_horizon = num_times * metadata["data_args"]["time_horizon"]
+    time_horizon = args.time_horizon if args.time_horizon else num_times * metadata["data_args"]["time_horizon"]
 
     # Store insets and connection lines
     prev_insets = []
@@ -124,7 +130,7 @@ def main():
 
         y = y[:, tuple(bool(v) for v in sampler._dyn.mask)]
         sq_error = np.square(y - y_pred)
-        print("MSE (mean square error):", np.mean(sq_error), "\n")
+        print("MSE (mean square error):", model.output_dim * np.mean(sq_error), "\n")
 
         # **Clear previous plots and remove insets & connections**
         for ax_ in ax1:
@@ -148,13 +154,18 @@ def main():
             line.remove()
         prev_markings.clear()
 
-        # **Plot y_true vs y_pred**
-        n = model.state_dim if model.state_dim==2 else 1
-        for k, ax_ in enumerate(ax1[:n]):
-            ax_.plot(t, y_pred[:, k], c='orange', label='Model output')
-            ax_.plot(t, y[:, k], 'b--', label='True state')
-            ax_.set_ylabel(f"$x_{k+1}$")
-            ax_.legend()
+
+        if args.continuous_state:
+            ax[0].pcolormesh(t.squeeze(), xx, y.T)
+            ax[1].pcolormesh(t.squeeze(), xx, y_pred.T)
+        else:
+            # **Plot y_true vs y_pred**
+            n = model.output_dim ### model.state_dim if model.state_dim==2 else 1
+            for k, ax_ in enumerate(ax1[:n]):
+                ax_.plot(t, y_pred[:, k], c='orange', label='Model output')
+                ax_.plot(t, y[:, k], 'b--', label='True state')
+                ax_.set_ylabel(f"$x_{k+1}$")
+                ax_.legend()
 
         # **Plot input u**
         ax1[-1].step(np.arange(0., time_horizon, delta), u[:-1], where='post')
@@ -257,6 +268,9 @@ def main():
 
 
         fig1.tight_layout()
+        fig1.subplots_adjust(hspace=0)
+        plt.setp([a.get_xticklabels() for a in fig1.axes[:-1]], visible=False)
+
         fig2.tight_layout()
         if mode_rnn!="old": 
             fig3.tight_layout()
@@ -266,7 +280,7 @@ def main():
             fig5.tight_layout()
             fig6.tight_layout()
 
-        plt.show(block=False)
+        plt.show(block=False)       # or plt.draw(block=False)
         plt.pause(0.1)
 
         """

@@ -35,17 +35,17 @@ class Hyperparams:
     def __init__(self):
         self.hyperparams_sets = {
             'hyperparams___init': {
-                'control_rnn_size': 8,          ### default 12 | try 20 | 8 if self.mode_rnn="true" else 10
+                'control_rnn_size': 64,         ### default 12 | try 20 | 8 if self.mode_rnn="true" else 10
                 'control_rnn_depth': 1,         ### maybe try 2? (num_layer == control_rnn_depth) --- Nope!
                 'encoder_size': 1,
                 'encoder_depth': 2,
                 'decoder_size': 1,
                 'decoder_depth': 2,
                 'batch_size': 128,
-                'lr': 0.001,                    ### try 5e-4 to increase stability
-                'n_epochs': 1000,
+                'lr': 7e-4,                     ### try 5e-4 to increase stability
+                'n_epochs': 2000,
                 'es_patience': 20,              ### default 20
-                'es_delta': 1e-7,
+                'es_delta': 5e-5,               ### default 1e-7
                 'sched_patience': 10,
                 'sched_factor': 2,
                 'loss': "mse",
@@ -53,7 +53,8 @@ class Hyperparams:
                 'optimiser_mode': "adam",       #-- {adam, tbptt, nesterov, newton}
                 'x_update_mode': "alpha",       #-- {alpha, beta, lamda}
                 "mode_rnn": "new",
-                "mode_dnn": "FFNet"
+                "mode_dnn": "FFNet", 
+                "linearisation_mode": "lpv",
             },
 
 
