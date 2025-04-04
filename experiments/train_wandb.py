@@ -60,6 +60,7 @@ from hyperparams import Hyperparams
 hp_manager = Hyperparams()
 
 sets = {
+    'init': 'hyperparams___init',
     'set_4': 'hyperparams___set_4',
     'set_6': 'hyperparams___set_6',
     'vdp_set': 'hyperparams___vdp',         # in progress
@@ -81,7 +82,7 @@ sweeps = {
 }
 
 
-name_set = sets['best']
+name_set = sets['init']     # best
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['vdp']
