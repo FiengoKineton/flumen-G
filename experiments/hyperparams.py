@@ -200,7 +200,7 @@ class Hyperparams:
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 96,               # 126    | modified these two 
+                "batch_size": 128,              # 96     | modified these two 
                 "lr": 0.001,                    # 0.0005 | to smooth the loss              
                 "n_epochs": 200,  
                 "es_patience": 25,              # 20,          
@@ -208,7 +208,7 @@ class Hyperparams:
                 "sched_patience": 10,           # 8,
                 "sched_factor": 3,              # 2,
                 "loss": "mse",                  
-                "discretisation_mode": "TU",    # or {BE, TU}
+                "discretisation_mode": "TU",    # mainly TU or {BE}
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 

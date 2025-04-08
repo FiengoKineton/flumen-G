@@ -119,6 +119,7 @@ def main():
 
         with torch.no_grad():
             y_pred, coeffs, matrices = model(x0_feed, u_feed, deltas_feed)
+            # model 2 
 
         y_pred = np.flip(y_pred.numpy(), 0)
         coeffs = np.flip(coeffs.numpy(), 0) 

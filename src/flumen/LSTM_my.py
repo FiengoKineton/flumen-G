@@ -103,7 +103,6 @@ class LSTM(nn.Module):
         coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)  
         matrices = torch.empty(seq_len, self.state_dim, self.state_dim, device=device)
 
-
         for t in range(seq_len):
             rnn_input_t = rnn_input_unpacked[:, t, :]
             tau_t = tau[:, t, :]
@@ -135,7 +134,8 @@ class LSTM(nn.Module):
             z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)            # same as the old one
             outputs[:, t, :].copy_(z[-1])  # In-place assignment
             coefficients[:, t, :].copy_(coeff)  
-            matrices[t, :, :].copy_(A_matrix)
+            matrices[t, :, :].copy_(A_matrix[0])
+            ###sys.exit()
 
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         out = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
@@ -396,7 +396,7 @@ def linearisation_curr__FitzHughNagumo(param, x, u):
 # ---------------- Linearisation LPV functions ------------------------------ #
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def linearisation_lpv__VanDerPol(param, x, u, radius=2, epsilon=1e-4):
+def linearisation_lpv__VanDerPol(param, x, u, radius=3, epsilon=1e-4):
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -404,11 +404,14 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=2, epsilon=1e-4):
     dtype = param['dtype']
     mhu = param['mhu']
 
-    x_target = x[0, 0]
-    u_target = u[0]
+
+    batch_size = u.shape[0]
+    x_target = x[0].unsqueeze(1)    # [1, 128, 2] -> [128, 1, 2]
+    u_target = u                    # [128, 1]
     
     # ----------------------------------------------
     B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
+    B = B.unsqueeze(0).expand(batch_size, -1, -1)       # Size | [128, 2, 1]
 
     def f_eq_vdp(x): 
         x1, x2 = x[0], x[1]
@@ -427,27 +430,37 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=2, epsilon=1e-4):
         ], dtype=dtype)
         return A
     
-    # Define 8 direction vectors (circle-like)
+    #-- Define 8 direction vectors (circle-like)
     angles = np.linspace(0, 2 * np.pi, 9)[:-1]
     deltas = torch.tensor([[np.cos(a), np.sin(a)] for a in angles], dtype=dtype)
 
-    # Generate sample points around the origin
+    #-- Generate sample points around the origin
     x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
     sampled_points = x_eq + radius * deltas  # [8, 2]
 
-    # Compute A_i for each sampled point
+    #-- Compute A_i for each sampled point
     A_list = [jacobian_vdp(xi) for xi in sampled_points]
+    A_list = torch.stack(A_list, dim=0)  # [8, 2, 2]
+    A_list = A_list.unsqueeze(0).expand(batch_size, -1, -1, -1) 
+    # Size | torch.Size([128, 8, 2, 2])
+
     f_eq_list = [f_eq_vdp(xi) for xi in sampled_points]
+    f_eq_list = torch.stack(f_eq_list, dim=0)  # [8, 2, 1]
+    f_eq_list = f_eq_list.unsqueeze(0).expand(batch_size, -1, -1) 
+    # Size | torch.Size([128, 8, 2])
 
-    # Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
-    distances = torch.norm(x_target - sampled_points, dim=1)  # [8]
-    #weights = 1.0 / (distances**2 + epsilon)  # [8]
-    weights = torch.exp(-(distances**2+epsilon))
-    weights = weights / weights.sum()  # normalize
+    #-- Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
+    sampled_points = sampled_points.unsqueeze(0).expand(batch_size, -1, -1) # Size | [128, 8, 2]
+    distances = torch.norm(x_target - sampled_points, dim=2)  # [8]
+    weights = torch.exp(-(distances**2+epsilon))    # before | weights = 1.0 / (distances**2 + epsilon)  # [8]
+    weights = weights / weights.sum()  # normalize, Size | [128, 8]
 
-    # Compute weighted sum: A(x) = sum_i A_i * w_i
-    A = sum(w * A for w, A in zip(weights, A_list))
-    f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
+    #-- Compute weighted sum: A(x) = sum_i A_i * w_i
+    w_A = weights.unsqueeze(-1).unsqueeze(-1)   # Size | [128, 8, 1, 1]
+    w_f = weights.unsqueeze(-1)                 # Size | [128, 8, 1]
+
+    A = torch.sum(w_A * A_list, dim=1)                      # Size; before | [128, 2, 2]; for w, A in zip(weights, A_list))
+    f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)  # Size; before | [128, 2, 1]; for w, f_eq in zip(weights, f_eq_list))
 
     return A, B, f_eq
 
@@ -462,11 +475,13 @@ def linearisation_lpv__FitzHughNagumo(param, x, u, radius=1, epsilon=1e-4):
     b = param['b']
     v_fact = param['v_fact']
 
-    x_target = x[0, 0]
-    u_target = u[0]
+    batch_size = u.shape[0]
+    x_target = x[0].unsqueeze(1)
+    u_target = u
 
     # ----------------------------------------------
     B = dyn_factor * torch.tensor([[v_fact], [0.0]], dtype=dtype)
+    B = B.unsqueeze(0).expand(batch_size, -1, -1)
 
     def f_eq_fhn(x): 
         v, w = x[0], x[1]
@@ -496,20 +511,28 @@ def linearisation_lpv__FitzHughNagumo(param, x, u, radius=1, epsilon=1e-4):
     x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
     sampled_points = x_eq + radius * deltas  # [8, 2]
 
-    # Compute A_i for each sampled point
+    # Compute A_i and f_i for each sampled point
     A_list = [jacobian_fhn(xi) for xi in sampled_points]
+    A_list = torch.stack(A_list, dim=0)
+    A_list = A_list.unsqueeze(0).expand(batch_size, -1, -1, -1) 
+
     f_eq_list = [f_eq_fhn(xi) for xi in sampled_points]
+    f_eq_list = torch.stack(f_eq_list, dim=0)  # [8, 2, 1]
+    f_eq_list = f_eq_list.unsqueeze(0).expand(batch_size, -1, -1) 
 
     # Compute weights k_i = 1 / (||x - xi||^2 + epsilon)
-    distances = torch.norm(x_target - sampled_points, dim=1)  # [8]
-    #weights = 1.0 / (distances**2 + epsilon)  # [8]
-    weights = torch.exp(-(distances**2+epsilon))
+    sampled_points = sampled_points.unsqueeze(0).expand(batch_size, -1, -1)
+    distances = torch.norm(x_target - sampled_points, dim=2)
+    weights = torch.exp(-(distances**2+epsilon))    # old | #weights = 1.0 / (distances**2 + epsilon)
     weights = weights / weights.sum()  # normalize
 
     # Compute weighted sum: A(x) = sum_i A_i * w_i
-    A = sum(w * A for w, A in zip(weights, A_list))
-    f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
+    w_A = weights.unsqueeze(-1).unsqueeze(-1)
+    w_f = weights.unsqueeze(-1)           
 
+    A = torch.sum(w_A * A_list, dim=1)                          # A = sum(w * A for w, A in zip(weights, A_list))
+    f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)      # f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
+    
     return A, B, f_eq
 
 
@@ -522,23 +545,19 @@ def discretisation_FE(x_prev, mat, u):
     batch_size = tau.shape[0]
 
     tau = tau.view(batch_size, 1, 1)
-    u = u.view(batch_size, 1, 1)    # 2, 1).transpose(1, 2)
+    u = u.view(batch_size, 1, 1)
     x_prev = x_prev.squeeze(0).unsqueeze(1)
 
     transform_matrix = I + tau * A 
-    input_matrix = tau * B.unsqueeze(0).expand(batch_size, -1, -1)
+    input_matrix = tau * B
     input_matrix = input_matrix.transpose(1, 2)
-
-    #B_exp = B.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
-    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
 
     ev_lib = torch.bmm(x_prev, transform_matrix)
     ev_for = torch.bmm(u, input_matrix)
-    f_eq_term = tau * f_eq_exp
+    f_eq_term = (tau * f_eq).transpose(1, 2)
 
     x_next = ev_lib + ev_for + f_eq_term
-
-    return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
+    return x_next.squeeze(1).unsqueeze(0)
 
 def discretisation_BE(x_prev, mat, u):
     A, tau, I, B, f_eq = mat
@@ -547,23 +566,16 @@ def discretisation_BE(x_prev, mat, u):
     tau = tau.view(batch_size, 1, 1)
     u = u.view(batch_size, 1, 1)
     x_prev = x_prev.squeeze(0).unsqueeze(2)
-    f_eq = f_eq.view(-1, 1)
 
     A_neg = I - tau * A
-    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
-    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
-
-    u_effect = torch.bmm(B_exp, u)
-    u_effect_scaled = tau * (u_effect + f_eq_exp)
+    u_effect = torch.bmm(B, u)
+    u_effect_scaled = tau * (u_effect + f_eq)
 
     ev_lib = torch.linalg.solve(A_neg, x_prev)
     ev_for = torch.linalg.solve(A_neg, u_effect_scaled)
 
-    """inv_matrix = torch.inverse(A_neg)
-    x_next = torch.bmm(x_prev, inv_matrix)"""
-
     x_next = ev_lib + ev_for
-    return x_next.squeeze(2).unsqueeze(0)   # .permute(1, 0, 2)
+    return x_next.squeeze(2).unsqueeze(0)
 
 def discretisation_TU(x_prev, mat, u):
     A, tau, I, B, f_eq = mat
@@ -576,14 +588,7 @@ def discretisation_TU(x_prev, mat, u):
     A_pos = I + (tau / 2) * A
     A_neg = I - (tau / 2) * A
 
-    """v = torch.linalg.solve(A_neg, x_prev)
-    x_next = torch.bmm(A_pos, v)"""
-
-    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)
-    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
-
-    rhs = torch.bmm(A_pos, x_prev) + tau * (torch.bmm(B_exp, u) + f_eq_exp)
-
+    rhs = torch.bmm(A_pos, x_prev) + tau * (torch.bmm(B, u) + f_eq)
     x_next = torch.linalg.solve(A_neg, rhs)
     return x_next.squeeze(2).unsqueeze(0)
 
@@ -595,16 +600,15 @@ def discretisation_RK4(x_prev, mat, u):
     """
     A, tau, _, B, f_eq = mat
     batch_size = tau.shape[0]
+    B = B.transpose(1, 2)
+    f_eq = f_eq.transpose(1, 2)
 
     tau = tau.view(batch_size, 1, 1)
     u = u.view(batch_size, 1, 1)
     x_prev = x_prev.squeeze(0).unsqueeze(1)
-    A = A.expand(batch_size, -1, -1)
 
-    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
-    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1).transpose(1, 2)
 
-    def f(x): return torch.bmm(x, A) + torch.bmm(u, B_exp) + f_eq_exp
+    def f(x): return torch.bmm(x, A) + torch.bmm(u, B) + f_eq
 
     k1 = f(x_prev)
     k2 = f(x_prev + 0.5 * tau * k1)
@@ -612,8 +616,7 @@ def discretisation_RK4(x_prev, mat, u):
     k4 = f(x_prev + tau * k3)
 
     x_next = x_prev + (tau / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
-
-    return x_next.squeeze(1).unsqueeze(0)   # .permute(1, 0, 2)
+    return x_next.squeeze(1).unsqueeze(0)
 
 def discretisation_exact(x_prev, mat, u):
     A, tau, I, B, f_eq = mat
@@ -621,27 +624,18 @@ def discretisation_exact(x_prev, mat, u):
 
     tau = tau.view(batch_size, 1, 1)
     u = u.view(batch_size, 1, 1)
-    x_prev = x_prev.squeeze(0).unsqueeze(1)  # [batch, 1, state]
+    x_prev = x_prev.squeeze(0).unsqueeze(1)
 
-    # Assuming A is shared (not batched)
-    A_exp = torch.matrix_exp(tau[0, 0] * A)  # [2, 2]
-    exp_matrix = A_exp.unsqueeze(0).expand(batch_size, -1, -1)  # [batch, 2, 2]
-
+    exp_matrix = torch.matrix_exp(tau * A)
     rhs = exp_matrix - I
-    integral_term = torch.linalg.solve(A, rhs)  # [2, 2] result, broadcasted
+    integral_term = torch.linalg.solve(A, rhs)
+    input_term = torch.bmm(B, u) + f_eq
 
-    B_exp = B.unsqueeze(0).expand(batch_size, -1, -1)  # [batch, 2, 1]
+    x1 = torch.bmm(x_prev, exp_matrix)
+    x2 = torch.bmm(integral_term.expand(batch_size, -1, -1), input_term)
 
-    f_eq = f_eq.view(-1, 1)  # [2, 1]
-    f_eq_exp = f_eq.unsqueeze(0).expand(batch_size, -1, -1)  # [batch, 2, 1]
-
-    input_term = torch.bmm(B_exp, u) + f_eq_exp  # [batch, 2, 1]
-
-    x1 = torch.bmm(x_prev, exp_matrix)          # [batch, 1, 2]
-    x2 = torch.bmm(integral_term.expand(batch_size, -1, -1), input_term)  # [batch, 2, 1]
-
-    x_next = x1 + x2.transpose(1, 2)  # [batch, 1, 2] + [batch, 1, 2]
-    return x_next.squeeze(1).unsqueeze(0)  # [1, batch, state]
+    x_next = x1 + x2.transpose(1, 2)
+    return x_next.squeeze(1).unsqueeze(0)
 
 
 

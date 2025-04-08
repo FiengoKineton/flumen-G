@@ -17,7 +17,6 @@ import wandb
 import psutil
 
 import random
-import os
 import numpy as np
 
 # --------------------------------------------------------------------------- #
@@ -54,7 +53,7 @@ import torch_optimizer as optim
 
 from hyperparams import Hyperparams  
 
-
+os.environ["WANDB_MODE"] = "offline"  # Set to "online" for real-time logging
 
 # ------ Current Run Settings ----------------------------------------------- #
 hp_manager = Hyperparams()
@@ -82,7 +81,7 @@ sweeps = {
 }
 
 
-name_set = sets['init']     # best
+name_set = sets['best']     # init
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['vdp']
@@ -203,7 +202,7 @@ def main(sweep):
 
     ap.add_argument('load_path', type=str, help="Path to trajectory dataset")
 
-    ap.add_argument('name', type=str, nargs='+', help="Name of the experiment.")
+    ap.add_argument('name', type=str, help="Name of the experiment.")       # type=str, nargs='+',
 
     ap.add_argument('--reset_noise',
                     action='store_true',

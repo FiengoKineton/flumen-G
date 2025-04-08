@@ -1,5 +1,6 @@
 import torch, sys
 from torch import nn
+from pprint import pprint
 from flumen.LSTM_my import LSTM
 from flumen.GRU_my import GRU
 from flumen.Seq2Seq import FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder
@@ -115,21 +116,23 @@ class CausalFlowModel(nn.Module):
 
     # ----------------------------------------------------------------------- #
     def forward(self, x, rnn_input, deltas):
-        ###h0, c0, tau = self.structure_function(x, deltas)
-        ###rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0), tau)
-
         h0, rnn_out_seq_packed, coefficients, matrices = self.structure_function(x, deltas, rnn_input)    ###############
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
         h_shift = torch.roll(h, shifts=1, dims=1)   
-        h_temp = h0[-1]
-        h_shift[:, 0, :] = h_temp
+        h_shift[:, 0, :] = h0[-1]
 
-        encoded_controls = (1 - deltas) * h_shift + deltas * h  
-        output = self.u_dnn(encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :])
-        output = output[:, :self.state_dim]  
+    #-- first element of deltas starts with 1 and goes to 0, not viceversa
+        encoded_controls = (1 - deltas) * h_shift + deltas * h      # Size | [128, 75, 50]
+        output = encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :]
+        output = self.u_dnn(output)       # ???
 
-        ###sys.exit()
+        """print(output.shape, self.u_dnn(output).shape, output[:, :self.state_dim].shape)
+        pprint(self.u_dnn(output) - output[:, :self.state_dim])
+        print(torch.norm(self.u_dnn(output) - output[:, :self.state_dim]))
+        sys.exit()"""
+        output = output[:, :self.state_dim]                         # Size | [128, 2]
+
         return output, coefficients, matrices
 
     # ----------------------------------------------------------------------- #
