@@ -21,8 +21,8 @@ class CausalFlowModel(nn.Module):
                  decoder_depth,
                  discretisation_mode,
                  x_update_mode,
-                 model_name,
-                 mode_rnn='new',
+                 model_name='VanDerPol',
+                 mode_rnn='old',
                  mode_dnn='FFNet',
                  use_batch_norm=False, 
                  linearisation_mode=None):
@@ -257,7 +257,7 @@ class CausalFlowModel(nn.Module):
 
         rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0))
 
-        return h0, rnn_out_seq_packed, torch.tensor([[0, 0], [0, 0]], dtype=torch.float32), torch.tensor([[0, 0], [0, 0]], dtype=torch.float32)
+        return h0, rnn_out_seq_packed, torch.tensor([[0, 0], [0, 0], [0, 0]], dtype=torch.float32), torch.tensor([[0, 0], [0, 0]], dtype=torch.float32)
 
 
 

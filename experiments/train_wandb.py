@@ -23,11 +23,11 @@ import numpy as np
 """
 COMMANDs:
 
---VDP-------------------------------    vdp_test3-data3
+--VDP-------------------------------    vdp_test3-data3 / vdp_TEST-r_3 / 026___default-code-same-dim
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
 python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
 
---FHN-------------------------------    fhn_data2
+--FHN-------------------------------    fhn_data2 /
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/fhn.yaml fhn_test_data
 python experiments/train_wandb.py data/fhn_test_data.pkl fhn_test 
 
@@ -53,10 +53,10 @@ import torch_optimizer as optim
 
 from hyperparams import Hyperparams  
 
-os.environ["WANDB_MODE"] = "offline"  # Set to "online" for real-time logging
+os.environ["WANDB_MODE"] = "online"  # Set to "online" for real-time logging, "offline" for local logging
 
 # ------ Current Run Settings ----------------------------------------------- #
-hp_manager = Hyperparams()
+hp_manager = Hyperparams()  
 
 sets = {
     'init': 'hyperparams___init',

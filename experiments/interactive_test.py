@@ -59,7 +59,7 @@ def main():
     #metadata["args"]["mode_rnn"] = 'old'
     pprint(metadata)
 
-    mode_rnn = metadata.get("args", {}).get("mode_rnn", "new")  # ["args"]["mode_rnn"]
+    mode_rnn = metadata.get("args", {}).get("mode_rnn", "old")  # ["args"]["mode_rnn"]
 
     if args.print_info:
         return
