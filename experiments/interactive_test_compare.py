@@ -23,6 +23,21 @@ aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_tes
 
 vdp_TEST-r_3 / --wandb
 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data3-vdp_TEST-r_3-pv6yc6ip:v1
+
+
+
+TEMP-without (dnn) / --wandb
+aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data3-xc0zpee1:v0
+
+TEMP-without-2 (dnn) / --wandb (GOOD)
+aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data3-awyl5oha:v1
+
+TEMP-with (dnn) / --wandb (good)
+aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data3-hjfz1nwh:v0
+
+TEMP-with-2 (dnn) / --wandb
+aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data3-nkxyl2cu:v0
+
 ------------------------------
 
 

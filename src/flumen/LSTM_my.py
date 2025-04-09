@@ -195,6 +195,27 @@ class LSTM(nn.Module):
                 'u_eq': u_star,
             }
 
+        elif model_name == "NonlinearActivationDynamics": 
+            state_dim = self.data["dynamics"]["args"]["state_dim"]
+            control_dim = self.data["dynamics"]["args"]["control_dim"]
+            activation = self.data["dynamics"]["args"]["activation"]
+            mode = self.data["dynamics"]["args"]["mode"]
+            a_s = self.data["dynamics"]["args"]["a_s"]
+            a_m = self.data["dynamics"]["args"]["a_m"]
+            b = self.data["dynamics"]["args"]["b"]
+
+            param = {
+                'dyn_factor': dyn_factor,
+                'dtype': self.dtype,
+                'state_dim': state_dim, 
+                'control_dim': control_dim, 
+                'activation': activation, 
+                'mode': mode, 
+                'A_s': a_s, 
+                'A_m': a_m, 
+                'B': b,
+            }
+
         else:
             raise ValueError(f"Unknown model name: {model_name}")
         
@@ -315,6 +336,8 @@ def linearisation_static__FitzHughNagumo(param, x, u):
 
     return A, B, f_eq
 
+def linearisation_static__NonlinearActivationDynamics(param, x, u):
+    return
 
 # ─────────────────────────────────────────────────────────────────────────── #
 # ---------------- Linearisation functions ---------------------------------- #
@@ -535,6 +558,12 @@ def linearisation_lpv__FitzHughNagumo(param, x, u, radius=1, epsilon=1e-4):
     
     return A, B, f_eq
 
+
+def linearisartion_lpv___NonlinearActivationDynamics(param, x, u, radius=1, epsilon=1e-4):
+
+    a = param['A_s']
+
+    return
 
 # ═══════════════════════════════════════════════════════════════════════════ #
 # ---------------- Discretisation functions --------------------------------- #

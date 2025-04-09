@@ -116,7 +116,7 @@ class CausalFlowModel(nn.Module):
 
     # ----------------------------------------------------------------------- #
     def forward(self, x, rnn_input, deltas):
-        h0, rnn_out_seq_packed, coefficients, matrices = self.structure_function(x, deltas, rnn_input)    ###############
+        h0, rnn_out_seq_packed, coefficients, matrices, mode = self.structure_function(x, deltas, rnn_input)    ###############
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
         h_shift = torch.roll(h, shifts=1, dims=1)   
@@ -125,7 +125,7 @@ class CausalFlowModel(nn.Module):
     #-- first element of deltas starts with 1 and goes to 0, not viceversa
         encoded_controls = (1 - deltas) * h_shift + deltas * h      # Size | [128, 75, 50]
         output = encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :]
-        output = self.u_dnn(output)       # ???
+        output = self.u_dnn(output) if mode else output
 
         """print(output.shape, self.u_dnn(output).shape, output[:, :self.state_dim].shape)
         pprint(self.u_dnn(output) - output[:, :self.state_dim])
@@ -239,16 +239,16 @@ class CausalFlowModel(nn.Module):
 
         rnn_out_seq_packed, _, coefficients, matrices = self.u_rnn(rnn_input, (z, c0), deltas)    ###############
 
-        return z, rnn_out_seq_packed, coefficients, matrices
+        return z, rnn_out_seq_packed, coefficients, matrices, False
 
     def mode_rnn_gru(self, x, deltas, rnn_input):
         h0 = self.x_dnn(x)
         z = torch.cat((x, h0), dim=1) 
         z = z.unsqueeze(0).expand(self.control_rnn_depth, -1, -1)
 
-        rnn_out_seq_packed, _, coefficients = self.u_rnn(rnn_input, z, deltas)    ###############
+        rnn_out_seq_packed, _, coefficients = self.u_rnn(rnn_input, z, deltas)
 
-        return z, rnn_out_seq_packed, coefficients  ###############
+        return z, rnn_out_seq_packed, coefficients, True
 
     def mode_rnn_old(self, x, _, rnn_input):
         h0 = self.x_dnn(x)
@@ -257,7 +257,7 @@ class CausalFlowModel(nn.Module):
 
         rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0))
 
-        return h0, rnn_out_seq_packed, torch.tensor([[0, 0], [0, 0], [0, 0]], dtype=torch.float32), torch.tensor([[0, 0], [0, 0]], dtype=torch.float32)
+        return h0, rnn_out_seq_packed, torch.tensor([[0, 0], [0, 0], [0, 0]], dtype=torch.float32), torch.tensor([[0, 0], [0, 0]], dtype=torch.float32), True
 
 
 

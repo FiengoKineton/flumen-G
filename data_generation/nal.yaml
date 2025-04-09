@@ -1,0 +1,25 @@
+dynamics:
+  name: NonlinearActivationDynamics
+  args:
+    state_dim: 5
+    control_dim: 1
+    activation: sigmoid   # or "sigmoid", "relu", "tanh"
+    mode: stable    # or "stable", "marginal"
+    a_s: [[-1.0,  0.3,  0.0,  0.0,  0.0],
+            [ 0.0, -1.0,  0.3,  0.0,  0.0],
+            [ 0.0,  0.0, -1.0,  0.3,  0.0],
+            [ 0.0,  0.0,  0.0, -1.0,  0.3],
+            [ 0.0,  0.0,  0.0,  0.0, -1.0]]
+    a_m: [[0.0, 1.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 0.0, 0.0]]
+    b: [[1.0], [0.0], [0.0], [0.0], [0.0]]
+
+sequence_generator:
+  name: GaussianSqWave
+  args:
+    period: 5
+
+control_delta: 0.2
