@@ -162,7 +162,7 @@ def print_system_performance(initial_metrics):
 # ------ Loss Function ------------------------------------------------------ #
 def get_loss(which):
     if which == "mse":
-        return torch.nn.MSELoss()
+        return torch.nn.MSELoss()   #########################################################
     elif which == "l1":
         return torch.nn.L1Loss()
     elif which == "huber": 
@@ -347,7 +347,7 @@ def main(sweep):
     optimiser_mode = __optimiser_mode  # wandb.config['optimiser_mode']
 
     if optimiser_mode == "adam":
-        optimiser = torch.optim.Adam(model.parameters(), lr=__lr)
+        optimiser = torch.optim.Adam(model.parameters(), lr=__lr)   #########################################################
     elif optimiser_mode == "tbptt":
         optimiser = torch.optim.Adam(model.parameters(), lr=__lr)
     elif optimiser_mode == "nesterov":

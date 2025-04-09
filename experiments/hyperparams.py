@@ -213,7 +213,7 @@ class Hyperparams:
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet", 
-                "linearisation_mode": "static",
+                "linearisation_mode": "lpv", 
             },
 
 

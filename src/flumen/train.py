@@ -80,18 +80,22 @@ def train_step(example, loss_fn, model, optimiser, device):
 
     optimiser.zero_grad()
 
-    y_pred, *_ = model(x0, u, deltas)    ###############
+    y_pred, *_ = model(x0, u, deltas)
     loss = model.state_dim * loss_fn(y, y_pred)       
 
+    #print(model.linear.weight.grad)
     loss.backward()
-    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)    # Clipping Gradient
+    #print(model.linear.weight.grad)
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+    #print(model.linear.weight.grad)
 
-    ###torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)        ### added for lamda mode
+    #print("Before:", model.layer.weight.data[0])
+    #print("Grad:", model.layer.weight.grad[0])
     optimiser.step()
+    #print("After:", model.layer.weight.data[0])
+    #sys.exit(0)
 
-    #mean_coeff = coefficients.mean().item() 
-
-    return loss.item()  #, mean_coeff
+    return loss.item()
 
 
 
