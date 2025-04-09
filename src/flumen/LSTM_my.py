@@ -6,7 +6,7 @@ from pathlib import Path
 from pprint import pprint
 import torch.nn.functional as F
 import numpy as np
-
+from scipy.special import expit
 
 """
 COMMANDs:
@@ -204,6 +204,24 @@ class LSTM(nn.Module):
             a_m = self.data["dynamics"]["args"]["a_m"]
             b = self.data["dynamics"]["args"]["b"]
 
+            a = a_s if mode=="stable" else a_m
+
+            def nad_equilibrium(z): 
+                x = z[:state_dim]
+                u = z[state_dim:]       
+
+                if activation == "sigmoid":
+                    eq_x = - x + expit(a @ x + b @ u)
+                else:
+                    eq_x = - x + np.tanh(a @ x + b @ u)
+                
+                eq_u = -u 
+                return np.concatenate([eq_x, eq_u])    
+            
+            from scipy.optimize import fsolve
+            eq = fsolve(nad_equilibrium, np.zeros(state_dim+control_dim))  
+            x_star, u_star = eq[:state_dim], eq[state_dim:]  # [0.42599762 0.42599282 0.42591131 0.4245284  0.40105814], [0.]
+
             param = {
                 'dyn_factor': dyn_factor,
                 'dtype': self.dtype,
@@ -211,9 +229,10 @@ class LSTM(nn.Module):
                 'control_dim': control_dim, 
                 'activation': activation, 
                 'mode': mode, 
-                'A_s': a_s, 
-                'A_m': a_m, 
+                'A': a, 
                 'B': b,
+                'x_eq': x_star,
+                'u_eq': u_star,
             }
 
         else:
@@ -238,6 +257,7 @@ class LSTM(nn.Module):
         elif self.model_name == "HodgkinHuxleyFS": model_ID = "hhfs"
         elif self.model_name == "LinearSys": model_ID = "linsys"
         elif self.model_name == "TwoTank": model_ID = "twotank"
+        elif self.model_name == "NonlinearActivationDynamics": model_ID = "nad"
         else: model_ID = ""
 
         # Define the file path
@@ -337,7 +357,35 @@ def linearisation_static__FitzHughNagumo(param, x, u):
     return A, B, f_eq
 
 def linearisation_static__NonlinearActivationDynamics(param, x, u):
-    return
+    A = param['A']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    activation = param['activation']
+    B = param['B']
+    x_eq = param['x_eq']
+    u_eq = param['u_eq']
+    state_dim = param['state_dim']
+
+    def sigma_prime(z): 
+        sigma = 1 / (1 + np.exp(-z))
+        return sigma * (1 - sigma)
+
+    z = A @ x_eq + B @ u_eq
+    f_eq = -x_eq + expit(-z) if activation == "sigmoid" else -x_eq + np.tanh(z)
+    S = np.diag(sigma_prime(z))
+    A = -np.eye(state_dim) + S @ A
+    B = S @ B
+
+    A = dyn_factor * torch.tensor(A, dtype=dtype)
+    B = dyn_factor * torch.tensor(B, dtype=dtype)
+    f_eq = dyn_factor * torch.tensor(f_eq, dtype=dtype).unsqueeze(-1)
+
+    print("A:", A)
+    print("B:", B)
+    print("f_eq:", f_eq)
+    sys.exit()
+    return A, B, f_eq
+
 
 # ─────────────────────────────────────────────────────────────────────────── #
 # ---------------- Linearisation functions ---------------------------------- #
@@ -412,6 +460,49 @@ def linearisation_curr__FitzHughNagumo(param, x, u):
         (x1_eq - a - b * x2_eq) / tau
     ], dtype=dtype)
 
+    return A, B, f_eq
+
+def linearisation_curr__NonlinearActivationDynamics(param, x, u):
+    A = param['A']
+    B = param['B']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    activation = param['activation']
+    x_eq = param['x_eq']
+    u_eq = param['u_eq']
+    state_dim = param['state_dim']
+
+    x_sample = x[0, 0]  # dimensione: [state_dim]
+    u_sample = u[0]     # dimensione: [control_dim]
+
+    x_ = x_sample - x_eq
+    u_ = u_sample - u_eq
+
+    def sigma_prime(z): 
+        if activation == "sigmoid":
+            sigma = 1 / (1 + np.exp(-z))
+            return sigma * (1 - sigma)
+        else:
+            return 1 - np.tanh(z) ** 2
+
+    A = torch.tensor(A, dtype=float)
+    B = torch.tensor(B, dtype=float)
+
+    z = A @ x_ + B @ u_
+    S = torch.diag(sigma_prime(z))
+
+    A_dyn = -torch.eye(state_dim) + S @ A
+    B_dyn = S @ B
+    f_eq = -x_ + (1 / (1 + torch.exp(-z))) #if activation == "sigmoid" else -x_eq + torch.tanh(A @ x_eq + B @ u_eq)
+
+    A = dyn_factor * torch.tensor(A_dyn, dtype=dtype)
+    B = dyn_factor * torch.tensor(B_dyn, dtype=dtype)
+    f_eq = dyn_factor * torch.tensor(f_eq, dtype=dtype).unsqueeze(-1)
+
+    print("A:", A)
+    print("B:", B)
+    print("f_eq:", f_eq)
+    sys.exit()
     return A, B, f_eq
 
 
@@ -558,12 +649,88 @@ def linearisation_lpv__FitzHughNagumo(param, x, u, radius=1, epsilon=1e-4):
     
     return A, B, f_eq
 
+def linearisation_lpv__NonlinearActivationDynamics(param, x, u, radius=1, epsilon=1e-4):
+    A_base = param['A']
+    B_base = param['B']
+    x_eq = param['x_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    activation = param['activation']
 
-def linearisartion_lpv___NonlinearActivationDynamics(param, x, u, radius=1, epsilon=1e-4):
+    batch_size = u.shape[0]
+    state_dim = param['state_dim']
 
-    a = param['A_s']
+    def sigma_prime(z): 
+        if activation == "sigmoid":
+            sigma = 1 / (1 + np.exp(-z))
+            return sigma * (1 - sigma)
+        else:
+            return 1 - np.tanh(z) ** 2
 
-    return
+    def compute_jacobian(x_sample, u_sample):
+        z = A_base @ x_sample + B_base @ u_sample
+        S = np.diag(sigma_prime(z))
+        A_dyn = -np.eye(state_dim) + S @ A_base
+        B_dyn = S @ B_base
+        return A_dyn, B_dyn
+
+    def compute_f_eq(x_sample, u_sample):
+        z = A_base @ x_sample + B_base @ u_sample
+        if activation == "sigmoid":
+            return -x_sample + expit(z)
+        else:
+            return -x_sample + np.tanh(z)
+
+    # Generate sampling points
+    angles = np.linspace(0, 2 * np.pi, 9)[:-1]
+    deltas = torch.tensor([[np.cos(a), np.sin(a)] for a in angles], dtype=dtype)
+    x_eq_t = torch.tensor(x_eq, dtype=dtype)
+    sampled_points = x_eq_t + radius * deltas  # [8, state_dim]
+
+    # Expand dimensions
+    x_target = x[0].unsqueeze(1)  # [batch, 1, state_dim]
+    u_target = u                 # [batch, control_dim]
+
+    A_list, B_list, f_eq_list = [], [], []
+
+    for xi in sampled_points:
+        xi_np = xi.numpy()
+        ui_np = u_eq  # fixed for equilibrium, or modify to sample around u if needed
+        A_i, B_i = compute_jacobian(xi_np, ui_np)
+        f_i = compute_f_eq(xi_np, ui_np)
+
+        A_list.append(torch.tensor(A_i, dtype=dtype))
+        B_list.append(torch.tensor(B_i, dtype=dtype))
+        f_eq_list.append(torch.tensor(f_i, dtype=dtype))
+
+    A_list = torch.stack(A_list).unsqueeze(0).expand(batch_size, -1, -1, -1)
+    B_list = torch.stack(B_list).unsqueeze(0).expand(batch_size, -1, -1, -1)
+    f_eq_list = torch.stack(f_eq_list).unsqueeze(0).expand(batch_size, -1, -1)
+
+    sampled_points = sampled_points.unsqueeze(0).expand(batch_size, -1, -1)
+    distances = torch.norm(x_target - sampled_points, dim=2)
+    weights = torch.exp(-(distances ** 2 + epsilon))
+    weights = weights / weights.sum(dim=1, keepdim=True)
+
+    w_A = weights.unsqueeze(-1).unsqueeze(-1)
+    w_B = weights.unsqueeze(-1).unsqueeze(-1)
+    w_f = weights.unsqueeze(-1)
+
+    A = torch.sum(w_A * A_list, dim=1)
+    B = torch.sum(w_B * B_list, dim=1)
+    f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)
+
+    A = dyn_factor * A
+    B = dyn_factor * B
+    f_eq = dyn_factor * f_eq
+
+    print("A:", A[0])
+    print("B:", B[0])
+    print("f_eq:", f_eq[0])
+    sys.exit()
+    return A, B, f_eq
+
 
 # ═══════════════════════════════════════════════════════════════════════════ #
 # ---------------- Discretisation functions --------------------------------- #

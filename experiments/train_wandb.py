@@ -53,7 +53,7 @@ import torch_optimizer as optim
 
 from hyperparams import Hyperparams  
 
-os.environ["WANDB_MODE"] = "online"  # Set to "online" for real-time logging, "offline" for local logging
+os.environ["WANDB_MODE"] = "offline"  # Set to "online" for real-time logging, "offline" for local logging
 
 # ------ Current Run Settings ----------------------------------------------- #
 hp_manager = Hyperparams()  
