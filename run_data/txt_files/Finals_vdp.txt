@@ -1440,47 +1440,215 @@ MSE (mean square error): 0.008196698228337589
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+TEMP-1-data3 (without dnn step in model.py) (true till TEMP-4)
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data3-r8er92lv:v3
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 53722.3176586, '_step': 105, '_timestamp': 1744264915.0027986, '_wandb': {'runtime': 53724}, 'batch_size': 128, 'best_epoch': 80, 'best_test': 0.04392782938740556, 'best_train': 0.0064521499061907725, 'best_val': 0.0382206335013348, 'epoch': 105, 'lr': 1.2345679012345677e-05, 'n_epochs': 200, 'test_loss': 0.04485671254732306, 'time': 53612.24860239029, 'train_loss': 0.005439786472057224, 'val_loss': 0.042829702741333416}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 48,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'linearisation_mode': 'lpv',
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data3',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data3.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},  
+                                          'name': 'GaussianSqWave'}}}
 
-===== SYSTEM PERFORMANCE SUMMARY =====      
 
-====================================== 
+mode_rnn: new
+mode_dnn: FFNet
+
+
+'lin_mode': <function linearisation_lpv__VanDerPol at 0x000001B9164762A0>
+'dis_mode': <function discretisation_TU at 0x000001B9164765C0>
+'upt_mode': <function x_update_mode__entropy at 0x000001B916476AC0>
+
+
+vdp mhu: 1.0
+Timings: 0.007194042205810547, 1.4749624729156494
+MSE (mean square error): 0.01853002603958816 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+TEMP-2-data3
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data3-j9g9f6nv:v1
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 34547.5343656, '_step': 50, '_timestamp': 1744245787.6613274, '_wandb': {'runtime': 34549}, 'batch_size': 128, 'best_epoch': 25, 'best_test': 0.033035918478927916, 'best_train': 0.027024905852697515, 'best_val': 0.04815789486562449, 'epoch': 50, 'lr': 0.0001111111111111111, 'n_epochs': 200, 'test_loss': 0.02413345743266363, 'time': 34412.37400722504, 'train_loss': 0.00703714464953731, 'val_loss': 0.051975279218620725}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 48,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'linearisation_mode': 'lpv',
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data3',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data3.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
 
-===== SYSTEM PERFORMANCE SUMMARY =====      
 
-====================================== 
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+'lin_mode': <function linearisation_lpv__VanDerPol at 0x000001F2A0A862A0>
+'dis_mode': <function discretisation_TU at 0x000001F2A0A865C0>
+'upt_mode': <function x_update_mode__entropy at 0x000001F2A0A86AC0>
+
+
+vdp mhu: 1.0
+Timings: 0.013504505157470703, 1.495880126953125
+MSE (mean square error): 0.014290542229260165 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+TEMP-3-data11
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data11-1y80ssb3:v0
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 23947.3052345, '_step': 32, '_timestamp': 1744240795.0445414, '_wandb': {'runtime': 23949}, 'batch_size': 128, 'best_epoch': 7, 'best_test': 0.12140552486692156, 'best_train': 0.07290151697539148, 'best_val': 0.07749249088385748, 'epoch': 32, 'lr': 0.0001111111111111111, 'n_epochs': 200, 'test_loss': 0.12577123047103958, 'time': 23753.51841187477, 'train_loss': 0.01087287561376653, 'val_loss': 0.09346460527370846}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 48,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'linearisation_mode': 'lpv',
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data11',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data11.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
 
-===== SYSTEM PERFORMANCE SUMMARY =====      
 
-====================================== 
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+'lin_mode': <function linearisation_lpv__VanDerPol at 0x000001D7DE06A2A0>
+'dis_mode': <function discretisation_TU at 0x000001D7DE06A5C0>
+'upt_mode': <function x_update_mode__entropy at 0x000001D7DE06AAC0>
+
+
+vdp mhu: 1.0
+Timings: 0.013480901718139648, 1.3660502433776855
+MSE (mean square error): 0.037403520473419036 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+TEMP-4-data2
 
 
-PC ...
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data2-3wf4ruch:v1
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 33508.0625307, '_step': 52, '_timestamp': 1744250372.9464028, '_wandb': {'runtime': 33510}, 'batch_size': 128, 'best_epoch': 27, 'best_test': 0.09667358021177942, 'best_train': 0.016005361657195464, 'best_val': 0.05909487554833057, 'epoch': 52, 'lr': 0.0001111111111111111, 'n_epochs': 200, 'test_loss': 0.07511518298396988, 'time': 33318.034784793854, 'train_loss': 0.006294373538660467, 'val_loss': 0.11435211674561575}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 48,
+          'decoder_depth': 2,
+          'decoder_size': 2,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 2,
+          'linearisation_mode': 'lpv',
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'VanDerPol',
+          'output_dim': 2,
+          'state_dim': 2,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'vdp_test_data2',
+               'settings': 'data_generation/vdp.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/vdp_test_data2.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'damping': 1.0}, 'name': 'VanDerPol'},
+                   'sequence_generator': {'args': {'period': 5},
+                                          'name': 'GaussianSqWave'}}}
 
-===== SYSTEM PERFORMANCE SUMMARY =====      
 
-====================================== 
+mode_rnn: new 
+mode_dnn: FFNet 
+
+
+'lin_mode': <function linearisation_lpv__VanDerPol at 0x0000021F947462A0>
+'dis_mode': <function discretisation_TU at 0x0000021F947465C0>
+'upt_mode': <function x_update_mode__entropy at 0x0000021F94746AC0>
+
+
+vdp mhu: 1.0
+Timings: 0.015485763549804688, 1.3794801235198975
+MSE (mean square error): 0.029274297013969778 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 

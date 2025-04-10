@@ -16,7 +16,7 @@ vdp_fin = "run_data/csv_files/Finals_vdp.csv"           # comment | FINAL COMPAR
 fhn_fin = "run_data/csv_files/Finals_fhn.csv"           # comment | FINAL COMPARISON for fhn
 default = "run_data/csv_files/Default_code.csv"         # comment | original RNN architecture
 table = "run_data/csv_files/table.csv"                  # comment | for LateX tables
-csv_path = table
+csv_path = vdp_fin
 
 
 # Define your scripts and optional args
