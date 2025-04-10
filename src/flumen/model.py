@@ -239,7 +239,7 @@ class CausalFlowModel(nn.Module):
 
         rnn_out_seq_packed, _, coefficients, matrices = self.u_rnn(rnn_input, (z, c0), deltas)    ###############
 
-        return z, rnn_out_seq_packed, coefficients, matrices, False
+        return z, rnn_out_seq_packed, coefficients, matrices, True
 
     def mode_rnn_gru(self, x, deltas, rnn_input):
         h0 = self.x_dnn(x)

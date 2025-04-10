@@ -194,19 +194,19 @@ class Hyperparams:
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
             # for GaussianSqWave - dataset 3
             'hyperparams___best': {
-                "control_rnn_size": 48,         # 22,  
+                "control_rnn_size": 64,         # 22, {48, 64, 80} 
                 "control_rnn_depth": 1,         
-                "encoder_size": 2,   
+                "encoder_size": 8,              # 2
                 "encoder_depth": 2,  
-                "decoder_size": 2,  
+                "decoder_size": 8,              # 2
                 "decoder_depth": 2,  
                 "batch_size": 128,              # 96     | modified these two 
                 "lr": 0.001,                    # 0.0005 | to smooth the loss              
                 "n_epochs": 200,  
                 "es_patience": 25,              # 20,          
                 "es_delta": 1e-07,
-                "sched_patience": 10,           # 8,
-                "sched_factor": 3,              # 2,
+                "sched_patience": 5,            # 10, 8,
+                "sched_factor": 2,              # 3,  2,
                 "loss": "mse",                  
                 "discretisation_mode": "TU",    # mainly TU or {BE}
                 "optimiser_mode": "adam",       

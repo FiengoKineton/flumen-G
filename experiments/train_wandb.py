@@ -347,7 +347,7 @@ def main(sweep):
     optimiser_mode = __optimiser_mode  # wandb.config['optimiser_mode']
 
     if optimiser_mode == "adam":
-        optimiser = torch.optim.Adam(model.parameters(), lr=__lr)   #########################################################
+        optimiser = torch.optim.Adam(model.parameters(), lr=__lr, weight_decay=1e-4)   #########################################################
     elif optimiser_mode == "tbptt":
         optimiser = torch.optim.Adam(model.parameters(), lr=__lr)
     elif optimiser_mode == "nesterov":
