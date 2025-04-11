@@ -37,8 +37,6 @@ class LSTM(nn.Module):
         self.bidirectional = bidirectional
         self.state_dim = state_dim
 
-        self.num_directions = 2 if bidirectional else 1
-
     # -------------------------------------------
         self.model_name = model_name
         self.data = self.get_model_data()
@@ -64,32 +62,23 @@ class LSTM(nn.Module):
         print("'upt_mode':", self.x_update_function)
         print("\n")
 
-    # ------------------------------------------- # torch.jit.script() 
+    # -------------------------------------------
         self.lstm_cells = nn.ModuleList([
-                LSTMCell(input_size + state_dim if layer == 0 else self.hidden_size, self.hidden_size, bias)   
+            LSTMCell(input_size + state_dim if layer == 0 else self.hidden_size, self.hidden_size, bias)        # torch.jit.script()    
             for layer in range(num_layers)
-        ]) if not bidirectional else nn.ModuleList([
-            nn.ModuleList([
-                bdrLSTMCell(input_size + state_dim if layer == 0 else self.hidden_size * self.num_directions, self.hidden_size, bias)
-                for _ in range(self.num_directions)
-            ]) for layer in range(num_layers)
         ])
 
     # -------------------------------------------
         """Dropout layer per regolarizzare la rete tra i layer interni della LSTM
         Viene attivato solo se: c'è più di un layer e il dropout è > 0.0
         Aiuta a prevenire l'overfitting spegnendo casualmente dei neuroni a ogni forward pass"""
-        self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else nn.Identity()
+        ### self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else None
 
 
         """LayerNorm applicato separatamente a ogni layer della LSTM
          Stabilizza la distribuzione delle attivazioni (h_new), normalizzandole rispetto ai feature di ogni step
         Questo migliora la convergenza e riduce l'effetto di vanishing/exploding gradient"""
-        self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)]) if not bidirectional else nn.ModuleList([
-                nn.ModuleList([
-                    nn.LayerNorm(self.hidden_size) for _ in range(self.num_directions)
-                ]) for _ in range(num_layers)
-            ])
+        ### self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)])
 
     # -------------------------------------------
         self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
@@ -100,10 +89,6 @@ class LSTM(nn.Module):
         torch.nn.init.xavier_uniform_(self.W__h_to_x.weight)
         if bias: torch.nn.init.constant_(self.W__h_to_x.bias, 0.0)
 
-    # -------------------------------------------
-        self.fc = nn.Linear(self.hidden_size * self.num_directions, output_size) if output_size is not None else None
-
-
 
     def forward(self, rnn_input: PackedSequence, hidden_state, tau):
         rnn_input_unpacked, lengths = pad_packed_sequence(rnn_input, batch_first=self.batch_first)
@@ -111,6 +96,7 @@ class LSTM(nn.Module):
         device = rnn_input_unpacked.device
 
         z, c_z = hidden_state
+        #self.A, self.B = self.A.to(device, dtype=self.dtype), self.B.to(device, dtype=self.dtype)
         self.I, tau = self.I.to(device, dtype=self.dtype), tau.to(device, dtype=self.dtype)
 
         outputs = torch.empty(batch_size, seq_len, self.z_size, device=device)  # Preallocate tensor | before: torch.zeros
@@ -132,40 +118,11 @@ class LSTM(nn.Module):
             for layer, cell in enumerate(self.lstm_cells):
                 h_new, c_new = cell(u_t, h[layer], c[layer])
 
-                h_new = self.ln_layers[layer](h_new)
-                if layer < self.num_layers - 1: h_new = self.dropout_layer(h_new)
+                ### h_new = self.ln_layers[layer](h_new)
+                ### if self.dropout_layer is not None and layer < self.num_layers - 1: h_new = self.dropout_layer(h_new)
 
                 h_list.append(h_new)
                 c_list.append(c_new)
-
-            """h_list, c_list = [], []
-            for layer, cells in enumerate(self.lstm_cells):
-                new_h, new_c = [], []
-
-                # Forward direction
-                h_fwd, c_fwd = cells[0](u_t, h[layer], c[layer])
-                h_fwd = self.ln_layers[layer](h_fwd)
-                new_h.append(h_fwd)
-                new_c.append(c_fwd)
-
-                if self.bidirectional:
-                    t_rev = seq_len - t - 1
-                    rnn_input_rev = rnn_input_unpacked[:, t_rev, :]
-                    x_rev = x_prev.squeeze(0)
-                    u_rev = torch.cat((x_rev, rnn_input_rev), dim=1)
-                    h_bwd, c_bwd = cells[1](u_rev, h[layer], c[layer])
-                    h_bwd = self.ln_layers[layer](h_bwd)
-                    new_h.append(h_bwd)
-                    new_c.append(c_bwd)
-                    u_t = torch.cat([h_fwd, h_bwd], dim=-1)
-                else:
-                    u_t = h_fwd
-
-                if layer < self.num_layers - 1:
-                    u_t = self.dropout_layer(u_t)
-
-                h_list.append(torch.stack(new_h, dim=0))
-                c_list.append(torch.stack(new_c, dim=0))"""
 
             u_dyn = rnn_input_t[:, :1]
             A_matrix, B_matrix, f_eq = self.linearisation_function(self.param, x_prev, u_dyn)
@@ -182,7 +139,6 @@ class LSTM(nn.Module):
 
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         out = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
-        ###if self.fc is not None and not isinstance(outputs, torch.nn.utils.rnn.PackedSequence): out = self.fc(out[:, -1, :])
         return out, (z, c_z), coefficients, matrices
 
 
@@ -340,32 +296,6 @@ class LSTMCell(nn.Module):
 
         return h, c
 
-class bdrLSTMCell(nn.Module):
-    def __init__(self, input_size: int, hidden_size: int, bias: bool=True, use_ln: bool=False):
-        super().__init__()
-        self.hidden_size = hidden_size
-        self.WU = nn.Linear(input_size + hidden_size, 4 * hidden_size, bias=bias)
-        torch.nn.init.xavier_uniform_(self.WU.weight)
-        if bias:
-            torch.nn.init.constant_(self.WU.bias, 0.0)
-
-        self.use_ln = use_ln
-        if use_ln:
-            self.layernorm = nn.LayerNorm(hidden_size)
-
-    def forward(self, u, h, c):
-        gates = self.WU(torch.cat((u, h), dim=1))
-        i, f, g, o = gates.chunk(4, dim=1)
-        i, f, o = torch.sigmoid(i), torch.sigmoid(f), torch.sigmoid(o)
-        g = torch.tanh(g)
-
-        c.mul_(f).add_(i * g)
-        h = o * torch.tanh(c)
-
-        if self.use_ln:
-            h = self.layernorm(h)
-
-        return h, c
 
 
 # --------------------------------------------------------------------------- #
@@ -450,11 +380,10 @@ def linearisation_static__NonlinearActivationDynamics(param, x, u):
     B = dyn_factor * torch.tensor(B, dtype=dtype)
     f_eq = dyn_factor * torch.tensor(f_eq, dtype=dtype).unsqueeze(-1)
 
-    """print("current method")
     print("A:", A)
     print("B:", B)
     print("f_eq:", f_eq)
-    sys.exit()"""
+    sys.exit()
     return A, B, f_eq
 
 
@@ -570,10 +499,10 @@ def linearisation_curr__NonlinearActivationDynamics(param, x, u):
     B = dyn_factor * torch.tensor(B_dyn, dtype=dtype)
     f_eq = dyn_factor * torch.tensor(f_eq, dtype=dtype).unsqueeze(-1)
 
-    """print("A:", A)
+    print("A:", A)
     print("B:", B)
     print("f_eq:", f_eq)
-    sys.exit()"""
+    sys.exit()
     return A, B, f_eq
 
 
@@ -895,7 +824,7 @@ def discretisation_exact(x_prev, mat, u):
 
     exp_matrix = torch.matrix_exp(tau * A)
     rhs = exp_matrix - I
-    integral_term = torch.linalg.solve(A, rhs)  # torch.linalg.solve: (Batch element 40): The solver failed because the input matrix is singular.
+    integral_term = torch.linalg.solve(A, rhs)
     input_term = torch.bmm(B, u) + f_eq
 
     x1 = torch.bmm(x_prev, exp_matrix)
