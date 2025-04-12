@@ -194,7 +194,7 @@ class Hyperparams:
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
             # for GaussianSqWave - dataset 3
             'hyperparams___best': {
-                "control_rnn_size": 64,         # 22, {48, 64, 80} 
+                "control_rnn_size": 48,         # 22, {48, 64, 80} 
                 "control_rnn_depth": 1,         
                 "encoder_size": 8,              # 2
                 "encoder_depth": 2,  
@@ -207,13 +207,13 @@ class Hyperparams:
                 "es_delta": 1e-07,
                 "sched_patience": 5,            # 10, 8,
                 "sched_factor": 2,              # 3,  2,
-                "loss": "mse",                  
-                "discretisation_mode": "TU",    # mainly TU or {BE}, FE for nad
-                "optimiser_mode": "adam",       
-                "x_update_mode": "entropy",
-                "mode_rnn": "new", 
-                "mode_dnn": "FFNet", 
-                "linearisation_mode": "lpv",    # static for nad
+                "loss": "mse",                      # {mse, huber, l1}
+                "discretisation_mode": "TU",        # {FE, BE, TU, RK4, exact}
+                "optimiser_mode": "adam",           # {adam, tbptt, nesterov, newton}
+                "x_update_mode": "entropy",         # {alpha, beta, lamda. relu, switch, entropy}
+                "mode_rnn": "new",                  # {new, old, gru}
+                "mode_dnn": "FFNet",                # {FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder}
+                "linearisation_mode": "lpv",        # {static, current, lpv}
             },
 
 
@@ -274,6 +274,28 @@ class Hyperparams:
 
             },
 
+            'hyperparams___nad': {
+                "control_rnn_size": 64,         # 22, {48, 64, 80} 
+                "control_rnn_depth": 1,         
+                "encoder_size": 8,              # 2
+                "encoder_depth": 2,  
+                "decoder_size": 8,              # 2
+                "decoder_depth": 2,  
+                "batch_size": 128,              # 96     | modified these two 
+                "lr": 0.001,                    # 0.0005 | to smooth the loss              
+                "n_epochs": 200,  
+                "es_patience": 25,              # 20,          
+                "es_delta": 1e-07,
+                "sched_patience": 5,            # 10, 8,
+                "sched_factor": 2,              # 3,  2,
+                "loss": "mse",                  
+                "discretisation_mode": "TU",    # mainly TU or {BE}, FE for nad
+                "optimiser_mode": "adam",       
+                "x_update_mode": "entropy",
+                "mode_rnn": "new", 
+                "mode_dnn": "FFNet", 
+                "linearisation_mode": "static",    # static for nad
+            },
 
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
             'hyperparams___run_037' : {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},

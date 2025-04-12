@@ -168,8 +168,9 @@ class LSTM(nn.Module):
                 c_list.append(torch.stack(new_c, dim=0))"""
 
             u_dyn = rnn_input_t[:, :1]
-            A_matrix, B_matrix, f_eq = self.linearisation_function(self.param, x_prev, u_dyn)
-            x_mid = self.discretisation_function(x_prev, (A_matrix, tau_t, self.I, B_matrix, f_eq), u_dyn)            
+            A_matrix, B_matrix, f_eq = self.linearisation_function(self.param, batch_size, x_prev, u_dyn)
+            x_mid = self.discretisation_function(x_prev, (A_matrix, tau_t, self.I, B_matrix, f_eq), u_dyn)   
+            print(x_prev.shape, A_matrix.shape, B_matrix.shape, f_eq.shape, x_mid.shape)         
 
             h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
             x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)      
@@ -178,7 +179,7 @@ class LSTM(nn.Module):
             outputs[:, t, :].copy_(z[-1])  # In-place assignment
             coefficients[:, t, :].copy_(coeff)  
             matrices[t, :, :].copy_(A_matrix[0])
-            ###sys.exit()
+            sys.exit()
 
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         out = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
@@ -372,7 +373,7 @@ class bdrLSTMCell(nn.Module):
 # ---------------- Linearisation static ------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def linearisation_static__VanDerPol(param, x, u): 
+def linearisation_static__VanDerPol(param, batch_size, x, u): 
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -388,13 +389,16 @@ def linearisation_static__VanDerPol(param, x, u):
     B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
 
     f_eq = dyn_factor * torch.tensor([
-        x2_eq,
-        -x1_eq + mhu * (1 - x1_eq**2) * x2_eq + u_eq
+        [x2_eq],
+        [-x1_eq + mhu * (1 - x1_eq**2) * x2_eq + u_eq]
     ], dtype=dtype)
 
+    A = A.unsqueeze(0).expand(batch_size, -1, -1) 
+    B = B.unsqueeze(0).expand(batch_size, -1, -1) 
+    f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
     return A, B, f_eq
 
-def linearisation_static__FitzHughNagumo(param, x, u): 
+def linearisation_static__FitzHughNagumo(param, batch_size, x, u): 
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -424,9 +428,13 @@ def linearisation_static__FitzHughNagumo(param, x, u):
         (x1_eq - a - b * x2_eq) / tau
     ], dtype=dtype)
 
+    A = A.unsqueeze(0).expand(batch_size, -1, -1) 
+    B = B.unsqueeze(0).expand(batch_size, -1, -1) 
+    f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
+
     return A, B, f_eq
 
-def linearisation_static__NonlinearActivationDynamics(param, x, u):
+def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u):
     A = param['A']
     dyn_factor = param['dyn_factor']
     dtype = param['dtype']
@@ -450,10 +458,14 @@ def linearisation_static__NonlinearActivationDynamics(param, x, u):
     B = dyn_factor * torch.tensor(B, dtype=dtype)
     f_eq = dyn_factor * torch.tensor(f_eq, dtype=dtype).unsqueeze(-1)
 
-    """print("current method")
-    print("A:", A)
-    print("B:", B)
-    print("f_eq:", f_eq)
+    A = A.unsqueeze(0).expand(batch_size, -1, -1) 
+    B = B.unsqueeze(0).expand(batch_size, -1, -1) 
+    f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
+
+    """print("static method")
+    print("A:", A.shape)
+    print("B:", B.shape)
+    print("f_eq:", f_eq.shape)
     sys.exit()"""
     return A, B, f_eq
 
@@ -462,7 +474,7 @@ def linearisation_static__NonlinearActivationDynamics(param, x, u):
 # ---------------- Linearisation functions ---------------------------------- #
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def linearisation_curr__VanDerPol(param, x, u): 
+def linearisation_curr__VanDerPol(param, batch_size, x, u): 
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -485,13 +497,17 @@ def linearisation_curr__VanDerPol(param, x, u):
     B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
 
     f_eq = dyn_factor * torch.tensor([
-        x2_eq,
-        -x1_eq + mhu * (1 - x1_eq**2) * x2_eq + u_eq
+        [x2_eq],
+        [-x1_eq + mhu * (1 - x1_eq**2) * x2_eq + u_eq]
     ], dtype=dtype)
+
+    A = A.unsqueeze(0).expand(batch_size, -1, -1) 
+    B = B.unsqueeze(0).expand(batch_size, -1, -1) 
+    f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
 
     return A, B, f_eq
 
-def linearisation_curr__FitzHughNagumo(param, x, u): 
+def linearisation_curr__FitzHughNagumo(param, batch_size, x, u): 
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -533,7 +549,7 @@ def linearisation_curr__FitzHughNagumo(param, x, u):
 
     return A, B, f_eq
 
-def linearisation_curr__NonlinearActivationDynamics(param, x, u):
+def linearisation_curr__NonlinearActivationDynamics(param, batch_size, x, u):
     A = param['A']
     B = param['B']
     dyn_factor = param['dyn_factor']
@@ -581,7 +597,7 @@ def linearisation_curr__NonlinearActivationDynamics(param, x, u):
 # ---------------- Linearisation LPV functions ------------------------------ #
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def linearisation_lpv__VanDerPol(param, x, u, radius=3, epsilon=1e-4):
+def linearisation_lpv__VanDerPol(param, batch_size, x, u, radius=3, epsilon=1e-4):
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -649,7 +665,7 @@ def linearisation_lpv__VanDerPol(param, x, u, radius=3, epsilon=1e-4):
 
     return A, B, f_eq
 
-def linearisation_lpv__FitzHughNagumo(param, x, u, radius=1, epsilon=1e-4):
+def linearisation_lpv__FitzHughNagumo(param, batch_size, x, u, radius=1, epsilon=1e-4):
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -720,7 +736,7 @@ def linearisation_lpv__FitzHughNagumo(param, x, u, radius=1, epsilon=1e-4):
     
     return A, B, f_eq
 
-def linearisation_lpv__NonlinearActivationDynamics(param, x, u, radius=1, epsilon=1e-4):
+def linearisation_lpv__NonlinearActivationDynamics(param, batch_size, x, u, radius=1, epsilon=1e-4):
     A_base = param['A']
     B_base = param['B']
     x_eq = param['x_eq']
@@ -754,13 +770,15 @@ def linearisation_lpv__NonlinearActivationDynamics(param, x, u, radius=1, epsilo
             return -x_sample + np.tanh(z)
 
     # Generate sampling points
-    angles = np.linspace(0, 2 * np.pi, 9)[:-1]
-    deltas = torch.tensor([[np.cos(a), np.sin(a)] for a in angles], dtype=dtype)
+    num_samples = 32  # o 64 se vuoi più precisione
+    deltas = torch.randn(num_samples, state_dim, dtype=dtype)
+    deltas = radius * deltas / torch.norm(deltas, dim=1, keepdim=True)
+
     x_eq_t = torch.tensor(x_eq, dtype=dtype)
-    sampled_points = x_eq_t + radius * deltas  # [8, state_dim]
+    sampled_points = x_eq_t + deltas  # [num_samples, state_dim]
 
     # Expand dimensions
-    x_target = x[0].unsqueeze(1)  # [batch, 1, state_dim]
+    x_target = x[:, :state_dim].unsqueeze(1)  # [batch, 1, state_dim]
     u_target = u                 # [batch, control_dim]
 
     A_list, B_list, f_eq_list = [], [], []
