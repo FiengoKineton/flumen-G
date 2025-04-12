@@ -10,7 +10,7 @@ from itertools import permutations
 
 
 class PhasePlot: 
-    def __init__(self, which):
+    def __init__(self, which, i=0, j=1):
 
         # Time span and initial condition
         self.t_span = (0, 40)
@@ -40,30 +40,29 @@ class PhasePlot:
             self.eq = np.array([0.42599762, 0.42599282, 0.42591131, 0.4245284,  0.40105814])  
             print("equilibrium:", self.eq)
             self.sol = solve_ivp(self.nad, self.t_span, self.y0, t_eval=self.t_eval)
-            self.i, self.j = 0, 4
+            self.i, self.j = i, j
+
+        self.which = which
+        self.initial_conds = self.polar_to_cartesian(self.i, self.j)
 
 
-        self.initial_conds = []
-        if which in ['vdp', 'fhn']:
-            self.initial_conds = [
-                [self.eq[self.i] + r * np.cos(theta), self.eq[self.j] + r * np.sin(theta)]
+    def polar_to_cartesian(self, i, j):   
+        initial_conds = []
+        if self.which in ['vdp', 'fhn']:
+            initial_conds = [
+                [self.eq[i] + r * np.cos(theta), self.eq[j] + r * np.sin(theta)]
                 for r in self.r_vals for theta in self.angles
             ]
-        elif which == 'nad':
+        elif self.which == 'nad':
             # Per il sistema NAD (a 5 dimensioni), proiettiamo solo le prime 2 componenti
-            self.initial_conds = [
-                [self.eq[self.i] + r * np.cos(theta), self.eq[self.j] + r * np.sin(theta)]
+            initial_conds = [
+                [self.eq[i] + r * np.cos(theta), self.eq[j] + r * np.sin(theta)]
                 for r in np.linspace(0.05, 2.5, 20)
                 for theta in np.linspace(0, 2*np.pi, 30)
             ]
+        
+        return initial_conds
 
-        #self.animate_2d()
-        #self.plot_3d_phase()
-        #self.plot_3d_phase_grid()
-
-        #self.plot_limit_cicle()
-        #self.animate_2d()
-        #self.plot_phase_plot(which)
 
     # -------------------------------------------------------
     # Dinamiche del sistema
@@ -257,7 +256,8 @@ class PhasePlot:
         ax.set_title("3D Phase Portrait")
 
         # Loop su tutte le condizioni iniziali
-        for y0 in self.initial_conds:
+        initial_conds = self.polar_to_cartesian(i, j)
+        for y0 in initial_conds:
             # Crea un vettore iniziale completo di 5 componenti
             y0_full = self.eq.copy()
             y0_full[i] = y0[0]
@@ -316,14 +316,15 @@ if __name__ == "__main__":
 
     if which == 'nad': 
         #p.animate_2d(0, 1, 2)
+        #p.plot_3d_phase(2, 3, 4)
 
         for i in range(5):
-            for j in range(5):
-                for k in range(5):
+            for j in range(i+1, 5):
+                for k in range(j+1, 5):
                     p.plot_3d_phase(i, j, k)
         
         """
-        ombrello basso
+        ombrello basso: 
         - 0, 1, 3
         - 0, 2, 3
         - 1, 2, 3
@@ -332,6 +333,7 @@ if __name__ == "__main__":
         - 0, 1, 2
         - 0, 1, 4
         - 0, 2, 4
+        - 0, 3, 4
         - 1, 2, 4
         - 1, 3, 4
         - 2, 3, 4
