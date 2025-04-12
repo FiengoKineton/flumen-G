@@ -170,7 +170,6 @@ class LSTM(nn.Module):
             u_dyn = rnn_input_t[:, :1]
             A_matrix, B_matrix, f_eq = self.linearisation_function(self.param, batch_size, x_prev, u_dyn)
             x_mid = self.discretisation_function(x_prev, (A_matrix, tau_t, self.I, B_matrix, f_eq), u_dyn)   
-            print(x_prev.shape, A_matrix.shape, B_matrix.shape, f_eq.shape, x_mid.shape)         
 
             h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
             x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)      
@@ -179,7 +178,6 @@ class LSTM(nn.Module):
             outputs[:, t, :].copy_(z[-1])  # In-place assignment
             coefficients[:, t, :].copy_(coeff)  
             matrices[t, :, :].copy_(A_matrix[0])
-            sys.exit()
 
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         out = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)

@@ -162,19 +162,24 @@ def main():
             if args.wandb_2: ax1[1].pcolormesh(t.squeeze(), xx, y_pred_2.T)
         else:
             # **Plot y_true vs y_pred**
-            n = model.output_dim if model.state_dim==2 else 1
+            n = model.output_dim #if model.state_dim==2 else 1
             colors = ['red', 'blue', 'green', 'red']  # extend if needed
             linestyles = ['-', '-.', ':', '--']  # different line styles
+
+            err, err_2 = np.zeros(n), np.zeros(n)
+            for k in range(n):
+                err[k] = model.output_dim * np.mean(np.square(y[:, k] - y_pred[:, k]))
+                err_2[k] = model.output_dim * np.mean(np.square(y[:, k] - y_pred_2[:, k]))
 
             for k, ax_ in enumerate(ax1[:n]):
                 # Predicted (Advanced)
                 ax_.plot(t, y_pred[:, k], color=colors[0], linestyle=linestyles[0], 
-                        label=f'Advanced ({sq_error:.3f})')
+                        label=f'Advanced ({err[k]:.6f})')
 
                 # Predicted (Default), optional
                 if args.wandb_2:
                     ax_.plot(t, y_pred_2[:, k], color=colors[1], linestyle=linestyles[1],
-                            label=f'Default ({sq_error_2:.3f})')
+                            label=f'Default ({err_2[k]:.6f})')
 
                 # True state trajectory
                 ax_.plot(t, y[:, k], color=colors[2], linestyle=linestyles[2], 
