@@ -1,0 +1,274 @@
+nad-old (stable)
+
+
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-btg9grfc:v7
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 36643.8082736, '_step': 155, '_timestamp': 1744450238.0700505, '_wandb': {'runtime': 36646}, 'batch_size': 128, 'best_epoch': 130, 'best_test': 0.0007047015022844934, 'best_train': 0.00046337013551026024, 'best_val': 0.000937256626211964, 'epoch': 155, 'lr': 4.8828125e-07, 'n_epochs': 200, 'test_loss': 0.0007011892075607893, 'time': 36527.23755979538, 'train_loss': 0.0004596979024379007, 'val_loss': 0.0009429730706624612}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 64,
+          'decoder_depth': 2,
+          'decoder_size': 8,
+          'discretisation_mode': 'TU',
+          'encoder_depth': 2,
+          'encoder_size': 8,
+          'linearisation_mode': 'lpv',
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'old',
+          'model_name': 'NonlinearActivationDynamics',
+          'output_dim': 5,
+          'state_dim': 5,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'nad_test_data',
+               'settings': '.\\data_generation\\nad.yaml',       
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/nad_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'a_m': [[0.0, 1.0, 0.0, 0.0, 0.0],
+                                                 [0.0, 0.0, 1.0, 0.0, 0.0],
+                                                 [0.0, 0.0, 0.0, 1.0, 0.0],
+                                                 [0.0, 0.0, 0.0, 0.0, 1.0],
+                                                 [1.0, 0.0, 0.0, 0.0, 0.0]],
+                                         'a_s': [[-1.0, 0.3, 0.0, 0.0, 0.0],
+                                                 [0.0, -1.0, 0.3, 0.0, 0.0],
+                                                 [0.0, 0.0, -1.0, 0.3, 0.0],
+                                                 [0.0, 0.0, 0.0, -1.0, 0.3],
+                                                 [0.0, 0.0, 0.0, 0.0, -1.0]],
+                                         'activation': 'sigmoid',
+                                         'b': [[1.0],
+                                               [0.0],
+                                               [0.0],
+                                               [0.0],
+                                               [0.0]],
+                                         'control_dim': 1,       
+                                         'mode': 'stable',       
+                                         'state_dim': 5},        
+                                'name': 'NonlinearActivationDynamics'},
+                   'sequence_generator': {'args': {'period': 5}, 
+                                          'name': 'GaussianSqWave'}}}
+
+
+mode_rnn: old
+mode_dnn: FFNet
+
+
+NonlinearActivationDynamics initialized with activation: sigmoid 
+Matrix A: [[-1.0, 0.3, 0.0, 0.0, 0.0], [0.0, -1.0, 0.3, 0.0, 0.0], [0.0, 0.0, -1.0, 0.3, 0.0], [0.0, 0.0, 0.0, -1.0, 0.3], [0.0, 0.0, 0.0, 0.0, -1.0]]
+Matrix B: [[1.0], [0.0], [0.0], [0.0], [0.0]]
+Timings: 0.019550085067749023, 0.8933737277984619
+MSE (mean square error): 0.0009696266698139846  
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+nad (stable)
+
+
+PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe  .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-2t2yze6b:v3
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb:   2 of 2 files downloaded.  
+{'_runtime': 42177.7797106, '_step': 79, '_timestamp': 1744454180.5483346, '_wandb': {'runtime': 42177}, 'batch_size': 128, 'best_epoch': 79, 'best_test': 0.0004739432032303219, 'best_train': 0.0004108879756896631, 'best_val': 0.0005286833246438098, 'epoch': 79, 'lr': 3.125e-05, 'n_epochs': 200, 'test_loss': 0.0004739432032303219, 'time': 42032.77153205872, 'train_loss': 0.0004108879756896631, 'val_loss': 0.0005286833246438098}
+{'args': {'control_dim': 1,
+          'control_rnn_depth': 1,
+          'control_rnn_size': 64,
+          'decoder_depth': 2,
+          'decoder_size': 8,
+          'discretisation_mode': 'FE',
+          'encoder_depth': 2,
+          'encoder_size': 8,
+          'linearisation_mode': 'static',
+          'mode_dnn': 'FFNet',
+          'mode_rnn': 'new',
+          'model_name': 'NonlinearActivationDynamics',
+          'output_dim': 5,
+          'state_dim': 5,
+          'use_batch_norm': False,
+          'x_update_mode': 'entropy'},
+ 'data_args': {'data_split': [20, 20],
+               'n_samples': 200,
+               'n_trajectories': 200,
+               'noise_seed': None,
+               'noise_std': 0.0,
+               'output_name': 'nad_test_data',
+               'settings': '.\\data_generation\\nad.yaml',
+               'time_horizon': 15.0},
+ 'data_path': 'C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/nad_test_data.pkl',
+ 'data_settings': {'control_delta': 0.2,
+                   'dynamics': {'args': {'a_m': [[0.0, 1.0, 0.0, 0.0, 0.0],
+                                                 [0.0, 0.0, 1.0, 0.0, 0.0],
+                                                 [0.0, 0.0, 0.0, 1.0, 0.0],
+                                                 [0.0, 0.0, 0.0, 0.0, 1.0],
+                                                 [1.0, 0.0, 0.0, 0.0, 0.0]],
+                                         'a_s': [[-1.0, 0.3, 0.0, 0.0, 0.0],
+                                                 [0.0, -1.0, 0.3, 0.0, 0.0],
+                                                 [0.0, 0.0, -1.0, 0.3, 0.0],
+                                                 [0.0, 0.0, 0.0, -1.0, 0.3],
+                                                 [0.0, 0.0, 0.0, 0.0, -1.0]],
+                                         'activation': 'sigmoid',
+                                         'b': [[1.0],
+                                               [0.0],
+                                               [0.0],
+                                               [0.0],
+                                               [0.0]],
+                                         'control_dim': 1,       
+                                         'mode': 'stable',       
+                                         'state_dim': 5},        
+                                'name': 'NonlinearActivationDynamics'},
+                   'sequence_generator': {'args': {'period': 5}, 
+                                          'name': 'GaussianSqWave'}}}
+
+
+mode_rnn: new
+mode_dnn: FFNet
+
+
+'lin_mode': <function linearisation_static__NonlinearActivationDynamics at 0x000001D4F5FFE2A0>
+'dis_mode': <function discretisation_FE at 0x000001D4F5FFE700>
+'upt_mode': <function x_update_mode__entropy at 0x000001D4F5FFED40>
+
+
+NonlinearActivationDynamics initialized with activation: sigmoid
+Matrix A: [[-1.0, 0.3, 0.0, 0.0, 0.0], [0.0, -1.0, 0.3, 0.0, 0.0], [0.0, 0.0, -1.0, 0.3, 0.0], [0.0, 0.0, 0.0, -1.0, 0.3], [0.0, 0.0, 0.0, 0.0, -1.0]]
+Matrix B: [[1.0], [0.0], [0.0], [0.0], [0.0]]
+Timings: 0.019669294357299805, 2.058637857437134
+MSE (mean square error): 0.00024302524247957948 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+000___
+
+
+PC ...
+
+===== SYSTEM PERFORMANCE SUMMARY =====      
+
+====================================== 
+
+------------------------------------------------------------------------------------------------------------------------------------------------

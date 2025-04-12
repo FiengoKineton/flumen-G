@@ -83,7 +83,7 @@ def main():
     fig1.canvas.mpl_connect('close_event', on_close_window)
 
     # Second Figure: Delta Plots
-    fig2, ax2 = plt.subplots(2, 1, sharex=True)
+    fig2, ax2 = plt.subplots(n_plots, 1, sharex=True) # 2
     fig2.canvas.mpl_connect('close_event', on_close_window)
 
     # Third Figure: Coefficient Evolution (for alpha, beta, lambda) ###############
@@ -130,8 +130,8 @@ def main():
         print(f"Timings: {time_integrate}, {time_predict}")
 
         y = y[:, tuple(bool(v) for v in sampler._dyn.mask)]
-        sq_error = np.square(y - y_pred)
-        print("MSE (mean square error):", model.output_dim * np.mean(sq_error), "\n")
+        sq_error = model.output_dim * np.mean(np.square(y - y_pred))
+        print("MSE (mean square error):", sq_error, "\n")
 
         # **Clear previous plots and remove insets & connections**
         for ax_ in ax1:
@@ -174,20 +174,13 @@ def main():
         ax1[-1].set_xlabel("$t$")
 
         # **Plot delta (Error)**
-        ax2[0].plot(t, y[:, 0] - y_pred[:, 0], label=r"$\Delta x_1$", color='red')
-        ax2[0].set_ylabel("Delta x1")
-        ax2[0].legend()
-        ax2[0].grid()
+        for k, ax_ in enumerate(ax2[:n]):
+            ax_.plot(t, y[:, 0] - y_pred[:, k], c='blue') #, label=f'Advanced ({sq_error:.3f})')
+            ax_.set_ylabel(f"$Δx_{k+1}$")
+            ax_.legend()
+
 
         if n==2:
-            #""" Comment this out if state_dim!=2
-            # ----------------------------------------------- #
-            ax2[1].plot(t, y[:, 1] - y_pred[:, 1], label=r"$\Delta x_2$", color='blue')
-            ax2[1].set_ylabel("Delta x2")
-            ax2[1].set_xlabel("$t$")
-            ax2[1].legend()
-            ax2[1].grid()
-
             # **Plot Coefficients Evolution**   ###############
             if mode_rnn!="old":
                 ax3[0].plot(t, coeffs[:, 0], label=r"$\alpha_1$", color='purple')

@@ -208,12 +208,12 @@ class Hyperparams:
                 "sched_patience": 5,            # 10, 8,
                 "sched_factor": 2,              # 3,  2,
                 "loss": "mse",                  
-                "discretisation_mode": "TU",    # mainly TU or {BE}
+                "discretisation_mode": "TU",    # mainly TU or {BE}, FE for nad
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet", 
-                "linearisation_mode": "lpv", 
+                "linearisation_mode": "lpv",    # static for nad
             },
 
 
