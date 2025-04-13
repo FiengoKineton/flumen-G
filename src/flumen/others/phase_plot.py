@@ -10,7 +10,7 @@ from itertools import permutations
 
 
 class PhasePlot: 
-    def __init__(self, which, i=0, j=1):
+    def __init__(self, which, i=0, j=1, k=2):
 
         # Time span and initial condition
         self.t_span = (0, 40)
@@ -33,20 +33,20 @@ class PhasePlot:
             self.eq = fsolve(lambda p: self.fhn(0, p), [0.0, 0.0])  # np.array([0.3087, 0.4348])
             print("equilibrium:", self.eq)
             self.sol = solve_ivp(self.fhn, self.t_span, self.y0, t_eval=self.t_eval)
-            self.i, self.j = 0, 1
+            self.i, self.j, self.k = 0, 1, 2
         elif which=='nad':
             self.y0 = [2.0, 0.0, 0.0, 0.0, 0.0]
             print("NonlinearActivationDynamics")
             self.eq = np.array([0.42599762, 0.42599282, 0.42591131, 0.4245284,  0.40105814])  
             print("equilibrium:", self.eq)
             self.sol = solve_ivp(self.nad, self.t_span, self.y0, t_eval=self.t_eval)
-            self.i, self.j = i, j
+            self.i, self.j, self.k = i, j, k
 
         self.which = which
-        self.initial_conds = self.polar_to_cartesian(self.i, self.j)
+        self.initial_conds = self.polar_to_cartesian(self.i, self.j, self.k)
 
 
-    def polar_to_cartesian(self, i, j):   
+    def polar_to_cartesian(self, i, j, k, dim=2):   
         initial_conds = []
         if self.which in ['vdp', 'fhn']:
             initial_conds = [
@@ -56,9 +56,17 @@ class PhasePlot:
         elif self.which == 'nad':
             # Per il sistema NAD (a 5 dimensioni), proiettiamo solo le prime 2 componenti
             initial_conds = [
+                [
+                    self.eq[i] + r * np.sin(phi) * np.cos(theta),
+                    self.eq[j] + r * np.sin(phi) * np.sin(theta),
+                    self.eq[k] + r * np.cos(phi)
+                ]
+                for r in np.linspace(0.05, 2.5, 10)
+                for theta in np.linspace(0, 2*np.pi, 20)
+                for phi in np.linspace(0, np.pi, 10)
+            ] if dim==3 else [
                 [self.eq[i] + r * np.cos(theta), self.eq[j] + r * np.sin(theta)]
-                for r in np.linspace(0.05, 2.5, 20)
-                for theta in np.linspace(0, 2*np.pi, 30)
+                for r in self.r_vals for theta in self.angles
             ]
         
         return initial_conds
@@ -212,8 +220,8 @@ class PhasePlot:
 
         return y0_full
 
-    def animate_2d(self):
-        i, j = self.i, self.j
+    def animate_2d(self, i, j, k=2):
+        initial_conds = self.polar_to_cartesian(i, j, k, 2)
 
         fig, ax = plt.subplots(figsize=(8, 8))
         ax.set_xlim(-2.5, 3)
@@ -227,7 +235,7 @@ class PhasePlot:
 
         # Pre-calcola tutte le soluzioni
         all_sols = []
-        for y0 in self.initial_conds:
+        for y0 in initial_conds:
             y0_full = self.eq.copy()
             y0_full[self.i] = y0[0]
             y0_full[self.j] = y0[1]
@@ -256,12 +264,13 @@ class PhasePlot:
         ax.set_title("3D Phase Portrait")
 
         # Loop su tutte le condizioni iniziali
-        initial_conds = self.polar_to_cartesian(i, j)
+        initial_conds = self.polar_to_cartesian(i, j, k, 3)
         for y0 in initial_conds:
             # Crea un vettore iniziale completo di 5 componenti
             y0_full = self.eq.copy()
             y0_full[i] = y0[0]
             y0_full[j] = y0[1]
+            y0_full[k] = y0[2]
 
             # Risolvi l'ODE
             sol = solve_ivp(self.nad, self.t_span, y0_full, t_eval=self.t_eval)
@@ -292,6 +301,7 @@ class PhasePlot:
                 y0_full = self.eq.copy()
                 y0_full[i] = y0[0]
                 y0_full[j] = y0[1]
+                y0_full
                 sol = solve_ivp(self.nad, self.t_span, y0_full, t_eval=self.t_eval)
                 ax.plot(sol.y[i], sol.y[j], sol.y[k], lw=0.7, alpha=0.6)
 
@@ -315,28 +325,17 @@ if __name__ == "__main__":
         p.animate_2d()
 
     if which == 'nad': 
-        #p.animate_2d(0, 1, 2)
+        #p.animate_2d(0, 1)
         #p.plot_3d_phase(2, 3, 4)
 
+        
+        for i in range(5):
+            for j in range(i + 1, 5):
+                p.animate_2d(i, j)
+
+        # i, j, k -> r=3
         for i in range(5):
             for j in range(i+1, 5):
                 for k in range(j+1, 5):
                     p.plot_3d_phase(i, j, k)
-        
-        """
-        ombrello basso: 
-        - 0, 1, 3
-        - 0, 2, 3
-        - 1, 2, 3
-
-        ombrello alto: 
-        - 0, 1, 2
-        - 0, 1, 4
-        - 0, 2, 4
-        - 0, 3, 4
-        - 1, 2, 4
-        - 1, 3, 4
-        - 2, 3, 4
-        """
-
-        #p.plot_3d_phase_grid()
+    

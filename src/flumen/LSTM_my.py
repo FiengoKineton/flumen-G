@@ -422,8 +422,8 @@ def linearisation_static__FitzHughNagumo(param, batch_size, x, u):
     B = dyn_factor * torch.tensor([[v_fact], [0.0]], dtype=dtype)
 
     f_eq = dyn_factor * torch.tensor([
-        v_fact * (x1_eq - x1_eq**3 - x2_eq + u_eq),
-        (x1_eq - a - b * x2_eq) / tau
+        [v_fact * (x1_eq - x1_eq**3 - x2_eq + u_eq)],
+        [(x1_eq - a - b * x2_eq) / tau]
     ], dtype=dtype)
 
     A = A.unsqueeze(0).expand(batch_size, -1, -1) 
@@ -541,8 +541,8 @@ def linearisation_curr__FitzHughNagumo(param, batch_size, x, u):
     B = dyn_factor * torch.tensor([[v_fact], [0.0]], dtype=dtype)
 
     f_eq = dyn_factor * torch.tensor([
-        v_fact * (x1_eq - x1_eq**3 - x2_eq + u_eq),
-        (x1_eq - a - b * x2_eq) / tau
+        [v_fact * (x1_eq - x1_eq**3 - x2_eq + u_eq)],
+        [(x1_eq - a - b * x2_eq) / tau]
     ], dtype=dtype)
 
     return A, B, f_eq
@@ -734,7 +734,7 @@ def linearisation_lpv__FitzHughNagumo(param, batch_size, x, u, radius=1, epsilon
     
     return A, B, f_eq
 
-def linearisation_lpv__NonlinearActivationDynamics(param, batch_size, x, u, radius=1, epsilon=1e-4):
+def linearisation_lpv__NonlinearActivationDynamics(param, batch_size, x, u, radius=3, epsilon=1e-4):
     A_base = param['A']
     B_base = param['B']
     x_eq = param['x_eq']
