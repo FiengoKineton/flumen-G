@@ -208,7 +208,7 @@ class Hyperparams:
                 "sched_patience": 5,            # 10, 8,
                 "sched_factor": 2,              # 3,  2,
                 "loss": "mse",                      # {mse, huber, l1}
-                "discretisation_mode": "TU",        # {FE, BE, TU, RK4, exact}
+                "discretisation_mode": "RK4",       # {FE, BE, TU, RK4, exact}
                 "optimiser_mode": "adam",           # {adam, tbptt, nesterov, newton}
                 "x_update_mode": "entropy",         # {alpha, beta, lamda. relu, switch, entropy}
                 "mode_rnn": "new",                  # {new, old, gru}

@@ -125,7 +125,7 @@ class CausalFlowModel(nn.Module):
     #-- first element of deltas starts with 1 and goes to 0, not viceversa
         encoded_controls = (1 - deltas) * h_shift + deltas * h      # Size | [128, 75, 50]
         output = encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :]
-        output = self.u_dnn(output) if mode else output
+        ###output = self.u_dnn(output) if mode else output
 
         """print(output.shape, self.u_dnn(output).shape, output[:, :self.state_dim].shape)
         pprint(self.u_dnn(output) - output[:, :self.state_dim])

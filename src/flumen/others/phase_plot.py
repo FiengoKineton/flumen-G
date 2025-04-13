@@ -6,6 +6,7 @@ from control.phaseplot import phase_plot
 from matplotlib.animation import FuncAnimation
 from mpl_toolkits.mplot3d import Axes3D
 from itertools import permutations
+import torch
 
 
 
@@ -256,6 +257,7 @@ class PhasePlot:
             return traces + points
 
         ani = FuncAnimation(fig, update, frames=len(self.t_eval), interval=20, blit=True)
+        plt.title(f"2D Phase Portrait (i={i}, j={j})")
         plt.show()
 
     def plot_3d_phase(self, i=0, j=1, k=2):
@@ -333,9 +335,29 @@ if __name__ == "__main__":
             for j in range(i + 1, 5):
                 p.animate_2d(i, j)
 
-        # i, j, k -> r=3
+        # i, j, k -> star (r=3)
         for i in range(5):
             for j in range(i+1, 5):
                 for k in range(j+1, 5):
                     p.plot_3d_phase(i, j, k)
     
+    """
+    star: 
+    - 0, 1
+
+    line horizontal: 
+    - 0, 2
+    - 0, 3
+    - 0, 4
+    - 1, 2
+    - 1, 3
+    - 1, 4
+
+    line vertical: 
+    - 
+
+    dot: 
+    - 2, 3
+    - 2, 4
+    - 3, 4
+    """
