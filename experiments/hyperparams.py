@@ -205,7 +205,7 @@ class Hyperparams:
                 "n_epochs": 200,  
                 "es_patience": 25,              # 20,          
                 "es_delta": 1e-07,
-                "sched_patience": 5,            # 10, 8,
+                "sched_patience": 6,            # 10, 8,
                 "sched_factor": 2,              # 3,  2,
                 "loss": "mse",                      # {mse, huber, l1}
                 "discretisation_mode": "RK4",       # {FE, BE, TU, RK4, exact}

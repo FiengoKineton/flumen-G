@@ -1,4 +1,4 @@
-nad-old (stable)
+nad-s-old (stable)
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-btg9grfc:v7
@@ -67,7 +67,7 @@ MSE (mean square error): 0.0009696266698139846
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-nad (stable)
+nad-s-FE (stable)
 
 
 PS C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G> python.exe  .\experiments\interactive_test.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-2t2yze6b:v3
@@ -141,58 +141,38 @@ MSE (mean square error): 0.00024302524247957948
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+nad-m-old
 
 
-PC ...
-
-===== SYSTEM PERFORMANCE SUMMARY =====      
-
-====================================== 
+PC (look at img comparison with nad-m-FE/TU)
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+nad-m-FE
 
 
-PC ...
-
-===== SYSTEM PERFORMANCE SUMMARY =====      
-
-====================================== 
+PC (look at img comparison with nad-m-old)
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+nad-s-TU
 
 
-PC ...
-
-===== SYSTEM PERFORMANCE SUMMARY =====      
-
-====================================== 
+PC (look at img comparison with nad-s-old)
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+nad-m-TU
 
 
-PC ...
-
-===== SYSTEM PERFORMANCE SUMMARY =====      
-
-====================================== 
+PC (look at img comparison with nad-m-old)
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-000___
+nad-s-RK4
 
 
-PC ...
-
-===== SYSTEM PERFORMANCE SUMMARY =====      
-
-====================================== 
+PC (look at img comparison with nad-s-old)
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
