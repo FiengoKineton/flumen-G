@@ -37,6 +37,8 @@ class Sort():
             starting_point = 5
         elif file_path==file_path_1: 
             starting_point = 15
+        elif file_path == file_path_5:
+            starting_point = 14
         else:
             starting_point = 1
         
