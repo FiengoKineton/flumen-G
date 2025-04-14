@@ -132,8 +132,8 @@ class LSTM(nn.Module):
             for layer, cell in enumerate(self.lstm_cells):
                 h_new, c_new = cell(u_t, h[layer], c[layer])
 
-                h_new = self.ln_layers[layer](h_new)
-                if layer < self.num_layers - 1: h_new = self.dropout_layer(h_new)
+                #h_new = self.ln_layers[layer](h_new)
+                #if layer < self.num_layers - 1: h_new = self.dropout_layer(h_new)
 
                 h_list.append(h_new)
                 c_list.append(c_new)

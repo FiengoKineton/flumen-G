@@ -205,10 +205,10 @@ class Hyperparams:
                 "n_epochs": 200,  
                 "es_patience": 25,              # 20,          
                 "es_delta": 1e-07,
-                "sched_patience": 6,            # 10, 8,
-                "sched_factor": 2,              # 3,  2,
+                "sched_patience": 8,            # 10, 8, 5
+                "sched_factor": 2,              # 3,  2, 1
                 "loss": "mse",                      # {mse, huber, l1}
-                "discretisation_mode": "RK4",       # {FE, BE, TU, RK4, exact}
+                "discretisation_mode": "TU",        # {FE, BE, TU, RK4, exact}
                 "optimiser_mode": "adam",           # {adam, tbptt, nesterov, newton}
                 "x_update_mode": "entropy",         # {alpha, beta, lamda. relu, switch, entropy}
                 "mode_rnn": "new",                  # {new, old, gru}
@@ -294,7 +294,7 @@ class Hyperparams:
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet", 
-                "linearisation_mode": "lpv",    # static for nad
+                "linearisation_mode": "lpv",    # static works fine
             },
 
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
