@@ -53,7 +53,7 @@ import torch_optimizer as optim
 
 from hyperparams import Hyperparams  
 
-os.environ["WANDB_MODE"] = "online"  # Set to "online" for real-time logging, "offline" for local logging
+os.environ["WANDB_MODE"] = "offline"  # Set to "online" for real-time logging, "offline" for local logging
 
 # ------ Current Run Settings ----------------------------------------------- #
 hp_manager = Hyperparams()  
@@ -82,7 +82,7 @@ sweeps = {
 }
 
 
-name_set = sets['best']     # best, nad
+name_set = sets['nad']     # best, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['vdp']

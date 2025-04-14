@@ -14,9 +14,10 @@ test6 = "run_data/csv_files/sweep_test6.csv"            # comment | vdp sweep_co
 
 vdp_fin = "run_data/csv_files/Finals_vdp.csv"           # comment | FINAL COMPARISON for vdp
 fhn_fin = "run_data/csv_files/Finals_fhn.csv"           # comment | FINAL COMPARISON for fhn
+nad_fin = "run_data/csv_files/Finals_nad.csv"           # comment | FINAL COMPARISON for nad
 default = "run_data/csv_files/Default_code.csv"         # comment | original RNN architecture
 table = "run_data/csv_files/table.csv"                  # comment | for LateX tables
-csv_path = table
+csv_path = nad_fin
 
 
 # Define your scripts and optional args

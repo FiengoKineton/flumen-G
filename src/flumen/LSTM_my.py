@@ -179,6 +179,9 @@ class LSTM(nn.Module):
             coefficients[:, t, :].copy_(coeff)  
             matrices[t, :, :].copy_(A_matrix[0])
 
+            ###print("checkpoint")
+            ###sys.exit() # Debugging
+
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         out = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
         ###if self.fc is not None and not isinstance(outputs, torch.nn.utils.rnn.PackedSequence): out = self.fc(out[:, -1, :])
@@ -265,6 +268,9 @@ class LSTM(nn.Module):
             eq = fsolve(nad_equilibrium, np.zeros(state_dim+control_dim))  
             x_star, u_star = eq[:state_dim], eq[state_dim:]  # [0.42599762 0.42599282 0.42591131 0.4245284  0.40105814], [0.]
 
+            a = torch.tensor(a, dtype=self.dtype)
+            b = torch.tensor(b, dtype=self.dtype)
+            
             param = {
                 'dyn_factor': dyn_factor,
                 'dtype': self.dtype,
@@ -584,6 +590,10 @@ def linearisation_curr__NonlinearActivationDynamics(param, batch_size, x, u):
     B = dyn_factor * torch.tensor(B_dyn, dtype=dtype)
     f_eq = dyn_factor * torch.tensor(f_eq, dtype=dtype).unsqueeze(-1)
 
+    A = A.unsqueeze(0).expand(batch_size, -1, -1) 
+    B = B.unsqueeze(0).expand(batch_size, -1, -1) 
+    f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
+
     """print("A:", A)
     print("B:", B)
     print("f_eq:", f_eq)
@@ -743,79 +753,72 @@ def linearisation_lpv__NonlinearActivationDynamics(param, batch_size, x, u, radi
     dtype = param['dtype']
     activation = param['activation']
 
-    batch_size = u.shape[0]
+    #batch_size = u.shape[0]
     state_dim = param['state_dim']
+    I = torch.eye(state_dim, dtype=dtype)
 
     def sigma_prime(z): 
         if activation == "sigmoid":
-            sigma = 1 / (1 + np.exp(-z))
+            sigma = 1 / (1 + torch.exp(-z))
             return sigma * (1 - sigma)
         else:
-            return 1 - np.tanh(z) ** 2
+            return 1 - torch.tanh(z) ** 2
 
     def compute_jacobian(x_sample, u_sample):
         z = A_base @ x_sample + B_base @ u_sample
-        S = np.diag(sigma_prime(z))
-        A_dyn = -np.eye(state_dim) + S @ A_base
-        B_dyn = S @ B_base
+        S = torch.diag(sigma_prime(z))
+        S = torch.tensor(S, dtype=dtype)
+        A_dyn = dyn_factor * (-I+ S @ A_base)
+        B_dyn = dyn_factor * (S @ B_base)
         return A_dyn, B_dyn
 
     def compute_f_eq(x_sample, u_sample):
         z = A_base @ x_sample + B_base @ u_sample
         if activation == "sigmoid":
-            return -x_sample + expit(z)
+            return dyn_factor * (-x_sample + expit(z))
         else:
-            return -x_sample + np.tanh(z)
+            return dyn_factor * (-x_sample + torch.tanh(z))
 
     # Generate sampling points
     num_samples = 32  # o 64 se vuoi più precisione
     deltas = torch.randn(num_samples, state_dim, dtype=dtype)
-    deltas = radius * deltas / torch.norm(deltas, dim=1, keepdim=True)
+    deltas = deltas / torch.norm(deltas, dim=1, keepdim=True)
 
     x_eq_t = torch.tensor(x_eq, dtype=dtype)
-    sampled_points = x_eq_t + deltas  # [num_samples, state_dim]
+    sampled_points = x_eq_t + radius * deltas  # [num_samples, state_dim]
 
     # Expand dimensions
-    x_target = x[:, :state_dim].unsqueeze(1)  # [batch, 1, state_dim]
+    x_target = x[0].unsqueeze(1)  # [batch, 1, state_dim]
     u_target = u                 # [batch, control_dim]
+    
+    A_list = [compute_jacobian(xi, u_eq)[0] for xi in sampled_points]
+    B_list = [compute_jacobian(xi, u_eq)[1] for xi in sampled_points]
+    f_eq_list = [compute_f_eq(xi, u_eq) for xi in sampled_points]
 
-    A_list, B_list, f_eq_list = [], [], []
-
-    for xi in sampled_points:
-        xi_np = xi.numpy()
-        ui_np = u_eq  # fixed for equilibrium, or modify to sample around u if needed
-        A_i, B_i = compute_jacobian(xi_np, ui_np)
-        f_i = compute_f_eq(xi_np, ui_np)
-
-        A_list.append(torch.tensor(A_i, dtype=dtype))
-        B_list.append(torch.tensor(B_i, dtype=dtype))
-        f_eq_list.append(torch.tensor(f_i, dtype=dtype))
-
-    A_list = torch.stack(A_list).unsqueeze(0).expand(batch_size, -1, -1, -1)
-    B_list = torch.stack(B_list).unsqueeze(0).expand(batch_size, -1, -1, -1)
-    f_eq_list = torch.stack(f_eq_list).unsqueeze(0).expand(batch_size, -1, -1)
+    A_list = torch.stack(A_list, dim=0).unsqueeze(0).expand(batch_size, -1, -1, -1)
+    B_list = torch.stack(B_list, dim=0).unsqueeze(0).expand(batch_size, -1, -1, -1)
+    f_eq_list = torch.stack(f_eq_list, dim=0).unsqueeze(0).expand(batch_size, -1, -1)
 
     sampled_points = sampled_points.unsqueeze(0).expand(batch_size, -1, -1)
     distances = torch.norm(x_target - sampled_points, dim=2)
     weights = torch.exp(-(distances ** 2 + epsilon))
     weights = weights / weights.sum(dim=1, keepdim=True)
 
-    w_A = weights.unsqueeze(-1).unsqueeze(-1)
-    w_B = weights.unsqueeze(-1).unsqueeze(-1)
+    w_m = weights.unsqueeze(-1).unsqueeze(-1)
     w_f = weights.unsqueeze(-1)
 
-    A = torch.sum(w_A * A_list, dim=1)
-    B = torch.sum(w_B * B_list, dim=1)
+    A = torch.sum(w_m * A_list, dim=1)
+    B = torch.sum(w_m * B_list, dim=1)
     f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)
 
-    A = dyn_factor * A
-    B = dyn_factor * B
-    f_eq = dyn_factor * f_eq
+    A = torch.tensor(A, dtype=dtype)
+    B = torch.tensor(B, dtype=dtype)
+    f_eq = torch.tensor(f_eq, dtype=dtype)
 
-    print("A:", A[0])
+    """print("A:", A[0])
     print("B:", B[0])
     print("f_eq:", f_eq[0])
-    sys.exit()
+    sys.exit()"""
     return A, B, f_eq
 
 
