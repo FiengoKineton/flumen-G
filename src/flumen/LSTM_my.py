@@ -270,6 +270,7 @@ class LSTM(nn.Module):
 
             a = torch.tensor(a, dtype=self.dtype)
             b = torch.tensor(b, dtype=self.dtype)
+            x_star = torch.tensor(x_star, dtype=self.dtype)
             
             param = {
                 'dyn_factor': dyn_factor,
@@ -449,13 +450,17 @@ def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u):
     state_dim = param['state_dim']
 
     def sigma_prime(z): 
-        sigma = 1 / (1 + np.exp(-z))
+        sigma = 1 / (1 + torch.exp(-z))
         return sigma * (1 - sigma)
+    
+    def sigma(z): 
+        return 1 / (1 + torch.exp(-z))
 
     z = A @ x_eq + B @ u_eq
-    f_eq = -x_eq + expit(-z) if activation == "sigmoid" else -x_eq + np.tanh(z)
-    S = np.diag(sigma_prime(z))
-    A = -np.eye(state_dim) + S @ A
+    f_eq = -x_eq + sigma(-z) if activation == "sigmoid" else -x_eq + np.tanh(z)
+    S = torch.diag(sigma_prime(z))
+    S = torch.tensor(S, dtype=dtype)
+    A = -torch.eye(state_dim) + S @ A
     B = S @ B
 
     A = dyn_factor * torch.tensor(A, dtype=dtype)
@@ -566,21 +571,19 @@ def linearisation_curr__NonlinearActivationDynamics(param, batch_size, x, u):
     x_sample = x[0, 0]  # dimensione: [state_dim]
     u_sample = u[0]     # dimensione: [control_dim]
 
-    x_ = x_sample - x_eq
-    u_ = u_sample - u_eq
+    x_, u_ = x_sample - x_eq, u_sample - u_eq
+    x_, u_ = torch.tensor(x_, dtype=dtype), torch.tensor(u_, dtype=dtype)
 
     def sigma_prime(z): 
         if activation == "sigmoid":
-            sigma = 1 / (1 + np.exp(-z))
+            sigma = 1 / (1 + torch.exp(-z))
             return sigma * (1 - sigma)
         else:
-            return 1 - np.tanh(z) ** 2
-
-    A = torch.tensor(A, dtype=float)
-    B = torch.tensor(B, dtype=float)
+            return 1 - torch.tanh(z) ** 2
 
     z = A @ x_ + B @ u_
     S = torch.diag(sigma_prime(z))
+    S = torch.tensor(S, dtype=dtype)
 
     A_dyn = -torch.eye(state_dim) + S @ A
     B_dyn = S @ B
