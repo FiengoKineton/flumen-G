@@ -289,7 +289,7 @@ class Hyperparams:
                 "sched_patience": 5,            # 10, 8,
                 "sched_factor": 2,              # 3,  2,
                 "loss": "mse",                  
-                "discretisation_mode": "TU",    # mainly TU or {BE}, FE for nad
+                "discretisation_mode": "RK4",    # mainly TU or {BE}, FE for nad
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
