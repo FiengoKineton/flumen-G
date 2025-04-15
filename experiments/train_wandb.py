@@ -18,6 +18,7 @@ import psutil
 
 import random
 import numpy as np
+import sys
 
 # --------------------------------------------------------------------------- #
 """
@@ -253,6 +254,108 @@ def main(sweep):
     val_data = TrajectoryDataset(data["val"])
     test_data = TrajectoryDataset(data["test"])
 
+    """
+    # ----------------------------------------------------------------------- #
+    train_dl = DataLoader(train_data, batch_size=wandb.config["batch_size"], shuffle=True)
+    sd = train_data.state_dim
+    all_u, all_y = [], []
+
+    for batch in train_dl:
+        _, y, u, lengths = batch
+
+        for i in range(y.shape[0]):
+            seq_len = lengths[i]
+            u_i = u[i, :seq_len]  # (seq_len, control_dim)
+            y_i = y[i, :seq_len]  # (seq_len, output_dim)
+
+            all_u.append(u_i)
+            all_y.append(y_i)
+
+    u_all = torch.cat(all_u, dim=0)  # (N, control_dim)
+    y_all = torch.cat(all_y, dim=0)  # (N, output_dim)
+
+    u_tilde = u_all - u_all.mean(dim=0, keepdim=True)
+    y_tilde = y_all - y_all.mean(dim=0, keepdim=True)
+
+    def estimate_bla_fir(u_tilde, y_tilde, n_order=10):
+        N = u_tilde.shape[0]
+
+        if N <= n_order:
+            raise ValueError("Not enough samples for the specified FIR order.")
+
+        # Costruisci sliding windows sugli input
+        X = u_tilde.unfold(0, n_order, 1)  # shape: (N - n_order + 1, n_order, control_dim)
+        X = X[:-1]  # Allinea con Y
+        X = X.permute(0, 2, 1).reshape(X.shape[0], -1)  # shape: (N - n_order, control_dim * n_order)
+
+        # Target corrispondente
+        Y = y_tilde[n_order:]  # shape: (N - n_order, output_dim)
+
+        print(f"X shape: {X.shape}, Y shape: {Y.shape}")
+        assert X.shape[0] == Y.shape[0], "Dimension mismatch between X and Y!"
+
+        G_bla = torch.linalg.lstsq(X, Y).solution
+        return G_bla
+
+    def estimate_bla_fir_from_batches(train_dl, n_order=10):
+        X_all, Y_all = [], []
+        num_skipped = 0
+
+        for batch in train_dl:
+            _, y, u, lengths = batch
+
+            for i in range(y.shape[0]):
+                seq_len = lengths[i]
+
+                u_i = u[i, :seq_len]
+                y_i = y[i, :seq_len]
+
+                if u_i.shape[0] <= n_order:
+                    num_skipped += 1
+                    continue
+
+                u_i = u_i - u_i.mean(0, keepdim=True)
+                y_i = y_i - y_i.mean(0, keepdim=True)
+
+                X_i = u_i.unfold(0, n_order, 1)  # (L - n_order + 1, n_order, control_dim)
+                Y_i = y_i[n_order:]              # (L - n_order, output_dim)
+
+                X_i = X_i[:-1]
+                X_i = X_i.permute(0, 2, 1).reshape(X_i.shape[0], -1)
+
+                if X_i.shape[0] != Y_i.shape[0]:
+                    num_skipped += 1
+                    continue
+
+                X_all.append(X_i)
+                Y_all.append(Y_i)
+
+        print(f"Num sequences skipped: {num_skipped}")
+        print(f"Num sequences used: {len(X_all)}")
+
+        if not X_all:
+            raise RuntimeError("No sequences had enough length for BLA estimation.")
+
+        X_total = torch.cat(X_all, dim=0)
+        Y_total = torch.cat(Y_all, dim=0)
+
+        print(f"X shape: {X_total.shape}, Y shape: {Y_total.shape}")
+        G_bla = torch.linalg.lstsq(X_total, Y_total).solution
+        return G_bla
+
+
+
+    #G_bla = estimate_bla_fir(u_tilde, y_tilde)
+    G_bla = estimate_bla_fir_from_batches(train_dl, n_order=3)
+    print("G_bla shape:", G_bla.shape)
+    print("G_bla:", G_bla)
+
+    A, B = G_bla[:sd], G_bla[sd:]
+    print(A)
+    print(B)
+    sys.exit()
+    # ----------------------------------------------------------------------- #
+    # """
 
 
     # normally wandb.config["param_name"], config.param_name when sweep
@@ -316,7 +419,8 @@ def main(sweep):
         'mode_rnn': __mode_rnn,
         'mode_dnn': __mode_dnn,
         'use_batch_norm': False,
-        'linearisation_mode': __linearisation_mode
+        'linearisation_mode': __linearisation_mode, 
+        'batch_size': __batch_size,
     }
 
     model_metadata = {
@@ -427,9 +531,9 @@ def main(sweep):
 
         #avg_train_coeff = tot_coeff / num_batches
         model.eval()
-        train_loss = validate(train_dl, loss, model, device) ### ###############
-        val_loss = validate(val_dl, loss, model, device) ###############
-        test_loss = validate(test_dl, loss, model, device)   ############### 
+        train_loss = validate(train_dl, loss, model, device) 
+        val_loss = validate(val_dl, loss, model, device) 
+        test_loss = validate(test_dl, loss, model, device)  
 
         sched.step(val_loss)
         early_stop.step(val_loss)

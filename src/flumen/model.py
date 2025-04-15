@@ -25,7 +25,8 @@ class CausalFlowModel(nn.Module):
                  mode_rnn='old',
                  mode_dnn='FFNet',
                  use_batch_norm=False, 
-                 linearisation_mode=None):
+                 linearisation_mode=None, 
+                 batch_size=128):
         super(CausalFlowModel, self).__init__()
 
         self.state_dim = state_dim
@@ -65,7 +66,8 @@ class CausalFlowModel(nn.Module):
                 discretisation_mode=discretisation_mode, 
                 x_update_mode=x_update_mode, 
                 model_name=model_name,
-                linearisation_mode=linearisation_mode_passed
+                linearisation_mode=linearisation_mode_passed,
+                batch_size=batch_size
             ) 
         elif self.mode_rnn=='old': 
             self.u_rnn = torch.nn.LSTM(

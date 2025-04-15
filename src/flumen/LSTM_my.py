@@ -7,6 +7,9 @@ from pprint import pprint
 import torch.nn.functional as F
 import numpy as np
 from scipy.special import expit
+from .trajectory import TrajectoryDataset
+from torch.utils.data import DataLoader
+
 
 """
 COMMANDs:
@@ -22,7 +25,7 @@ class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
                  state_dim=None, discretisation_mode=None, x_update_mode=None, 
-                 model_name=None, linearisation_mode=None):
+                 model_name=None, linearisation_mode=None, batch_size=126):
         super(LSTM, self).__init__()
 
     # -------------------------------------------
@@ -36,6 +39,7 @@ class LSTM(nn.Module):
         self.dropout = dropout
         self.bidirectional = bidirectional
         self.state_dim = state_dim
+        self.batch_size = batch_size
 
         #self.num_directions = 2 if bidirectional else 1
 
@@ -190,6 +194,45 @@ class LSTM(nn.Module):
         return out, (z, c_z), coefficients, matrices
 
 
+    def BLA(self, train_dl): 
+        all_u, all_y = [], []
+
+        for batch in train_dl:
+            _, y, u, lengths = batch
+
+            for i in range(y.shape[0]):
+                seq_len = lengths[i]
+                u_i = u[i, :seq_len]  # (seq_len, control_dim)
+                y_i = y[i, :seq_len]  # (seq_len, output_dim)
+
+                all_u.append(u_i)
+                all_y.append(y_i)
+
+        u_all = torch.cat(all_u, dim=0)  # (N, control_dim)
+        y_all = torch.cat(all_y, dim=0)  # (N, output_dim)
+
+        u_tilde = u_all - u_all.mean(dim=0, keepdim=True)
+        y_tilde = y_all - y_all.mean(dim=0, keepdim=True)
+
+        def estimate_bla_fir(u_tilde, y_tilde, n_order=self.state_dim):
+            N = u_tilde.shape[0] - n_order
+
+            X = torch.stack([u_tilde[i:N+i] for i in range(n_order)], dim=2)  # shape: (N, control_dim, n_order)
+            X = X.reshape(N, -1)  # flatten for regression: (N, control_dim * n_order)
+
+            Y = y_tilde[n_order:]  # shape: (N, output_dim)
+
+            # Risolvi Y = X @ theta con least squares
+            G_bla, _ = torch.lstsq(Y, X)
+            return G_bla[:X.shape[1]]  # (control_dim * n_order, output_dim)
+
+        G_bla = estimate_bla_fir(u_tilde, y_tilde, n_order=10)
+        print("G_bla shape:", G_bla.shape)
+        print("G_bla:", G_bla)
+
+        return G_bla[:2], G_bla[2:]  # A, B matrices
+
+
     def get_dyn_matrix_params(self): 
         """
         Dynamics are located in semble/semble/dynamics.py 
@@ -204,6 +247,13 @@ class LSTM(nn.Module):
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
+
+            """train_data = TrajectoryDataset(self.data["train"])
+            train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
+            A, B = self.BLA(train_dl)
+            print(A)
+            print(B)
+            sys.exit()"""
 
             param = {
                 'dyn_factor': dyn_factor,
