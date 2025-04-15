@@ -60,7 +60,7 @@ class CausalFlowModel(nn.Module):
                 z_size=control_rnn_size + state_dim,            # output | 10
                 batch_first=True,
                 num_layers=self.control_rnn_depth,              # output | 1
-                dropout=0.1,                                    # prova med 0.1 eller 0.2
+                dropout=0.0,                                    # prova med 0.1 eller 0.2
                 state_dim=self.state_dim,
                 discretisation_mode=discretisation_mode, 
                 x_update_mode=x_update_mode, 

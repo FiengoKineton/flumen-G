@@ -37,7 +37,7 @@ class LSTM(nn.Module):
         self.bidirectional = bidirectional
         self.state_dim = state_dim
 
-        self.num_directions = 2 if bidirectional else 1
+        #self.num_directions = 2 if bidirectional else 1
 
     # -------------------------------------------
         self.model_name = model_name
@@ -68,28 +68,29 @@ class LSTM(nn.Module):
         self.lstm_cells = nn.ModuleList([
                 LSTMCell(input_size + state_dim if layer == 0 else self.hidden_size, self.hidden_size, bias)   
             for layer in range(num_layers)
-        ]) if not bidirectional else nn.ModuleList([
+        ]) 
+        """if not bidirectional else nn.ModuleList([
             nn.ModuleList([
                 bdrLSTMCell(input_size + state_dim if layer == 0 else self.hidden_size * self.num_directions, self.hidden_size, bias)
                 for _ in range(self.num_directions)
             ]) for layer in range(num_layers)
-        ])
+        ])"""
 
     # -------------------------------------------
         """Dropout layer per regolarizzare la rete tra i layer interni della LSTM
         Viene attivato solo se: c'è più di un layer e il dropout è > 0.0
         Aiuta a prevenire l'overfitting spegnendo casualmente dei neuroni a ogni forward pass"""
-        self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else nn.Identity()
+        #self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else nn.Identity()
 
 
         """LayerNorm applicato separatamente a ogni layer della LSTM
          Stabilizza la distribuzione delle attivazioni (h_new), normalizzandole rispetto ai feature di ogni step
         Questo migliora la convergenza e riduce l'effetto di vanishing/exploding gradient"""
-        self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)]) if not bidirectional else nn.ModuleList([
+        """self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)]) if not bidirectional else nn.ModuleList([
                 nn.ModuleList([
                     nn.LayerNorm(self.hidden_size) for _ in range(self.num_directions)
                 ]) for _ in range(num_layers)
-            ])
+            ])"""
 
     # -------------------------------------------
         self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
@@ -101,7 +102,7 @@ class LSTM(nn.Module):
         if bias: torch.nn.init.constant_(self.W__h_to_x.bias, 0.0)
 
     # -------------------------------------------
-        self.fc = nn.Linear(self.hidden_size * self.num_directions, output_size) if output_size is not None else None
+        #self.fc = nn.Linear(self.hidden_size * self.num_directions, output_size) if output_size is not None else None
 
 
 
@@ -346,6 +347,7 @@ class LSTMCell(nn.Module):
 
         return h, c
 
+"""
 class bdrLSTMCell(nn.Module):
     def __init__(self, input_size: int, hidden_size: int, bias: bool=True, use_ln: bool=False):
         super().__init__()
@@ -372,7 +374,7 @@ class bdrLSTMCell(nn.Module):
             h = self.layernorm(h)
 
         return h, c
-
+"""
 
 # --------------------------------------------------------------------------- #
 # ---------------- Linearisation static ------------------------------------- #

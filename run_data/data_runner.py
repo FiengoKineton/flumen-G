@@ -17,7 +17,7 @@ fhn_fin = "run_data/csv_files/Finals_fhn.csv"           # comment | FINAL COMPAR
 nad_fin = "run_data/csv_files/Finals_nad.csv"           # comment | FINAL COMPARISON for nad
 default = "run_data/csv_files/Default_code.csv"         # comment | original RNN architecture
 table = "run_data/csv_files/table.csv"                  # comment | for LateX tables
-csv_path = nad_fin
+csv_path = "run_data/txt_files/temp.csv"
 
 
 # Define your scripts and optional args

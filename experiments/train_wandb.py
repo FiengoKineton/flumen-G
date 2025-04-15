@@ -82,7 +82,7 @@ sweeps = {
 }
 
 
-name_set = sets['nad']     # best, nad
+name_set = sets['best']     # best, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['vdp']
