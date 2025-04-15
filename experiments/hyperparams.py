@@ -200,7 +200,7 @@ class Hyperparams:
                 "encoder_depth": 2,  
                 "decoder_size": 2,                  # 8
                 "decoder_depth": 2,  
-                "batch_size": 96,                   # 128     | modified these two 
+                "batch_size": 96,                   # 128    | modified these two 
                 "lr": 0.001,                        # 0.0005 | to smooth the loss              
                 "n_epochs": 200,  
                 "es_patience": 25,                  # 20,          
@@ -277,24 +277,24 @@ class Hyperparams:
             'hyperparams___nad': {
                 "control_rnn_size": 64,         # 22, {48, 64, 80} 
                 "control_rnn_depth": 1,         
-                "encoder_size": 8,              # 2
+                "encoder_size": 2,              # 8
                 "encoder_depth": 2,  
-                "decoder_size": 8,              # 2
+                "decoder_size": 2,              # 8
                 "decoder_depth": 2,  
                 "batch_size": 128,              # 96     | modified these two 
                 "lr": 0.001,                    # 0.0005 | to smooth the loss              
                 "n_epochs": 200,  
                 "es_patience": 25,              # 20,          
                 "es_delta": 1e-07,
-                "sched_patience": 5,            # 10, 8,
-                "sched_factor": 2,              # 3,  2,
+                "sched_patience": 10,           # 10, 8,
+                "sched_factor": 3,              # 3,  2,
                 "loss": "mse",                  
-                "discretisation_mode": "RK4",    # mainly TU or {BE}, FE for nad
+                "discretisation_mode": "FE",    # mainly TU or {BE}, FE for nad
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet", 
-                "linearisation_mode": "current",    # static works fine
+                "linearisation_mode": "static",    # static works fine
             },
 
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #

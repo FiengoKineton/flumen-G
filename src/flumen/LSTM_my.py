@@ -80,13 +80,14 @@ class LSTM(nn.Module):
         """Dropout layer per regolarizzare la rete tra i layer interni della LSTM
         Viene attivato solo se: c'è più di un layer e il dropout è > 0.0
         Aiuta a prevenire l'overfitting spegnendo casualmente dei neuroni a ogni forward pass"""
-        #self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else nn.Identity()
+        self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else nn.Identity()
 
 
         """LayerNorm applicato separatamente a ogni layer della LSTM
          Stabilizza la distribuzione delle attivazioni (h_new), normalizzandole rispetto ai feature di ogni step
         Questo migliora la convergenza e riduce l'effetto di vanishing/exploding gradient"""
-        """self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)]) if not bidirectional else nn.ModuleList([
+        self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)]) 
+        """if not bidirectional else nn.ModuleList([
                 nn.ModuleList([
                     nn.LayerNorm(self.hidden_size) for _ in range(self.num_directions)
                 ]) for _ in range(num_layers)
