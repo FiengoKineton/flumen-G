@@ -225,7 +225,7 @@ class CalcValues:
 
     def get_from_csv(self, loc):
         results = []
-        n = 4 if loc=="run_data/csv_files/Finals_fhn.csv" else 0
+        n = 0 if loc=="run_data/csv_files/Finals_fhn.csv" else 0
 
         with open(loc, mode='r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
