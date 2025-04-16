@@ -194,45 +194,6 @@ class LSTM(nn.Module):
         return out, (z, c_z), coefficients, matrices
 
 
-    def BLA(self, train_dl): 
-        all_u, all_y = [], []
-
-        for batch in train_dl:
-            _, y, u, lengths = batch
-
-            for i in range(y.shape[0]):
-                seq_len = lengths[i]
-                u_i = u[i, :seq_len]  # (seq_len, control_dim)
-                y_i = y[i, :seq_len]  # (seq_len, output_dim)
-
-                all_u.append(u_i)
-                all_y.append(y_i)
-
-        u_all = torch.cat(all_u, dim=0)  # (N, control_dim)
-        y_all = torch.cat(all_y, dim=0)  # (N, output_dim)
-
-        u_tilde = u_all - u_all.mean(dim=0, keepdim=True)
-        y_tilde = y_all - y_all.mean(dim=0, keepdim=True)
-
-        def estimate_bla_fir(u_tilde, y_tilde, n_order=self.state_dim):
-            N = u_tilde.shape[0] - n_order
-
-            X = torch.stack([u_tilde[i:N+i] for i in range(n_order)], dim=2)  # shape: (N, control_dim, n_order)
-            X = X.reshape(N, -1)  # flatten for regression: (N, control_dim * n_order)
-
-            Y = y_tilde[n_order:]  # shape: (N, output_dim)
-
-            # Risolvi Y = X @ theta con least squares
-            G_bla, _ = torch.lstsq(Y, X)
-            return G_bla[:X.shape[1]]  # (control_dim * n_order, output_dim)
-
-        G_bla = estimate_bla_fir(u_tilde, y_tilde, n_order=10)
-        print("G_bla shape:", G_bla.shape)
-        print("G_bla:", G_bla)
-
-        return G_bla[:2], G_bla[2:]  # A, B matrices
-
-
     def get_dyn_matrix_params(self): 
         """
         Dynamics are located in semble/semble/dynamics.py 
@@ -373,6 +334,45 @@ class LSTM(nn.Module):
             model_data = yaml.safe_load(f)
         
         return model_data
+
+    def BLA(self, train_dl): 
+        all_u, all_y = [], []
+
+        for batch in train_dl:
+            _, y, u, lengths = batch
+
+            for i in range(y.shape[0]):
+                seq_len = lengths[i]
+                u_i = u[i, :seq_len]  # (seq_len, control_dim)
+                y_i = y[i, :seq_len]  # (seq_len, output_dim)
+
+                all_u.append(u_i)
+                all_y.append(y_i)
+
+        u_all = torch.cat(all_u, dim=0)  # (N, control_dim)
+        y_all = torch.cat(all_y, dim=0)  # (N, output_dim)
+
+        u_tilde = u_all - u_all.mean(dim=0, keepdim=True)
+        y_tilde = y_all - y_all.mean(dim=0, keepdim=True)
+
+        def estimate_bla_fir(u_tilde, y_tilde, n_order=self.state_dim):
+            N = u_tilde.shape[0] - n_order
+
+            X = torch.stack([u_tilde[i:N+i] for i in range(n_order)], dim=2)  # shape: (N, control_dim, n_order)
+            X = X.reshape(N, -1)  # flatten for regression: (N, control_dim * n_order)
+
+            Y = y_tilde[n_order:]  # shape: (N, output_dim)
+
+            # Risolvi Y = X @ theta con least squares
+            G_bla, _ = torch.lstsq(Y, X)
+            return G_bla[:X.shape[1]]  # (control_dim * n_order, output_dim)
+
+        G_bla = estimate_bla_fir(u_tilde, y_tilde, n_order=10)
+        print("G_bla shape:", G_bla.shape)
+        print("G_bla:", G_bla)
+
+        return G_bla[:2], G_bla[2:]  # A, B matrices
+
 
 
 # ---------------- LSTMCell ------------------------------------------------- #

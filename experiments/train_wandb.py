@@ -256,103 +256,64 @@ def main(sweep):
 
     """
     # ----------------------------------------------------------------------- #
+    from torch.nn.utils.rnn import pad_packed_sequence
+    #from sippy import system_identification as sysid
+
     train_dl = DataLoader(train_data, batch_size=wandb.config["batch_size"], shuffle=True)
     sd = train_data.state_dim
     all_u, all_y = [], []
 
-    for batch in train_dl:
-        _, y, u, lengths = batch
+    def prep_inputs(x0, y, u, lengths):
+        sort_idxs = torch.argsort(lengths, descending=True)
 
-        for i in range(y.shape[0]):
-            seq_len = lengths[i]
-            u_i = u[i, :seq_len]  # (seq_len, control_dim)
-            y_i = y[i, :seq_len]  # (seq_len, output_dim)
+        x0 = x0[sort_idxs]
+        y = y[sort_idxs]
+        u = u[sort_idxs]
+        lengths = lengths[sort_idxs]
 
-            all_u.append(u_i)
-            all_y.append(y_i)
+        deltas = u[:, :lengths[0], -1].unsqueeze(-1)
 
-    u_all = torch.cat(all_u, dim=0)  # (N, control_dim)
-    y_all = torch.cat(all_y, dim=0)  # (N, output_dim)
+        u = torch.nn.utils.rnn.pack_padded_sequence(u,
+                                                    lengths,
+                                                    batch_first=True,
+                                                    enforce_sorted=True)
+        return x0, y, u, deltas
 
-    u_tilde = u_all - u_all.mean(dim=0, keepdim=True)
-    y_tilde = y_all - y_all.mean(dim=0, keepdim=True)
+    def estimate_bla(train_dl, n_order=2):
+        for example in train_dl:
+            _, y, u, _ = prep_inputs(*example)
+            u, lengths = pad_packed_sequence(u, batch_first=True)
+            u = u[:, -1, :]
 
-    def estimate_bla_fir(u_tilde, y_tilde, n_order=10):
-        N = u_tilde.shape[0]
-
-        if N <= n_order:
-            raise ValueError("Not enough samples for the specified FIR order.")
-
-        # Costruisci sliding windows sugli input
-        X = u_tilde.unfold(0, n_order, 1)  # shape: (N - n_order + 1, n_order, control_dim)
-        X = X[:-1]  # Allinea con Y
-        X = X.permute(0, 2, 1).reshape(X.shape[0], -1)  # shape: (N - n_order, control_dim * n_order)
-
-        # Target corrispondente
-        Y = y_tilde[n_order:]  # shape: (N - n_order, output_dim)
-
-        print(f"X shape: {X.shape}, Y shape: {Y.shape}")
-        assert X.shape[0] == Y.shape[0], "Dimension mismatch between X and Y!"
-
-        G_bla = torch.linalg.lstsq(X, Y).solution
-        return G_bla
-
-    def estimate_bla_fir_from_batches(train_dl, n_order=10):
-        X_all, Y_all = [], []
-        num_skipped = 0
-
-        for batch in train_dl:
-            _, y, u, lengths = batch
+            #print(y.shape)          # torch.Size([96, 2])
+            #print(u.shape)          # torch.Size([96, 75, 2])
+            #print(lengths.shape)    # torch.Size([96])
 
             for i in range(y.shape[0]):
                 seq_len = lengths[i]
+                u_i = u[i, :seq_len]  # (seq_len, control_dim)
+                y_i = y[i, :seq_len]  # (seq_len, output_dim)
 
-                u_i = u[i, :seq_len]
-                y_i = y[i, :seq_len]
+                all_u.append(u_i)
+                all_y.append(y_i)
 
-                if u_i.shape[0] <= n_order:
-                    num_skipped += 1
-                    continue
+        u_all = torch.cat(all_u, dim=0)  # (N, control_dim)
+        y_all = torch.cat(all_y, dim=0)  # (N, output_dim)
 
-                u_i = u_i - u_i.mean(0, keepdim=True)
-                y_i = y_i - y_i.mean(0, keepdim=True)
+        u_tilde = u_all - u_all.mean(dim=0, keepdim=True)
+        y_tilde = y_all - y_all.mean(dim=0, keepdim=True)
 
-                X_i = u_i.unfold(0, n_order, 1)  # (L - n_order + 1, n_order, control_dim)
-                Y_i = y_i[n_order:]              # (L - n_order, output_dim)
+        X = u_tilde.unfold(0, n_order, 1)  # shape: (N - n_order + 1, n_order, control_dim)
+        Y = y_tilde[n_order-1:]  # shape: (N - n_order, output_dim) 
 
-                X_i = X_i[:-1]
-                X_i = X_i.permute(0, 2, 1).reshape(X_i.shape[0], -1)
-
-                if X_i.shape[0] != Y_i.shape[0]:
-                    num_skipped += 1
-                    continue
-
-                X_all.append(X_i)
-                Y_all.append(Y_i)
-
-        print(f"Num sequences skipped: {num_skipped}")
-        print(f"Num sequences used: {len(X_all)}")
-
-        if not X_all:
-            raise RuntimeError("No sequences had enough length for BLA estimation.")
-
-        X_total = torch.cat(X_all, dim=0)
-        Y_total = torch.cat(Y_all, dim=0)
-
-        print(f"X shape: {X_total.shape}, Y shape: {Y_total.shape}")
-        G_bla = torch.linalg.lstsq(X_total, Y_total).solution
-        return G_bla
-
-
-
-    #G_bla = estimate_bla_fir(u_tilde, y_tilde)
-    G_bla = estimate_bla_fir_from_batches(train_dl, n_order=3)
+        G_bla = torch.linalg.lstsq(X, Y).solution
+        #model = sysid.N4SID(y, u, dt=1.0, SS_fixed_order=sd)
+        return G_bla, 0 #model
+    
+    G_bla, model = estimate_bla(train_dl, n_order=sd)
     print("G_bla shape:", G_bla.shape)
     print("G_bla:", G_bla)
-
-    A, B = G_bla[:sd], G_bla[sd:]
-    print(A)
-    print(B)
+    #print(model.A, model.B, model.C, model.D)
     sys.exit()
     # ----------------------------------------------------------------------- #
     # """
