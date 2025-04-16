@@ -26,6 +26,7 @@ class Sort():
         file_path_5 = "run_data/csv_files/models.csv"
         file_path_6 = "run_data/csv_files/sweep_test3.csv"
         file_path_7 = "run_data/csv_files/Finals_fhn.csv"
+        file_path_8 = "run_data/csv_files/Finals_vdp.csv"
 
 
         file_path = file_path_6 if loc is None else loc
@@ -39,6 +40,8 @@ class Sort():
             starting_point = 15
         elif file_path == file_path_5:
             starting_point = 14
+        elif file_path == file_path_8:
+            starting_point = 46
         else:
             starting_point = 1
         

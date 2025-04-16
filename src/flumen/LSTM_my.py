@@ -25,7 +25,7 @@ class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
                  state_dim=None, discretisation_mode=None, x_update_mode=None, 
-                 model_name=None, linearisation_mode=None, batch_size=126):
+                 model_name=None, linearisation_mode=None, batch_size=128):
         super(LSTM, self).__init__()
 
     # -------------------------------------------
@@ -84,18 +84,18 @@ class LSTM(nn.Module):
         """Dropout layer per regolarizzare la rete tra i layer interni della LSTM
         Viene attivato solo se: c'è più di un layer e il dropout è > 0.0
         Aiuta a prevenire l'overfitting spegnendo casualmente dei neuroni a ogni forward pass"""
-        self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else nn.Identity()
+        #self.dropout_layer = nn.Dropout(p=dropout) if dropout > 0.0 else nn.Identity()
 
 
         """LayerNorm applicato separatamente a ogni layer della LSTM
          Stabilizza la distribuzione delle attivazioni (h_new), normalizzandole rispetto ai feature di ogni step
         Questo migliora la convergenza e riduce l'effetto di vanishing/exploding gradient"""
-        self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)]) 
+        #self.ln_layers = nn.ModuleList([nn.LayerNorm(self.hidden_size) for _ in range(num_layers)]) 
         """if not bidirectional else nn.ModuleList([
                 nn.ModuleList([
                     nn.LayerNorm(self.hidden_size) for _ in range(self.num_directions)
                 ]) for _ in range(num_layers)
-            ])"""
+            ])#"""
 
     # -------------------------------------------
         self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
@@ -431,7 +431,7 @@ class bdrLSTMCell(nn.Module):
 # ---------------- Linearisation static ------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def linearisation_static__VanDerPol(param, batch_size, x, u): 
+def linearisation_static__VanDerPol(param, batch_size, x, u):                                           # --nope--
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -456,7 +456,7 @@ def linearisation_static__VanDerPol(param, batch_size, x, u):
     f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
     return A, B, f_eq
 
-def linearisation_static__FitzHughNagumo(param, batch_size, x, u): 
+def linearisation_static__FitzHughNagumo(param, batch_size, x, u):                                      # --nope--
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -492,7 +492,7 @@ def linearisation_static__FitzHughNagumo(param, batch_size, x, u):
 
     return A, B, f_eq
 
-def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u):
+def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u):                         ### USE THIS!
     A = param['A']
     dyn_factor = param['dyn_factor']
     dtype = param['dtype']
@@ -536,7 +536,7 @@ def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u):
 # ---------------- Linearisation functions ---------------------------------- #
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def linearisation_curr__VanDerPol(param, batch_size, x, u): 
+def linearisation_curr__VanDerPol(param, batch_size, x, u):                                             # --nope--
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -569,7 +569,7 @@ def linearisation_curr__VanDerPol(param, batch_size, x, u):
 
     return A, B, f_eq
 
-def linearisation_curr__FitzHughNagumo(param, batch_size, x, u): 
+def linearisation_curr__FitzHughNagumo(param, batch_size, x, u):                                        # --nope--
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -579,13 +579,6 @@ def linearisation_curr__FitzHughNagumo(param, batch_size, x, u):
     a = param['a']
     b = param['b']
     v_fact = param['v_fact']
-
-    x_sample = x[0, 0]
-    u_sample = u[0]
-
-    x1 = x_sample[0] - x1_eq
-    x2 = x_sample[1] - x2_eq
-    u = u_sample[0] - u_eq
 
     x_sample = x[0, 0]
     u_sample = u[0]
@@ -609,9 +602,13 @@ def linearisation_curr__FitzHughNagumo(param, batch_size, x, u):
         [(x1_eq - a - b * x2_eq) / tau]
     ], dtype=dtype)
 
+    A = A.unsqueeze(0).expand(batch_size, -1, -1) 
+    B = B.unsqueeze(0).expand(batch_size, -1, -1) 
+    f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
+
     return A, B, f_eq
 
-def linearisation_curr__NonlinearActivationDynamics(param, batch_size, x, u):
+def linearisation_curr__NonlinearActivationDynamics(param, batch_size, x, u):                           # --nope--
     A = param['A']
     B = param['B']
     dyn_factor = param['dyn_factor']
@@ -661,7 +658,7 @@ def linearisation_curr__NonlinearActivationDynamics(param, batch_size, x, u):
 # ---------------- Linearisation LPV functions ------------------------------ #
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def linearisation_lpv__VanDerPol(param, batch_size, x, u, radius=3, epsilon=1e-4):
+def linearisation_lpv__VanDerPol(param, batch_size, x, u, radius=3, epsilon=1e-4):                      ### USE THIS!
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -729,7 +726,7 @@ def linearisation_lpv__VanDerPol(param, batch_size, x, u, radius=3, epsilon=1e-4
 
     return A, B, f_eq
 
-def linearisation_lpv__FitzHughNagumo(param, batch_size, x, u, radius=1, epsilon=1e-4):
+def linearisation_lpv__FitzHughNagumo(param, batch_size, x, u, radius=1, epsilon=1e-4):                 ### USE THIS!
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -740,7 +737,7 @@ def linearisation_lpv__FitzHughNagumo(param, batch_size, x, u, radius=1, epsilon
     b = param['b']
     v_fact = param['v_fact']
 
-    batch_size = u.shape[0]
+    #batch_size = u.shape[0]
     x_target = x[0].unsqueeze(1)
     u_target = u
 
@@ -800,7 +797,7 @@ def linearisation_lpv__FitzHughNagumo(param, batch_size, x, u, radius=1, epsilon
     
     return A, B, f_eq
 
-def linearisation_lpv__NonlinearActivationDynamics(param, batch_size, x, u, radius=3, epsilon=1e-4):
+def linearisation_lpv__NonlinearActivationDynamics(param, batch_size, x, u, radius=3, epsilon=1e-4):    # --nope--
     A_base = param['A']
     B_base = param['B']
     x_eq = param['x_eq']

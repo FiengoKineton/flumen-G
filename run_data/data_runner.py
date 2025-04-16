@@ -2,23 +2,24 @@ import subprocess
 
 
 general = "run_data/csv_files/wandb_get_runs.csv"       # comment | all the wandb runs  
-temp = "run_data/csv_files/temp.csv"                    # comment | temporary file
-models = "run_data/csv_files/models.csv"                # comment | different models
+___temp = "run_data/csv_files/temp.csv"                 # comment | temporary file
+_models = "run_data/csv_files/models.csv"               # comment | different models
 
-test1 = "run_data/csv_files/sweep_test1.csv"            # comment | vdp beta update
-test2 = "run_data/csv_files/sweep_test2.csv"            # comment | vdp sweep_config_test_2
-test3 = "run_data/csv_files/sweep_test3.csv"            # comment | fhn sweep_config_test_3
-test4 = "run_data/csv_files/sweep_test4.csv"            # comment | vdp sweep_config_test_2 right dyn_model
-test5 = "run_data/csv_files/sweep_test5.csv"            # comment | twotank sweep_config_test_3
-test6 = "run_data/csv_files/sweep_test6.csv"            # comment | vdp sweep_config_test_4
+__test1 = "run_data/csv_files/sweep_test1.csv"          # comment | vdp beta update
+__test2 = "run_data/csv_files/sweep_test2.csv"          # comment | vdp sweep_config_test_2
+__test3 = "run_data/csv_files/sweep_test3.csv"          # comment | fhn sweep_config_test_3
+__test4 = "run_data/csv_files/sweep_test4.csv"          # comment | vdp sweep_config_test_2 right dyn_model
+__test5 = "run_data/csv_files/sweep_test5.csv"          # comment | twotank sweep_config_test_3
+__test6 = "run_data/csv_files/sweep_test6.csv"          # comment | vdp sweep_config_test_4
 
 vdp_fin = "run_data/csv_files/Finals_vdp.csv"           # comment | FINAL COMPARISON for vdp
 fhn_fin = "run_data/csv_files/Finals_fhn.csv"           # comment | FINAL COMPARISON for fhn
 nad_fin = "run_data/csv_files/Finals_nad.csv"           # comment | FINAL COMPARISON for nad
 default = "run_data/csv_files/Default_code.csv"         # comment | original RNN architecture
-table = "run_data/csv_files/table.csv"                  # comment | for LateX tables
-csv_path = "run_data/txt_files/temp.csv"
+__table = "run_data/csv_files/table.csv"                # comment | for LateX tables
 
+
+csv_path = __table                                      # "run_data/txt_files/temp.csv"
 
 # Define your scripts and optional args
 scripts_gen = [
@@ -29,7 +30,7 @@ scripts_gen = [
 ]
 
 scripts_spc = [
-    #{"file": "run_data/output_calculus.py", "args": ["--plot", "--display", "--loc", csv_path]},            # ["--plot", "--all", "--display", "--loc"]
+    {"file": "run_data/output_calculus.py", "args": ["--plot", "--display", "--loc", csv_path]},            # ["--plot", "--all", "--display", "--loc"]
     {"file": "run_data/wandb_calculus_sort.py", "args": ["--loc", csv_path]},                               # ["--loc", "--all"]
     #{"file": "run_data/wandb_calculus_plots.py", "args": ["--loc", csv_path]},                              # ["--all", "--loc"]
 ]

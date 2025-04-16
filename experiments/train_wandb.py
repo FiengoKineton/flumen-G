@@ -54,7 +54,7 @@ import torch_optimizer as optim
 
 from hyperparams import Hyperparams  
 
-os.environ["WANDB_MODE"] = "online"  # Set to "online" for real-time logging, "offline" for local logging
+os.environ["WANDB_MODE"] = "offline"  # Set to "online" for real-time logging, "offline" for local logging
 
 # ------ Current Run Settings ----------------------------------------------- #
 hp_manager = Hyperparams()  
@@ -63,13 +63,13 @@ sets = {
     'init': 'hyperparams___init',
     'set_4': 'hyperparams___set_4',
     'set_6': 'hyperparams___set_6',
-    'vdp_set': 'hyperparams___vdp',         # in progress
-    'fhn_set': 'hyperparams___fhn',         # FOUND
-    'linsys_set': 'hyperparams___linsys',   # to look for
-    'twotank_set': 'hyperparams___twotank', # to look for
-    'hhfs_set': 'hyperparams___hhfs',       # to look for
-    'best': 'hyperparams___best',
-    'nad': 'hyperparams___nad',
+    'vdp_set': 'hyperparams___vdp',         
+    'linsys_set': 'hyperparams___linsys',   
+    'twotank_set': 'hyperparams___twotank', 
+    'hhfs_set': 'hyperparams___hhfs',       
+    'vdp': 'hyperparams___best',            # use TU and lpv! (vdp)
+    'nad': 'hyperparams___nad',             # use FE and static!
+    'fhn': 'hyperparams___fhn',             # in progress
 }
 
 sweeps = {
@@ -83,7 +83,7 @@ sweeps = {
 }
 
 
-name_set = sets['best']     # best, nad
+name_set = sets['fhn']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['vdp']
