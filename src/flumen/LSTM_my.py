@@ -544,28 +544,37 @@ def linearisation_curr__VanDerPol(param, batch_size, x, u):                     
     dtype = param['dtype']
     mhu = param['mhu']
 
-    x_sample = x[0, 0]
-    u_sample = u[0]
+    def f_eq_vdp(x):
+        x1 = x[:, 0] - x1_eq
+        x2 = x[:, 1] - x2_eq
 
-    x1 = x_sample[0] - x1_eq
-    x2 = x_sample[1] - x2_eq
-    u = u_sample[0] - u_eq
+        f1 = x2
+        f2 = -x1 + mhu * (1 - x1**2) * x2 + u_eq
 
-    A = dyn_factor* torch.tensor([[0.0, 1.0],
-                        [-1.0 - 2 * mhu * x1 * x2,
-                        mhu * (1 - x1**2)]], 
-                        dtype=dtype)
-    
+        f_eq = dyn_factor * torch.stack([f1, f2], dim=1)  
+        return f_eq.to(dtype=dtype).unsqueeze(-1)  
+
+    def jacobian_vdp(x):
+        x1 = x[:, 0] - x1_eq
+        x2 = x[:, 1] - x2_eq
+
+        a11 = torch.zeros_like(x1)                     
+        a12 = torch.ones_like(x1)                       
+        a21 = -1.0 - 2 * mhu * x1 * x2
+        a22 = mhu * (1 - x1**2)
+
+        A = dyn_factor * torch.stack([
+            torch.stack([a11, a12], dim=1),   
+            torch.stack([a21, a22], dim=1)   
+        ], dim=1) 
+
+        return A.to(dtype=dtype)  
+
+    x = torch.randn(batch_size, 2)  
+    A = jacobian_vdp(x)             
+    f_eq = f_eq_vdp(x)              
     B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
-
-    f_eq = dyn_factor * torch.tensor([
-        [x2_eq],
-        [-x1_eq + mhu * (1 - x1_eq**2) * x2_eq + u_eq]
-    ], dtype=dtype)
-
-    A = A.unsqueeze(0).expand(batch_size, -1, -1) 
     B = B.unsqueeze(0).expand(batch_size, -1, -1) 
-    f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
 
     return A, B, f_eq
 

@@ -213,7 +213,7 @@ class Hyperparams:
                 "x_update_mode": "entropy",         # {alpha, beta, lamda. relu, switch, entropy}
                 "mode_rnn": "new",                  # {new, old, gru}
                 "mode_dnn": "FFNet",                # {FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder}
-                "linearisation_mode": "lpv",        # {static, current, lpv}
+                "linearisation_mode": "current",        # {static, current, lpv}
             },
 
 
