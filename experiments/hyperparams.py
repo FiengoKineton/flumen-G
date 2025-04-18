@@ -200,7 +200,7 @@ class Hyperparams:
                 "encoder_depth": 2,  
                 "decoder_size": 2,                  # 8
                 "decoder_depth": 2,  
-                "batch_size": 96,                   # 128    | modified these two 
+                "batch_size": 128,                   # 128    | modified these two 
                 "lr": 0.001,                        # 0.0005 | to smooth the loss              
                 "n_epochs": 200,  
                 "es_patience": 25,                  # 20,          

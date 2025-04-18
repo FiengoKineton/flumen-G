@@ -307,7 +307,9 @@ def main(sweep):
         Y = y_tilde[n_order-1:]  # shape: (N - n_order, output_dim) 
 
         G_bla = torch.linalg.lstsq(X, Y).solution
-        #model = sysid.N4SID(y, u, dt=1.0, SS_fixed_order=sd)
+        #model = sysid.N4SID(Y, X, dt=1.0, SS_fixed_order=sd)
+        #model.show()
+        #sys.exit()
         return G_bla, 0 #model
     
     G_bla, model = estimate_bla(train_dl, n_order=sd)
