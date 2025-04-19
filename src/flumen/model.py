@@ -26,7 +26,7 @@ class CausalFlowModel(nn.Module):
                  mode_dnn='FFNet',
                  use_batch_norm=False, 
                  linearisation_mode=None, 
-                 decoder_mode=True,
+                 decoder_mode=None,
                  batch_size=128):
         super(CausalFlowModel, self).__init__()
 
@@ -120,7 +120,7 @@ class CausalFlowModel(nn.Module):
 
     # ----------------------------------------------------------------------- #
     def forward(self, x, rnn_input, deltas):
-        h0, rnn_out_seq_packed, coefficients, matrices, _ = self.structure_function(x, deltas, rnn_input)    ###############
+        h0, rnn_out_seq_packed, coefficients, matrices, mode = self.structure_function(x, deltas, rnn_input)    ###############
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
         h_shift = torch.roll(h, shifts=1, dims=1)   
@@ -129,6 +129,7 @@ class CausalFlowModel(nn.Module):
     #-- first element of deltas starts with 1 and goes to 0, not viceversa
         encoded_controls = (1 - deltas) * h_shift + deltas * h      # Size | [128, 75, 50]
         output = encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :]
+        ###self.decoder_mode = mode
         output = self.u_dnn(output) if self.decoder_mode else output
 
         """print(output.shape, self.u_dnn(output).shape, output[:, :self.state_dim].shape)
@@ -242,8 +243,8 @@ class CausalFlowModel(nn.Module):
         c0 = torch.zeros_like(z)
 
         rnn_out_seq_packed, _, coefficients, matrices = self.u_rnn(rnn_input, (z, c0), deltas)    ###############
-
-        return z, rnn_out_seq_packed, coefficients, matrices, False
+        if self.decoder_mode is None: self.decoder_mode = False
+        return z, rnn_out_seq_packed, coefficients, matrices, self.decoder_mode #False
 
     def mode_rnn_gru(self, x, deltas, rnn_input):
         h0 = self.x_dnn(x)
@@ -260,8 +261,8 @@ class CausalFlowModel(nn.Module):
         c0 = torch.zeros_like(h0)
 
         rnn_out_seq_packed, _ = self.u_rnn(rnn_input, (h0, c0))
-
-        return h0, rnn_out_seq_packed, torch.tensor([[0, 0], [0, 0], [0, 0]], dtype=torch.float32), torch.tensor([[0, 0], [0, 0]], dtype=torch.float32), True
+        if self.decoder_mode is None: self.decoder_mode = True
+        return h0, rnn_out_seq_packed, torch.tensor([[0, 0], [0, 0], [0, 0]], dtype=torch.float32), torch.tensor([[0, 0], [0, 0]], dtype=torch.float32), self.decoder_mode
 
 
 

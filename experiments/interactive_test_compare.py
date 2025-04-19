@@ -120,7 +120,8 @@ def main():
         n_plots = model.output_dim
 
     # First Figure: y_true vs y_pred + Input
-    fig1, ax1 = plt.subplots(n_plots+1, 1, sharex=True)
+    num = n_plots if n_plots==2 else 1
+    fig1, ax1 = plt.subplots(num+1, 1, sharex=True)   # before | n_plots+1
     fig1.canvas.mpl_connect('close_event', on_close_window)
 
     time_horizon = args.time_horizon if args.time_horizon else num_times * metadata["data_args"]["time_horizon"]
@@ -171,8 +172,9 @@ def main():
                 err[k] = model.output_dim * np.mean(np.square(y[:, k] - y_pred[:, k]))
                 err_2[k] = model.output_dim * np.mean(np.square(y[:, k] - y_pred_2[:, k]))
 
-            for k, ax_ in enumerate(ax1[:n] if n == 2 else [ax1[n]]):   ######
+            for k, ax_ in enumerate(ax1[:n] if n == 2 else [ax1[0]]):   ######
                 # Predicted (Advanced)
+                if num!=2: k=n-1
                 ax_.plot(t, y_pred[:, k], color=colors[0], linestyle=linestyles[0], 
                         label=f'Advanced ({err[k]:.6f})')
 

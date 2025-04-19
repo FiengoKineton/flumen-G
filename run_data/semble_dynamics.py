@@ -422,7 +422,7 @@ class TwoTank(Dynamics):
 
 
 class NonlinearActivationDynamics(Dynamics):
-    def __init__(self, a_s, a_m, a_b, b_b, b, state_dim=5, control_dim=1, activation="sigmoid", mode="stable"):
+    def __init__(self, a_s, a_m, b, a_b=0, b_b=0, state_dim=5, control_dim=1, activation="sigmoid", mode="stable"):
         super().__init__(state_dim, control_dim)
 
         self.activation = activation
