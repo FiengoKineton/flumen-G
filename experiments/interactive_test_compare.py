@@ -171,7 +171,7 @@ def main():
                 err[k] = model.output_dim * np.mean(np.square(y[:, k] - y_pred[:, k]))
                 err_2[k] = model.output_dim * np.mean(np.square(y[:, k] - y_pred_2[:, k]))
 
-            for k, ax_ in enumerate(ax1[:n]):
+            for k, ax_ in enumerate(ax1[:n] if n == 2 else [ax1[n]]):   ######
                 # Predicted (Advanced)
                 ax_.plot(t, y_pred[:, k], color=colors[0], linestyle=linestyles[0], 
                         label=f'Advanced ({err[k]:.6f})')
