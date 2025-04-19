@@ -24,13 +24,17 @@ import sys
 """
 COMMANDs:
 
---VDP-------------------------------    vdp_test3-data3 / vdp_TEST-r_3 / 026___default-code-same-dim
+--VDP-------------------------------    vdp_test3-data3 / vdp_TEST-r_3 / 026___default-code-same-dim / vdp_fin-old
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
 python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
 
---FHN-------------------------------    fhn_data2 /
+--FHN-------------------------------    fhn_data2 / fhn_001--set_4-old
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/fhn.yaml fhn_test_data
 python experiments/train_wandb.py data/fhn_test_data.pkl fhn_test 
+
+--nad-------------------------------    nad_old / nad_FE_stat
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 .\data_generation\nad.yaml nad_test_data
+python.exe .\experiments\train_wandb.py .\data\nad_test_data.pkl nad
 
 --linsys----------------------------
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/linsys.yaml linsys_test_data
