@@ -26,6 +26,7 @@ class CausalFlowModel(nn.Module):
                  mode_dnn='FFNet',
                  use_batch_norm=False, 
                  linearisation_mode=None, 
+                 decoder_mode=True,
                  batch_size=128):
         super(CausalFlowModel, self).__init__()
 
@@ -33,6 +34,7 @@ class CausalFlowModel(nn.Module):
         self.control_dim = control_dim
         self.output_dim = output_dim
         self.use_batch_norm = use_batch_norm
+        self.decoder_mode = decoder_mode
 
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth  
@@ -118,7 +120,7 @@ class CausalFlowModel(nn.Module):
 
     # ----------------------------------------------------------------------- #
     def forward(self, x, rnn_input, deltas):
-        h0, rnn_out_seq_packed, coefficients, matrices, mode = self.structure_function(x, deltas, rnn_input)    ###############
+        h0, rnn_out_seq_packed, coefficients, matrices, _ = self.structure_function(x, deltas, rnn_input)    ###############
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
         h_shift = torch.roll(h, shifts=1, dims=1)   
@@ -127,7 +129,7 @@ class CausalFlowModel(nn.Module):
     #-- first element of deltas starts with 1 and goes to 0, not viceversa
         encoded_controls = (1 - deltas) * h_shift + deltas * h      # Size | [128, 75, 50]
         output = encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :]
-        output = self.u_dnn(output) if mode else output
+        output = self.u_dnn(output) if self.decoder_mode else output
 
         """print(output.shape, self.u_dnn(output).shape, output[:, :self.state_dim].shape)
         pprint(self.u_dnn(output) - output[:, :self.state_dim])

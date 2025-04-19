@@ -83,7 +83,7 @@ sweeps = {
 }
 
 
-name_set = sets['vdp']     # vdp, fhn, nad
+name_set = sets['nad']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['vdp']
@@ -343,6 +343,7 @@ def main(sweep):
         __mode_rnn = config.mode_rnn
         __mode_dnn = config.mode_dnn
         __linearisation_mode = config.linearisation_mode
+        __decoder_mode = config.decoder_mode
     else:
         __control_rnn_size = wandb.config["control_rnn_size"]
         __control_rnn_depth = wandb.config["control_rnn_depth"]
@@ -364,6 +365,7 @@ def main(sweep):
         __mode_rnn = wandb.config["mode_rnn"]
         __mode_dnn = wandb.config["mode_dnn"]
         __linearisation_mode = wandb.config["linearisation_mode"]
+        __decoder_mode = wandb.config["decoder_mode"]
 
 
     model_args = {
@@ -384,6 +386,7 @@ def main(sweep):
         'use_batch_norm': False,
         'linearisation_mode': __linearisation_mode, 
         'batch_size': __batch_size,
+        'decoder_mode': __decoder_mode,
     }
 
     model_metadata = {
