@@ -11,15 +11,15 @@ class CalcValues:
 
         self.metrics = [
             "_step", 
-            "best_epoch", 
+            #"best_epoch", 
             "best_test", 
             "best_train", 
             "best_val", 
-            "lr", 
-            "test_loss", 
+            #"lr", 
+            #"test_loss", 
             "time", 
-            "train_loss", 
-            "val_loss"
+            #"train_loss", 
+            #"val_loss"
             ]
 
         if display:

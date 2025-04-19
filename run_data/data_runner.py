@@ -19,7 +19,7 @@ default = "run_data/csv_files/Default_code.csv"         # comment | original RNN
 __table = "run_data/csv_files/table.csv"                # comment | for LateX tables
 
 
-csv_path = fhn_fin                                      # "run_data/txt_files/temp.csv"
+csv_path = vdp_fin                                      # "run_data/txt_files/temp.csv"
 
 # Define your scripts and optional args
 scripts_gen = [

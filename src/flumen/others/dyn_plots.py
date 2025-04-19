@@ -30,7 +30,7 @@ class Dynamics:
 
 
         # -------------------------------
-        term_time = [28]    #[1, 12, 28, 80, 150]
+        term_time = []    # [28]    #[1, 12, 28, 80, 150]
         for t in term_time:
             self.t_span = (0, t) 
             self.t_eval = np.linspace(*self.t_span, 1000)
@@ -39,7 +39,7 @@ class Dynamics:
             self.init_config()
             #self.plot(both)
 
-        models = ['vdp', 'fhn', 'nad']
+        models = []   # ['vdp', 'fhn', 'nad']
         if stab: 
             for m in models: self.stability(m)
 
@@ -344,6 +344,10 @@ class Dynamics:
     def mu_infinity(self, W):
         return max(W[i, i] + sum(abs(W[i, j]) for j in range(W.shape[1]) if j != i) for i in range(W.shape[0]))
 
+    def is_stable(self, A):
+        eigenvalues = np.linalg.eigvals(A)
+        return np.all(np.real(eigenvalues) < 0), eigenvalues
+    
     # -------------------------------
     def _linear_system(self, t, x, A, B, eq):
         u = np.interp(t, self.t_eval, self.u_array)
@@ -386,4 +390,31 @@ class Dynamics:
 # --------------------------------------------------------------
 if __name__ == "__main__":
     args = Dynamics.parse_arguments()
-    Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab, method=args.method)
+    dyn = Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab, method=args.method)
+
+    """
+    A = np.array([[-1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+        [ 0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+        [ 0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+        [ 0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+        [ 0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+        [ 0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+        [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+        [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+        [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ],
+        [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ],
+        [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ],
+        [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ],
+        [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ],
+        [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3],
+        [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ]])
+    B = np.array([[0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [1.]])
+    
+    mu_inf = dyn.mu_infinity(A)
+    controllable_nad, rank_nad = dyn.is_controllable(A, B)
+    stable, eigvals = dyn.is_stable(A)
+
+    print(f"Controllability of A_nad: {controllable_nad}, Rank: {rank_nad}")
+    print(f"Mu infinity of A_nad: {mu_inf}")
+    print(f"Stable: {stable} | Eigenvalues: {eigvals}")
+    #"""

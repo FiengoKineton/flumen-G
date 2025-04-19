@@ -180,13 +180,12 @@ class LSTM(nn.Module):
             h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
             x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)      
 
-            z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)            # same as the old one
-            outputs[:, t, :].copy_(z[-1])  # In-place assignment
+            z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)
+            outputs[:, t, :].copy_(z[-1])
             coefficients[:, t, :].copy_(coeff)  
             matrices[t, :, :].copy_(A_matrix[0])
 
-            ###print("checkpoint")
-            ###sys.exit() # Debugging
+            ###print("checkpoint"), sys.exit()     # Debugging
 
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         out = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)
@@ -261,9 +260,19 @@ class LSTM(nn.Module):
             mode = self.data["dynamics"]["args"]["mode"]
             a_s = self.data["dynamics"]["args"]["a_s"]
             a_m = self.data["dynamics"]["args"]["a_m"]
+            a_b = self.data["dynamics"]["args"]["a_b"]
             b = self.data["dynamics"]["args"]["b"]
+            b_b = self.data["dynamics"]["args"]["b_b"]
 
-            a = a_s if mode=="stable" else a_m
+            if mode=="stable": 
+                a = a_s #if mode=="stable" else a_m
+                b = b
+            elif mode=="big": 
+                a = a_b
+                b = b_b
+            else: 
+                a = a_m
+                b = b
 
             def nad_equilibrium(z): 
                 x = z[:state_dim]
@@ -510,7 +519,7 @@ def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u): 
         return 1 / (1 + torch.exp(-z))
 
     z = A @ x_eq + B @ u_eq
-    f_eq = -x_eq + sigma(-z) if activation == "sigmoid" else -x_eq + np.tanh(z)
+    f_eq = -x_eq + sigma(z) # before, wrongly, i wrote -z /// #if activation == "sigmoid" else -x_eq + np.tanh(z)
     S = torch.diag(sigma_prime(z))
     S = torch.tensor(S, dtype=dtype)
     A = -torch.eye(state_dim) + S @ A
@@ -524,11 +533,12 @@ def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u): 
     B = B.unsqueeze(0).expand(batch_size, -1, -1) 
     f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
 
-    """print("static method")
+    """
+    print(f"state_dim: {state_dim}")
     print("A:", A.shape)
     print("B:", B.shape)
     print("f_eq:", f_eq.shape)
-    sys.exit()"""
+    sys.exit() #"""
     return A, B, f_eq
 
 

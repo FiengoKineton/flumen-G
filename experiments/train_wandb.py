@@ -32,7 +32,7 @@ python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/fhn.yaml fhn_test_data
 python experiments/train_wandb.py data/fhn_test_data.pkl fhn_test 
 
---nad-------------------------------    nad_old / nad_FE_stat
+--nad-------------------------------    nad_old / nad_FE_stat / nad_fin-01
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 .\data_generation\nad.yaml nad_test_data
 python.exe .\experiments\train_wandb.py .\data\nad_test_data.pkl nad
 

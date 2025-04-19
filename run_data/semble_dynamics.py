@@ -422,16 +422,23 @@ class TwoTank(Dynamics):
 
 
 class NonlinearActivationDynamics(Dynamics):
-    def __init__(self, a_s, a_m, b, state_dim=5, control_dim=1, activation="sigmoid", mode="stable"):
+    def __init__(self, a_s, a_m, a_b, b_b, b, state_dim=5, control_dim=1, activation="sigmoid", mode="stable"):
         super().__init__(state_dim, control_dim)
 
         self.activation = activation
         self.mode = mode
 
-        self.B = b
-        self.A = a_s if mode == "stable" else a_m
+        if mode=="stable": 
+            self.A = a_s
+            self.B = b
+        elif mode=="big": 
+            self.A = a_b
+            self.B = b_b
+        else: 
+            self.A = a_m #if mode == "stable" else a_m
+            self.B = b
 
-        print(f"NonlinearActivationDynamics initialized with activation: {activation}")
+        print(f"NonlinearActivationDynamics initialized with activation: {activation}\nMode: {mode}\nSize: {state_dim}")
         print("Matrix A:", self.A)
         print("Matrix B:", self.B)
 
