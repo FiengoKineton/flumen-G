@@ -187,8 +187,8 @@ def main():
                 ax_.plot(t, y[:, k], color=colors[2], linestyle=linestyles[2], 
                         label='True state')
 
-                ax_.set_ylabel(f"$x_{k+1}$")
-                ax_.legend()
+                ax_.set_ylabel(f"$x_{{{k+1}}}$")
+                ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
 
 
         # **Plot input u**

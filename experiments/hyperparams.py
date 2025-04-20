@@ -192,7 +192,7 @@ class Hyperparams:
 
 
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
-            # for GaussianSqWave - dataset 3
+        ### ----------------------------------------------------------   
             'hyperparams___vdp': {
                 "control_rnn_size": 48,             # 22, {48, 64, 80} 
                 "control_rnn_depth": 1,         
@@ -241,7 +241,7 @@ class Hyperparams:
                 "decoder_mode": True,
             },
 
-        # ----------------------------------------------------------
+        ### ----------------------------------------------------------
             'hyperparams___fhn': {
                 "control_rnn_size": 48,  
                 "control_rnn_depth": 1,         
@@ -273,24 +273,24 @@ class Hyperparams:
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 96,                   # 128,  
+                "batch_size": 96, 
                 "lr": 0.001,                    
                 "n_epochs": 200,  
                 "es_patience": 25,              
                 "es_delta": 1e-7,
                 "sched_patience": 10,
-                "sched_factor": 3,                  # 2,
+                "sched_factor": 3,
                 "loss": "mse",                  
-                "discretisation_mode": None,        # TU
+                "discretisation_mode": None,
                 "optimiser_mode": "adam",       
                 "x_update_mode": None,
                 "mode_rnn": "old", 
                 "mode_dnn": "FFNet",
-                "linearisation_mode": None,     # lpv
+                "linearisation_mode": None,
                 "decoder_mode": True,
             },
 
-            # ----------------------------------------------------------
+        ### ----------------------------------------------------------
             'hyperparams___nad': {
                 "control_rnn_size": 64,         # {48, 64, 80} 
                 "control_rnn_depth": 1,         
@@ -316,30 +316,30 @@ class Hyperparams:
             },
 
             'hyperparams___nad_old': {
-                "control_rnn_size": 66,         # {48, 64, 80} 
+                "control_rnn_size": 66,
                 "control_rnn_depth": 1,         
-                "encoder_size": 2,              # 8
+                "encoder_size": 2,
                 "encoder_depth": 2,  
-                "decoder_size": 2,              # 8
+                "decoder_size": 2,
                 "decoder_depth": 2,  
                 "batch_size": 128,
                 "lr": 0.001,             
                 "n_epochs": 200,  
                 "es_patience": 25,        
                 "es_delta": 1e-07,
-                "sched_patience": 10,           # 5
-                "sched_factor": 3,              # 2
+                "sched_patience": 10,
+                "sched_factor": 3,
                 "loss": "mse",                  
-                "discretisation_mode": None,    # {BE, FE}
+                "discretisation_mode": None,
                 "optimiser_mode": "adam",       
                 "x_update_mode": None,
                 "mode_rnn": "old", 
                 "mode_dnn": "FFNet", 
                 "linearisation_mode": None,
-                "decoder_mode": True,          # set to True if mode_rnn is 'old'
+                "decoder_mode": True,
             },
 
-
+        ### ----------------------------------------------------------
             'hyperparams___linsys': {
 
             },
