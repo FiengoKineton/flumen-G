@@ -33,8 +33,8 @@ python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --tim
 python experiments/train_wandb.py data/fhn_test_data.pkl fhn_test 
 
 --nad-------------------------------    nad_old / nad_FE_stat / nad_fin-01
-python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 .\data_generation\nad.yaml nad_test_data
-python.exe .\experiments\train_wandb.py .\data\nad_test_data.pkl nad
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/nad.yaml nad_test_data
+python.exe experiments/train_wandb.py data/nad_test_data.pkl nad
 
 --linsys----------------------------
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/linsys.yaml linsys_test_data
@@ -87,7 +87,7 @@ sweeps = {
 }
 
 
-name_set = sets['nad']     # vdp, fhn, nad
+name_set = sets['fhn']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['vdp']
