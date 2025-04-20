@@ -65,15 +65,12 @@ hp_manager = Hyperparams()
 
 sets = {
     'init': 'hyperparams___init',
-    'set_4': 'hyperparams___set_4',
-    'set_6': 'hyperparams___set_6',
-    'vdp_set': 'hyperparams___vdp',         
-    'linsys_set': 'hyperparams___linsys',   
-    'twotank_set': 'hyperparams___twotank', 
-    'hhfs_set': 'hyperparams___hhfs',       
-    'vdp': 'hyperparams___best',            # use TU and lpv! (vdp)
+    'vdp': 'hyperparams___vdp',             # use TU and lpv!
     'nad': 'hyperparams___nad',             # use FE and static!
     'fhn': 'hyperparams___fhn',             # in progress
+    'vdp_old': 'hyperparams___vdp_old', 
+    'fhn_old': 'hyperparams___fhn_old', 
+    'nad_old': 'hyperparams___nad_old'
 }
 
 sweeps = {

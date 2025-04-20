@@ -193,7 +193,7 @@ class Hyperparams:
 
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
             # for GaussianSqWave - dataset 3
-            'hyperparams___best': {
+            'hyperparams___vdp': {
                 "control_rnn_size": 48,             # 22, {48, 64, 80} 
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,                  # 8
@@ -217,30 +217,31 @@ class Hyperparams:
                 "decoder_mode": False,
             },
 
-
-            # for SinusoidalSequence
-            'hyperparams___vdp': {
-                "control_rnn_size": 48,  
+            'hyperparams___vdp_old': {
+                "control_rnn_size": 50,
                 "control_rnn_depth": 1,         
-                "encoder_size": 2,   
+                "encoder_size": 2,
                 "encoder_depth": 2,  
-                "decoder_size": 2,  
+                "decoder_size": 2,
                 "decoder_depth": 2,  
-                "batch_size": 96,  
-                "lr": 0.001,                    
+                "batch_size": 96, 
+                "lr": 0.001,              
                 "n_epochs": 200,  
-                "es_patience": 25,              
+                "es_patience": 25,         
                 "es_delta": 1e-07,
-                "sched_patience": 10,
-                "sched_factor": 3,
-                "loss": "mse",                  
-                "discretisation_mode": "BE",
-                "optimiser_mode": "adam",       
-                "x_update_mode": "entropy",
-                "mode_rnn": "new", 
-                "mode_dnn": "FFNet"
+                "sched_patience": 10, 
+                "sched_factor": 3,   
+                "loss": "mse",  
+                "discretisation_mode": None,
+                "optimiser_mode": "adam", 
+                "x_update_mode": None, 
+                "mode_rnn": "old",   
+                "mode_dnn": "FFNet", 
+                "linearisation_mode": None, 
+                "decoder_mode": True,
             },
 
+        # ----------------------------------------------------------
             'hyperparams___fhn': {
                 "control_rnn_size": 48,  
                 "control_rnn_depth": 1,         
@@ -265,18 +266,31 @@ class Hyperparams:
                 "decoder_mode": True,
             },
 
-            'hyperparams___linsys': {
-
+            'hyperparams___fhn_old': {
+                "control_rnn_size": 50,  
+                "control_rnn_depth": 1,         
+                "encoder_size": 2,   
+                "encoder_depth": 2,  
+                "decoder_size": 2,  
+                "decoder_depth": 2,  
+                "batch_size": 96,                   # 128,  
+                "lr": 0.001,                    
+                "n_epochs": 200,  
+                "es_patience": 25,              
+                "es_delta": 1e-7,
+                "sched_patience": 10,
+                "sched_factor": 3,                  # 2,
+                "loss": "mse",                  
+                "discretisation_mode": None,        # TU
+                "optimiser_mode": "adam",       
+                "x_update_mode": None,
+                "mode_rnn": "old", 
+                "mode_dnn": "FFNet",
+                "linearisation_mode": None,     # lpv
+                "decoder_mode": True,
             },
 
-            'hyperparams___twotank': {
-
-            },
-
-            'hyperparams___hhfs': {
-
-            },
-
+            # ----------------------------------------------------------
             'hyperparams___nad': {
                 "control_rnn_size": 64,         # {48, 64, 80} 
                 "control_rnn_depth": 1,         
@@ -300,6 +314,44 @@ class Hyperparams:
                 "linearisation_mode": "static",
                 "decoder_mode": False,          # set to True if mode_rnn is 'old'
             },
+
+            'hyperparams___nad_old': {
+                "control_rnn_size": 66,         # {48, 64, 80} 
+                "control_rnn_depth": 1,         
+                "encoder_size": 2,              # 8
+                "encoder_depth": 2,  
+                "decoder_size": 2,              # 8
+                "decoder_depth": 2,  
+                "batch_size": 128,
+                "lr": 0.001,             
+                "n_epochs": 200,  
+                "es_patience": 25,        
+                "es_delta": 1e-07,
+                "sched_patience": 10,           # 5
+                "sched_factor": 3,              # 2
+                "loss": "mse",                  
+                "discretisation_mode": None,    # {BE, FE}
+                "optimiser_mode": "adam",       
+                "x_update_mode": None,
+                "mode_rnn": "old", 
+                "mode_dnn": "FFNet", 
+                "linearisation_mode": None,
+                "decoder_mode": True,          # set to True if mode_rnn is 'old'
+            },
+
+
+            'hyperparams___linsys': {
+
+            },
+
+            'hyperparams___twotank': {
+
+            },
+
+            'hyperparams___hhfs': {
+
+            },
+
 
         # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
             'hyperparams___run_037' : {'lr': 0.001, 'loss': 'mse', 'es_delta': 1e-07, 'n_epochs': 1000, 'batch_size': 128, 'es_patience': 20, 'decoder_size': 1, 'encoder_size': 1, 'sched_factor': 2, 'decoder_depth': 2, 'encoder_depth': 2, 'x_update_mode': 'beta', 'optimiser_mode': 'adam', 'sched_patience': 10, 'control_rnn_size': 8, 'control_rnn_depth': 1, 'discretisation_mode': 'TU', 'mode_rnn': 'new', 'mode_dnn': 'FFNet'},
