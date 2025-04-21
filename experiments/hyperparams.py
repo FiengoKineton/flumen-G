@@ -243,28 +243,41 @@ class Hyperparams:
 
         ### ----------------------------------------------------------
             'hyperparams___fhn': {
-                "control_rnn_size": 48,  
+                "control_rnn_size": 48,             # 48 -> 64
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 96,                   # 128,  
+                "batch_size": 96,                   # 96 -> 128
                 "lr": 0.001,                    
                 "n_epochs": 200,  
                 "es_patience": 25,              
                 "es_delta": 1e-7,
                 "sched_patience": 10,
-                "sched_factor": 3,                  # 2,
+                "sched_factor": 3,
                 "loss": "mse",                  
-                "discretisation_mode": "BE",        # TU
+                "discretisation_mode": "FE",        # BE -> FE or TU
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet",
-                "linearisation_mode": "static",     # lpv
-                "decoder_mode": True,
+                "linearisation_mode": "lpv",        # static -> lpv
+                "decoder_mode": False,              # True -> False
             },
+
+            """
+            fhn--096_FE_True    ########
+            fhn--096_TU_True    ########
+
+            fhn--128_FE_True    #
+            fhn--128_TU_True    #
+            fhn--096_FE_False
+
+            fhn--096_TU_False
+            fhn--128_FE_False
+            fhn--128_TU_False
+            """
 
             'hyperparams___fhn_old': {
                 "control_rnn_size": 50,  
@@ -569,7 +582,7 @@ class Hyperparams:
                 'method': 'grid',
                 'metric': {'name': 'best_val', 'goal': 'minimize'},
                 'parameters': {
-                    "control_rnn_size": {'values': [48, 64]},  
+                    "control_rnn_size": {'values': [48]}, #64]},  
                     "control_rnn_depth": {'values': [1]},         
                     "encoder_size": {'values': [2]},   
                     "encoder_depth": {'values': [2]},  
@@ -583,7 +596,7 @@ class Hyperparams:
                     "sched_patience": {'values': [10]},
                     "sched_factor": {'values': [3]},                  
                     "loss": {'values': ["mse"]},                  
-                    "discretisation_mode": {'values': ["FE"]},      # "FE" from Ubuntu and "TU" from Windows      
+                    "discretisation_mode": {'values': ["FE", "TU"]},      # "FE" from Ubuntu and "TU" from Windows      
                     "optimiser_mode": {'values': ["adam"]},       
                     "x_update_mode": {'values': ["entropy"]},
                     "mode_rnn": {'values': ["new"]}, 
