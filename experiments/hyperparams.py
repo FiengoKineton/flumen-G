@@ -565,6 +565,34 @@ class Hyperparams:
                 }
             },
 
+            'sweep_config_fhn' : {
+                'method': 'grid',
+                'metric': {'name': 'best_val', 'goal': 'minimize'},
+                'parameters': {
+                    "control_rnn_size": {'values': [48, 64]},  
+                    "control_rnn_depth": {'values': [1]},         
+                    "encoder_size": {'values': [2]},   
+                    "encoder_depth": {'values': [2]},  
+                    "decoder_size": {'values': [2]},  
+                    "decoder_depth": {'values': [2]},  
+                    "batch_size": {'values': [96, 128]},                   
+                    "lr": {'values': [0.001]},                    
+                    "n_epochs": {'values': [200]},  
+                    "es_patience": {'values': [20]},          
+                    "es_delta": {'values': [1e-7]},
+                    "sched_patience": {'values': [10]},
+                    "sched_factor": {'values': [3]},                  
+                    "loss": {'values': ["mse"]},                  
+                    "discretisation_mode": {'values': ["FE"]},      # "FE" from Ubuntu and "TU" from Windows      
+                    "optimiser_mode": {'values': ["adam"]},       
+                    "x_update_mode": {'values': ["entropy"]},
+                    "mode_rnn": {'values': ["new"]}, 
+                    "mode_dnn": {'values': ["FFNet"]},
+                    "linearisation_mode": {'values': ["lpv"]},     
+                    "decoder_mode": {'values': [True, False]},
+                }
+            },
+
         }
 
 
