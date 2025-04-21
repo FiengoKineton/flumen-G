@@ -186,3 +186,4 @@ artifacts/
 !DT_comparison/*.py
 
 !run_data/pkl_files/*.pkl
+!src/flumen/finals/*.ipynb

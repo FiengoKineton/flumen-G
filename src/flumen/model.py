@@ -35,6 +35,7 @@ class CausalFlowModel(nn.Module):
         self.output_dim = output_dim
         self.use_batch_norm = use_batch_norm
         self.decoder_mode = decoder_mode
+        if model_name=='FitzHughNagumo': self.decoder_mode = True
 
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth  
@@ -51,7 +52,7 @@ class CausalFlowModel(nn.Module):
 
         self.mode_rnn = mode_rnn                            # {"new", "old", "gru"} | if new then h0_stack, else h0
         self.mode_dnn = mode_dnn                            # if True then old dnn  | better always True
-        print("\n\nmode_rnn:", self.mode_rnn, "\nmode_dnn:", self.mode_dnn, "\n\n")
+        print("\n\nmode_rnn:", self.mode_rnn, "\nmode_dnn:", self.mode_dnn, "\ndecoder_mode:", self.decoder_mode, "\n\n")
 
         function_name = f"mode_rnn_{self.mode_rnn}"
         self.structure_function = getattr(self, function_name, None)

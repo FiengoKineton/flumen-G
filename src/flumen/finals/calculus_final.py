@@ -152,4 +152,8 @@ if __name__ == "__main__":
     save it in pdf in ./src/flumen/finals/
 
     run: python experiments/interactive_test_compare.py --wandb (new) --wandb_2 (old)
+    
+    -------------------------------------------------------
+    
+    go here to see wandb report: https://wandb.ai/aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/reports/Finals--VmlldzoxMjM5MjEwNA
     """
