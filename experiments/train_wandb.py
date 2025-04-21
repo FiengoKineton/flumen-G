@@ -402,8 +402,8 @@ def main(sweep):
 
     # Prepare for saving the model
     model_save_dir = Path(
-        ###f"./outputs/{sys_args.name}/{sys_args.name}_{run.id}")
-        f"./outputs/{first_name}/{full_name}_{run.id}")
+        f"./outputs/{sys_args.name}/{sys_args.name}_{run.id}")
+        ###f"./outputs/{first_name}/{full_name}_{run.id}")
     model_save_dir.mkdir(parents=True, exist_ok=True)
 
     # Save local copy of metadata
