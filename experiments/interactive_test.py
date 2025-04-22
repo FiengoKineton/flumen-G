@@ -91,11 +91,11 @@ def main():
         fig3, ax3 = plt.subplots(2, 1, sharex=True)
         fig3.canvas.mpl_connect('close_event', on_close_window)
 
-        fig4, ax4 = plt.subplots(2, 1, sharex=True)
-        fig4.canvas.mpl_connect('close_event', on_close_window)
-
     others = True if more and mode_rnn!="old" else False
     if others:
+        fig4, ax4 = plt.subplots(2, 1, sharex=True)
+        fig4.canvas.mpl_connect('close_event', on_close_window)
+                                
         fig5, ax5 = plt.subplots(1, 2)
         fig5.canvas.mpl_connect('close_event', on_close_window)
 
@@ -140,8 +140,8 @@ def main():
             ax_.cla()
         if mode_rnn!="old": 
             for ax_ in ax3: ax_.cla()  ###############
-            for ax_ in ax4: ax_.cla()
         if others: 
+            for ax_ in ax4: ax_.cla()
             for ax_ in ax5: ax_.cla()
             ax6.cla()
             
@@ -194,7 +194,29 @@ def main():
                 ax3[1].legend()
                 ax3[1].grid()
 
-            
+
+            # **Zoomed-in Insets for Initial Conditions (first 5% of data)**
+            for i, ax in enumerate(ax2):
+                inset = inset_axes(ax, width="30%", height="30%", loc="lower right", borderpad=1)
+                inset.plot(t, y[:, i] - y_pred[:, i], color='black')
+
+                # Focus the inset on the first part of the curve
+                inset_xlim = (t[0], t[int(len(t) * 0.05)])
+                inset_ylim = (np.min(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1,
+                            np.max(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1)
+
+                inset.set_xlim(inset_xlim)
+                inset.set_ylim(inset_ylim)
+                inset.grid()
+
+                # Connect inset to the main plot and store references
+                lines = mark_inset(ax, inset, loc1=2, loc2=4, fc="none", ec="0.5")
+                
+                prev_insets.append(inset)  # Store inset reference
+                prev_markings.extend(lines)  # Store connection line references
+            #"""
+
+            if others: 
                 eigvals = np.linalg.eigvals(matrices)  # shape: [seq_len, state_dim]
                 eig_real, eig_imag = eigvals.real, eigvals.imag
                 t_vals = np.linspace(0, delta * (eigvals.shape[0] - 1), eigvals.shape[0])
@@ -224,33 +246,11 @@ def main():
                 fig4.colorbar(sc2, cax=cax2, label=r"seq_len")
 
 
-
-            # **Zoomed-in Insets for Initial Conditions (first 5% of data)**
-            for i, ax in enumerate(ax2):
-                inset = inset_axes(ax, width="30%", height="30%", loc="lower right", borderpad=1)
-                inset.plot(t, y[:, i] - y_pred[:, i], color='black')
-
-                # Focus the inset on the first part of the curve
-                inset_xlim = (t[0], t[int(len(t) * 0.05)])
-                inset_ylim = (np.min(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1,
-                            np.max(y[:int(len(t) * 0.05), i] - y_pred[:int(len(t) * 0.05), i]) * 1.1)
-
-                inset.set_xlim(inset_xlim)
-                inset.set_ylim(inset_ylim)
-                inset.grid()
-
-                # Connect inset to the main plot and store references
-                lines = mark_inset(ax, inset, loc1=2, loc2=4, fc="none", ec="0.5")
-                
-                prev_insets.append(inset)  # Store inset reference
-                prev_markings.extend(lines)  # Store connection line references
-            #"""
-
-            if others: 
                 ax5[0].hist(coeffs[:, 0], bins=30, color="purple", alpha=0.7)
                 ax5[0].set_title("γ₁ distribution")
                 ax5[1].hist(coeffs[:, 1], bins=30, color="green", alpha=0.7)
                 ax5[1].set_title("γ₂ distribution")
+
 
                 sc = ax6.scatter(coeffs[:, 0], coeffs[:, 1], c=t, cmap="viridis", s=10)
                 ax6.set_xlabel("γ₁")
@@ -268,9 +268,9 @@ def main():
         fig2.tight_layout()
         if mode_rnn!="old": 
             fig3.tight_layout()
-            fig4.tight_layout()
 
         if others: 
+            fig4.tight_layout()
             fig5.tight_layout()
             fig6.tight_layout()
 

@@ -243,13 +243,13 @@ class Hyperparams:
 
         ### ----------------------------------------------------------
             'hyperparams___fhn': {
-                "control_rnn_size": 48,             # 48 -> 64
+                "control_rnn_size": 48,
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 96,                   # 96 -> 128
+                "batch_size": 96,
                 "lr": 0.001,                    
                 "n_epochs": 200,  
                 "es_patience": 25,              
@@ -257,13 +257,13 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 3,
                 "loss": "mse",                  
-                "discretisation_mode": "BE",        # BE -> FE or TU
+                "discretisation_mode": "FE",        # BE -> FE
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet",
-                "linearisation_mode": "static",     # static -> lpv
-                "decoder_mode": True,               # True -> False
+                "linearisation_mode": "lpv",        # static -> lpv
+                "decoder_mode": False,              # True -> False
             },
 
             'hyperparams___fhn_old': {

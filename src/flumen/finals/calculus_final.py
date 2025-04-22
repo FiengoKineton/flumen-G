@@ -116,7 +116,8 @@ if __name__ == "__main__":
         },
         'FHN': {
             'old': 'src/flumen/finals/csv/old_fhn.csv',
-            'new': 'src/flumen/finals/csv/fhn.csv',
+            'BE_stat_true': 'src/flumen/finals/csv/fhn-BE_stat_true.csv',
+            'FE_lpv_false': 'src/flumen/finals/csv/fhn-FE_lpv_false.csv',
         },
         'NAD': {
             'old_stable': 'src/flumen/finals/csv/old_nad-stable.csv',

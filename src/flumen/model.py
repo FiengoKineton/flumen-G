@@ -35,7 +35,7 @@ class CausalFlowModel(nn.Module):
         self.output_dim = output_dim
         self.use_batch_norm = use_batch_norm
         self.decoder_mode = decoder_mode
-        if model_name=='FitzHughNagumo': self.decoder_mode = True
+        #if model_name=='FitzHughNagumo': self.decoder_mode = True
 
         self.control_rnn_size = control_rnn_size
         self.control_rnn_depth = control_rnn_depth  
@@ -121,13 +121,12 @@ class CausalFlowModel(nn.Module):
 
     # ----------------------------------------------------------------------- #
     def forward(self, x, rnn_input, deltas):
-        h0, rnn_out_seq_packed, coefficients, matrices, mode = self.structure_function(x, deltas, rnn_input)    ###############
+        h0, rnn_out_seq_packed, coefficients, matrices, _ = self.structure_function(x, deltas, rnn_input)    ###############
         h, h_lens = torch.nn.utils.rnn.pad_packed_sequence(rnn_out_seq_packed, batch_first=True)
 
         h_shift = torch.roll(h, shifts=1, dims=1)   
         h_shift[:, 0, :] = h0[-1]
 
-    #-- first element of deltas starts with 1 and goes to 0, not viceversa
         encoded_controls = (1 - deltas) * h_shift + deltas * h      # Size | [128, 75, 50]
         output = encoded_controls[range(encoded_controls.shape[0]), h_lens - 1, :]
         ###self.decoder_mode = mode
