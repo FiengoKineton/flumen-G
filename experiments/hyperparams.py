@@ -243,13 +243,13 @@ class Hyperparams:
 
         ### ----------------------------------------------------------
             'hyperparams___fhn': {
-                "control_rnn_size": 48,
+                "control_rnn_size": 64,             # 48 -> 64
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 96,
+                "batch_size": 128,                  # 96 -> 128
                 "lr": 0.001,                    
                 "n_epochs": 200,  
                 "es_patience": 25,              
