@@ -321,6 +321,46 @@ class Dynamics:
         from scipy.special import expit
         dx = -x + expit(A @ x + B.flatten() * u)
         return dx
+    
+    def nad(self, A, B, m, k=30): 
+        n = A.shape[0]
+        t_span = (0, k) 
+        t_eval = np.linspace(*t_span, 1000)
+
+        A = A / self.control_delta
+        B = B / self.control_delta
+        u_array = self.generate_random_input(t_eval, step_size=self.step_size)
+
+        from scipy.special import expit
+        from scipy.optimize import fsolve
+
+        def dyn(t, x): 
+            u = np.interp(t, t_eval, u_array)
+            dx = -x + expit(A @ x + B.flatten() * u)
+            return dx
+
+        def eq(x): 
+            return - x + expit(A @ x)  
+        
+        x0 = fsolve(eq, np.zeros(n))  
+        sol = solve_ivp(dyn, t_span, x0, args=(), t_eval=t_eval)
+
+        plt.figure(figsize=(14, 10))
+        plt.subplot(2, 1, 1)
+        plt.plot(sol.t, sol.y[m], '--', label=f'NAD ({n})')
+        plt.ylabel('controllable x')
+        plt.legend()
+        plt.grid()
+
+        # Ingresso
+        plt.subplot(2, 1, 2)
+        plt.plot(t_eval, u_array, label='u(t)')
+        plt.title('Ingresso randomico a gradini')
+        plt.ylabel('u(t)')
+        plt.grid()
+
+        plt.tight_layout()
+        plt.show()
 
     # -------------------------------
     # Equilibrio FitzHugh-Nagumo
@@ -393,7 +433,7 @@ if __name__ == "__main__":
     dyn = Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab, method=args.method)
 
     """
-    A = np.array([[-1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+    A_big = np.array([[-1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
         [ 0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
         [ 0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
         [ 0. ,  0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
@@ -408,13 +448,42 @@ if __name__ == "__main__":
         [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3,  0. ],
         [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ,  0.3],
         [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. , -1. ]])
-    B = np.array([[0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [1.]])
+    B_big = np.array([[0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [1.]])
     
+    A_stable = np.array([[-1.0,  0.3,  0.0,  0.0,  0.0],
+            [ 0.0, -1.0,  0.3,  0.0,  0.0],
+            [ 0.0,  0.0, -1.0,  0.3,  0.0],
+            [ 0.0,  0.0,  0.0, -1.0,  0.3],
+            [ 0.0,  0.0,  0.0,  0.0, -1.0]])        
+    B_stable = np.array([[0.0], [0.0], [0.0], [0.0], [1.0]])
+
+    n = 20
+    A_n, B_n = np.diag([-1.0]*n), np.zeros(n)
+    for k in (n-1,): B_n[k] = 1.0
+    for i in range(n - 1):
+        A_n[i, i + 1] = 0.3
+        A_n[i + 1, i] = 0.3
+
+    for i in range(n):
+        for j in range(n):
+            if i == j or j == i+1 or j == i-1:
+                continue
+            if np.random.rand() < 0.25:  # 10% chance to insert a random value
+                A_n[i, j] = 1.5 * np.random.uniform(-0.05, 0.05)
+    #print('n:', n), print('\nA:', A_n), print('\nB:', B_n)
+
+    #A, B = A_stable, B_stable
+    A, B = A_big, B_big
+    #A, B = A_n, B_n
+
     mu_inf = dyn.mu_infinity(A)
     controllable_nad, rank_nad = dyn.is_controllable(A, B)
     stable, eigvals = dyn.is_stable(A)
 
+    print(f"dim: {A.shape[0]}")
     print(f"Controllability of A_nad: {controllable_nad}, Rank: {rank_nad}")
     print(f"Mu infinity of A_nad: {mu_inf}")
     print(f"Stable: {stable} | Eigenvalues: {eigvals}")
+
+    dyn.nad(A, B, m=A.shape[0]-1, k=30)
     #"""
