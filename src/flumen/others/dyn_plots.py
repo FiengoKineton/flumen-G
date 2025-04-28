@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from scipy.optimize import fsolve
-import argparse
+import argparse, sys
 from numpy.linalg import matrix_rank
 from scipy.linalg import block_diag
 
 
 class Dynamics: 
-    def __init__(self, mhu=1, k=50, c=-1, both=False, stab=False, method="FE"):
+    def __init__(self, mhu=1, k=50, c=-1, both=False, stab=False, method="FE", u_mode='rnd'):
         # -------------------------------
         # Parametri
         self.mu = mhu       # <0, try -1
@@ -21,6 +21,7 @@ class Dynamics:
         self.v_fact = k     # <2.3, try 2
 
         self.control_delta = 0.2
+        self.u_mode = u_mode
 
         self.v_star = fsolve(self.fhn_equilibrium, 0)[0]
         self.w_star = (self.v_star - self.a) / self.b
@@ -34,7 +35,7 @@ class Dynamics:
         for t in term_time:
             self.t_span = (0, t) 
             self.t_eval = np.linspace(*self.t_span, 1000)
-            self.u_array = self.generate_random_input(self.t_eval, step_size=self.step_size)
+            self.u_array = self.generate_input(self.t_eval, step_size=self.step_size)
 
             self.init_config()
             #self.plot(both)
@@ -267,7 +268,14 @@ class Dynamics:
     
     # -------------------------------
     # Funzione per generare un segnale randomico a gradini
-    def generate_random_input(self, t_eval, step_size=2.0, low=-1.0, high=1.0, seed=42):
+    def generate_input(self, t_eval, step_size=2.0):
+
+        if self.u_mode == 'rnd':    u_t = self.generate_random_input(t_eval, step_size, low=-1.0, high=1.0, seed=42)
+        elif self.u_mode == 'sin':  u_t = self.generate_sinusoidal_input(t_eval, step_size)
+
+        return u_t
+
+    def generate_random_input(self, t_eval, step_size= 2.0, low=-1.0, high=1.0, seed=42): 
         np.random.seed(seed)
         t_min, t_max = t_eval[0], t_eval[-1]
         steps = np.arange(t_min, t_max, step_size)
@@ -278,7 +286,35 @@ class Dynamics:
             index = int((t - t_min) // step_size)
             u_t[i] = values[min(index, len(values) - 1)]
         
+        print(u_t.shape)#, print(u_t), sys.exit()
+
         return u_t
+    
+
+    def generate_sinusoidal_input(self, t_eval, step_size=2.0, max_freq=1.0, amp_mean=1.0, amp_std=1.0, seed=42):
+        np.random.seed(seed)
+        t_min, t_max = t_eval[0], t_eval[-1]
+
+        control_times = np.arange(t_min, t_max, step_size)
+        amplitudes = np.random.lognormal(mean=amp_mean, sigma=amp_std, size=len(control_times))
+        frequencies = np.random.uniform(0, max_freq, size=len(control_times))
+
+        u_t = np.zeros_like(t_eval)
+
+        for i, t in enumerate(t_eval):
+            index = np.searchsorted(control_times, t, side='right') - 1
+            index = np.clip(index, 0, len(control_times) - 1)
+
+            amp = amplitudes[index]
+            freq = frequencies[index]
+            relative_time = t - control_times[index]
+
+            u_t[i] = amp * np.sin(2 * np.pi * freq * relative_time)
+
+        #print(u_t.shape)  # (1000,)
+        return u_t
+
+
 
     # -------------------------------
     # Dinamica Van der Pol (non lineare)
@@ -329,7 +365,7 @@ class Dynamics:
 
         A = A / self.control_delta
         B = B / self.control_delta
-        u_array = self.generate_random_input(t_eval, step_size=self.step_size)
+        u_array = self.generate_input(t_eval, step_size=self.step_size)
 
         from scipy.special import expit
         from scipy.optimize import fsolve
@@ -427,12 +463,15 @@ class Dynamics:
             raise ValueError(f"Unknown method: {method}")
 
 
+
+
 # --------------------------------------------------------------
 if __name__ == "__main__":
     args = Dynamics.parse_arguments()
-    dyn = Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab, method=args.method)
+    u_mode = 'sin'  # [rnd, sin]
+    dyn = Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab, method=args.method, u_mode=u_mode)
 
-    """
+    #"""
     A_big = np.array([[-1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
         [ 0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
         [ 0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
