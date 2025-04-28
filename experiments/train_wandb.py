@@ -346,6 +346,7 @@ def main(sweep):
         __mode_dnn = config.mode_dnn
         __linearisation_mode = config.linearisation_mode
         __decoder_mode = config.decoder_mode
+        __radius = config.radius
     else:
         __control_rnn_size = wandb.config["control_rnn_size"]
         __control_rnn_depth = wandb.config["control_rnn_depth"]
@@ -368,6 +369,7 @@ def main(sweep):
         __mode_dnn = wandb.config["mode_dnn"]
         __linearisation_mode = wandb.config["linearisation_mode"]
         __decoder_mode = wandb.config["decoder_mode"]
+        __radius = wandb.config["radius"]
 
 
     model_args = {
@@ -389,6 +391,7 @@ def main(sweep):
         'linearisation_mode': __linearisation_mode, 
         'batch_size': __batch_size,
         'decoder_mode': __decoder_mode,
+        'radius': __radius,
     }
 
     model_metadata = {

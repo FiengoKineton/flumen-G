@@ -215,6 +215,7 @@ class Hyperparams:
                 "mode_dnn": "FFNet",                # {FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder}
                 "linearisation_mode": "static",        # {static, current, lpv}
                 "decoder_mode": False,
+                "radius": 3,
             },
 
             'hyperparams___vdp_old': {
@@ -239,6 +240,7 @@ class Hyperparams:
                 "mode_dnn": "FFNet", 
                 "linearisation_mode": None, 
                 "decoder_mode": True,
+                "radius": None,
             },
 
         ### ----------------------------------------------------------
@@ -257,13 +259,14 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 3,
                 "loss": "mse",                  
-                "discretisation_mode": "FE",        # BE -> FE
+                "discretisation_mode": "TU",        # BE -> FE
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet",
                 "linearisation_mode": "lpv",        # static -> lpv
-                "decoder_mode": True,               # True -> False
+                "decoder_mode": False,              # True -> False
+                "radius": 2.5,
             },
 
             'hyperparams___fhn_old': {
@@ -288,6 +291,7 @@ class Hyperparams:
                 "mode_dnn": "FFNet",
                 "linearisation_mode": None,
                 "decoder_mode": True,
+                "radius": None,
             },
 
         ### ----------------------------------------------------------
@@ -313,10 +317,11 @@ class Hyperparams:
                 "mode_dnn": "FFNet", 
                 "linearisation_mode": "static",
                 "decoder_mode": False,          # set to True if mode_rnn is 'old'
+                "radius": 3,
             },
 
             'hyperparams___nad_old': {
-                "control_rnn_size": 66,
+                "control_rnn_size": 69,         # 69 if state_dim==5 else 79
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,
                 "encoder_depth": 2,  
@@ -337,6 +342,7 @@ class Hyperparams:
                 "mode_dnn": "FFNet", 
                 "linearisation_mode": None,
                 "decoder_mode": True,
+                "radius": None,
             },
 
         ### ----------------------------------------------------------

@@ -318,7 +318,7 @@ class PhasePlot:
 
 
 if __name__ == "__main__": 
-    which = 'nad'            # if True then VanDerPol, elif False then FitzHughNagumo
+    which = 'fhn'            # if True then VanDerPol, elif False then FitzHughNagumo
     p = PhasePlot(which=which)
 
     if which in ['vdp', 'fhn']: 
