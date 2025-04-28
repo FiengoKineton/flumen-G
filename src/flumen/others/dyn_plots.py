@@ -13,6 +13,7 @@ class Dynamics:
         # Parametri
         self.mu = mhu       # <0, try -1
         self.step_size = 1.0
+        self.max_freq = 0.3 # 1.0
         self.c = c          # for linsys
 
         self.tau = 0.8
@@ -35,7 +36,7 @@ class Dynamics:
         for t in term_time:
             self.t_span = (0, t) 
             self.t_eval = np.linspace(*self.t_span, 1000)
-            self.u_array = self.generate_input(self.t_eval, step_size=self.step_size)
+            self.u_array = self.generate_input(self.t_eval, step_size=self.step_size, max_freq=self.max_freq)
 
             self.init_config()
             #self.plot(both)
@@ -268,10 +269,10 @@ class Dynamics:
     
     # -------------------------------
     # Funzione per generare un segnale randomico a gradini
-    def generate_input(self, t_eval, step_size=2.0):
+    def generate_input(self, t_eval, step_size=2.0, max_freq=1.0):
 
-        if self.u_mode == 'rnd':    u_t = self.generate_random_input(t_eval, step_size, low=-1.0, high=1.0, seed=42)
-        elif self.u_mode == 'sin':  u_t = self.generate_sinusoidal_input(t_eval, step_size)
+        if self.u_mode == 'rnd':    u_t = self.generate_random_input(t_eval, step_size)
+        elif self.u_mode == 'sin':  u_t = self.generate_sinusoidal_input(t_eval, step_size, max_freq)
 
         return u_t
 
@@ -358,14 +359,14 @@ class Dynamics:
         dx = -x + expit(A @ x + B.flatten() * u)
         return dx
     
-    def nad(self, A, B, m, k=30): 
+    def nad(self, A, B, m, k=30, max_freq=1.0): 
         n = A.shape[0]
         t_span = (0, k) 
         t_eval = np.linspace(*t_span, 1000)
 
         A = A / self.control_delta
         B = B / self.control_delta
-        u_array = self.generate_input(t_eval, step_size=self.step_size)
+        u_array = self.generate_input(t_eval, step_size=self.step_size, max_freq=max_freq)
 
         from scipy.special import expit
         from scipy.optimize import fsolve
@@ -524,5 +525,5 @@ if __name__ == "__main__":
     print(f"Mu infinity of A_nad: {mu_inf}")
     print(f"Stable: {stable} | Eigenvalues: {eigvals}")
 
-    dyn.nad(A, B, m=A.shape[0]-1, k=30)
+    for f in [1.0, 1.5, 2.0]: dyn.nad(A, B, m=A.shape[0]-1, k=30, max_freq=f)
     #"""
