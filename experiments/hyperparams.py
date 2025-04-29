@@ -266,7 +266,7 @@ class Hyperparams:
                 "mode_dnn": "FFNet",
                 "linearisation_mode": "lpv",        # static -> lpv
                 "decoder_mode": False,              # True -> False
-                "radius": 2.5,
+                "radius": 1.0,                      # 1.0
             },
 
             'hyperparams___fhn_old': {

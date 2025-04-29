@@ -25,7 +25,7 @@ class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
                  state_dim=None, discretisation_mode=None, x_update_mode=None, 
-                 model_name=None, linearisation_mode=None, batch_size=128, radius=2):
+                 model_name=None, linearisation_mode=None, batch_size=128, radius=None):
         super(LSTM, self).__init__()
 
     # -------------------------------------------
@@ -62,6 +62,7 @@ class LSTM(nn.Module):
             self.linearisation_function = globals().get(f"linearisation_curr__{self.model_name}")
         elif linearisation_mode=='lpv': 
             self.linearisation_function = globals().get(f"linearisation_lpv__{self.model_name}")
+            print("lpv radius:", self.radius)
 
 
         print("'lin_mode':", self.linearisation_function)
@@ -175,7 +176,7 @@ class LSTM(nn.Module):
                 c_list.append(torch.stack(new_c, dim=0))"""
 
             u_dyn = rnn_input_t[:, :1]
-            A_matrix, B_matrix, f_eq = self.linearisation_function(self.param, batch_size, x_prev, u_dyn)
+            A_matrix, B_matrix, f_eq = self.linearisation_function(self.param, (batch_size, self.radius), x_prev, u_dyn)
             x_mid = self.discretisation_function(x_prev, (A_matrix, tau_t, self.I, B_matrix, f_eq), u_dyn)   
 
             h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
@@ -208,6 +209,7 @@ class LSTM(nn.Module):
 
         if model_name == "VanDerPol":
             mhu = self.data["dynamics"]["args"]["damping"]
+            if self.radius==None: self.radius = 3
 
             """train_data = TrajectoryDataset(self.data["train"])
             train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
@@ -230,6 +232,8 @@ class LSTM(nn.Module):
             a = self.data["dynamics"]["args"]["a"]
             b = self.data["dynamics"]["args"]["b"]
             v_fact = 50
+
+            if self.radius==None: self.radius = 1
 
             from scipy.optimize import fsolve
 
@@ -264,6 +268,8 @@ class LSTM(nn.Module):
             a_b = self.data["dynamics"]["args"]["a_b"]
             b = self.data["dynamics"]["args"]["b"]
             b_b = self.data["dynamics"]["args"]["b_b"]
+            
+            if self.radius==None: self.radius = 3
 
             if mode=="stable": 
                 a = a_s #if mode=="stable" else a_m
@@ -441,13 +447,15 @@ class bdrLSTMCell(nn.Module):
 # ---------------- Linearisation static ------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-def linearisation_static__VanDerPol(param, batch_size, x, u, r):                                        # --nope--
+def linearisation_static__VanDerPol(param, const, x, u):                                                # --nope--
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
     dyn_factor = param['dyn_factor']
     dtype = param['dtype']
     mhu = param['mhu']
+
+    batch_size, _ = const
 
     A = dyn_factor* torch.tensor([[0.0, 1.0],
                         [-1.0 - 2 * mhu * x1_eq * x2_eq,
@@ -466,7 +474,7 @@ def linearisation_static__VanDerPol(param, batch_size, x, u, r):                
     f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
     return A, B, f_eq
 
-def linearisation_static__FitzHughNagumo(param, batch_size, x, u, r):                                   # --nope--
+def linearisation_static__FitzHughNagumo(param, const, x, u):                                           # --nope--
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -476,6 +484,8 @@ def linearisation_static__FitzHughNagumo(param, batch_size, x, u, r):           
     a = param['a']
     b = param['b']
     v_fact = param['v_fact']
+
+    batch_size, _ = const
 
     v = x1_eq
     w = x2_eq
@@ -502,7 +512,7 @@ def linearisation_static__FitzHughNagumo(param, batch_size, x, u, r):           
 
     return A, B, f_eq
 
-def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u, r):                      ### USE THIS!
+def linearisation_static__NonlinearActivationDynamics(param, const, x, u):                              ### USE THIS!
     A = param['A']
     dyn_factor = param['dyn_factor']
     dtype = param['dtype']
@@ -511,6 +521,8 @@ def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u, r
     x_eq = param['x_eq']
     u_eq = param['u_eq']
     state_dim = param['state_dim']
+
+    batch_size, _ = const
 
     def sigma_prime(z): 
         sigma = 1 / (1 + torch.exp(-z))
@@ -547,13 +559,15 @@ def linearisation_static__NonlinearActivationDynamics(param, batch_size, x, u, r
 # ---------------- Linearisation functions ---------------------------------- #
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def linearisation_curr__VanDerPol(param, batch_size, x, u, r):                                          # --nope--
+def linearisation_curr__VanDerPol(param, const, x, u):                                                  # --nope--
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
     dyn_factor = param['dyn_factor']
     dtype = param['dtype']
     mhu = param['mhu']
+
+    batch_size, _ = const
 
     def f_eq_vdp(x):
         x1 = x[:, 0] - x1_eq
@@ -589,7 +603,7 @@ def linearisation_curr__VanDerPol(param, batch_size, x, u, r):                  
 
     return A, B, f_eq
 
-def linearisation_curr__FitzHughNagumo(param, batch_size, x, u, r):                                     # --nope--
+def linearisation_curr__FitzHughNagumo(param, const, x, u):                                             # --nope--
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -599,6 +613,8 @@ def linearisation_curr__FitzHughNagumo(param, batch_size, x, u, r):             
     a = param['a']
     b = param['b']
     v_fact = param['v_fact']
+
+    batch_size, _ = const
 
     x_sample = x[0, 0]
     u_sample = u[0]
@@ -628,7 +644,7 @@ def linearisation_curr__FitzHughNagumo(param, batch_size, x, u, r):             
 
     return A, B, f_eq
 
-def linearisation_curr__NonlinearActivationDynamics(param, batch_size, x, u, r):                        # --nope--
+def linearisation_curr__NonlinearActivationDynamics(param, const, x, u):                                # --nope--
     A = param['A']
     B = param['B']
     dyn_factor = param['dyn_factor']
@@ -637,6 +653,8 @@ def linearisation_curr__NonlinearActivationDynamics(param, batch_size, x, u, r):
     x_eq = param['x_eq']
     u_eq = param['u_eq']
     state_dim = param['state_dim']
+
+    batch_size, _ = const
 
     x_sample = x[0, 0]  # dimensione: [state_dim]
     u_sample = u[0]     # dimensione: [control_dim]
@@ -678,7 +696,7 @@ def linearisation_curr__NonlinearActivationDynamics(param, batch_size, x, u, r):
 # ---------------- Linearisation LPV functions ------------------------------ #
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def linearisation_lpv__VanDerPol(param, batch_size, x, u, radius=3, epsilon=1e-4):                      ### USE THIS!
+def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):                                     ### USE THIS!
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -686,6 +704,7 @@ def linearisation_lpv__VanDerPol(param, batch_size, x, u, radius=3, epsilon=1e-4
     dtype = param['dtype']
     mhu = param['mhu']
 
+    batch_size, radius = const
 
     batch_size = u.shape[0]
     x_target = x[0].unsqueeze(1)    # [1, 128, 2] -> [128, 1, 2]
@@ -746,7 +765,7 @@ def linearisation_lpv__VanDerPol(param, batch_size, x, u, radius=3, epsilon=1e-4
 
     return A, B, f_eq
 
-def linearisation_lpv__FitzHughNagumo(param, batch_size, x, u, radius=1, epsilon=1e-4):                 ### USE THIS!
+def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):                                ### USE THIS!
     x1_eq = param['x1_eq']
     x2_eq = param['x2_eq']
     u_eq = param['u_eq']
@@ -756,6 +775,8 @@ def linearisation_lpv__FitzHughNagumo(param, batch_size, x, u, radius=1, epsilon
     a = param['a']
     b = param['b']
     v_fact = param['v_fact']
+
+    batch_size, radius = const
 
     #batch_size = u.shape[0]
     x_target = x[0].unsqueeze(1)
@@ -817,7 +838,7 @@ def linearisation_lpv__FitzHughNagumo(param, batch_size, x, u, radius=1, epsilon
     
     return A, B, f_eq
 
-def linearisation_lpv__NonlinearActivationDynamics(param, batch_size, x, u, radius=3, epsilon=1e-4):    # --nope--
+def linearisation_lpv__NonlinearActivationDynamics(param, const, x, u, epsilon=1e-4):                   # --nope--
     A_base = param['A']
     B_base = param['B']
     x_eq = param['x_eq']
@@ -825,6 +846,8 @@ def linearisation_lpv__NonlinearActivationDynamics(param, batch_size, x, u, radi
     dyn_factor = param['dyn_factor']
     dtype = param['dtype']
     activation = param['activation']
+
+    batch_size, radius = const
 
     #batch_size = u.shape[0]
     state_dim = param['state_dim']
