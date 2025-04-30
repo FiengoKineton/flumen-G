@@ -45,7 +45,7 @@ class SimulationMetrics:
         best_simulation = {}
         for name, df in self.sections[section].items():
             best_row = df.loc[df['best_val'].idxmin()]
-            best_simulation[name] = best_row['name']
+            best_simulation[name] = best_row#['name']
         return best_simulation
 
     def plot_comparison(self, section, model_names):
@@ -124,6 +124,12 @@ if __name__ == "__main__":
             'new_stable': 'src/flumen/finals/csv/nad-stable.csv',
             'old_big': 'src/flumen/finals/csv/old_nad-big.csv',
             'new_big': 'src/flumen/finals/csv/nad-big.csv',
+        },
+        'NAD-sin': {
+            'old_sin': 'src/flumen/finals/csv/old_nad-stable-sin.csv',
+            'new_sin': 'src/flumen/finals/csv/nad-stable-sin.csv',
+            'old_big_sin': 'src/flumen/finals/csv/old_nad-big-sin.csv',
+            'new_big_sin': 'src/flumen/finals/csv/nad-big-sin.csv',
         }
     }
 
@@ -144,8 +150,9 @@ if __name__ == "__main__":
         metrics_df = pd.DataFrame(index=["Best Simulation"] + sim_metrics.metrics)
 
         best_simulations = sim_metrics.get_best_simulation(section)
-        for model_name, best_sim in best_simulations.items():
-            metrics_df.loc["Best Simulation", model_name] = best_sim
+        for model_name, best_row in best_simulations.items():
+            best_sim, best_val = best_row['name'], best_row['best_val']
+            metrics_df.loc["Best Simulation", model_name] = f"{best_sim} (val={best_val:.4g})"
 
         for model_name, metrics in models.items():
             for metric, values in metrics.items():
@@ -197,7 +204,19 @@ if __name__ == "__main__":
     
     Note: (decoder_mode, linearisation_mode, discretisation_mode) = (False, static, FE)
     PS: change nad.yaml in section [state_dim, mode]
-
+    -------------------------------------------------------
+    
+    NAD-sin best runs: 
+    - old_stable | nad_sin_old-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-ux5pkc68:v2
+    - new_stable | nad_sin-02(03): (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-xvc3v8nf:v0
+    - old_big | nad_sin_big_old-01: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
+    - new_big | nad_sin_big-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v1
+    
+    (nad_sin.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-xvc3v8nf:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-ux5pkc68:v2
+    (nad_big_sin.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v1 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
+    
+    Note: (decoder_mode, linearisation_mode, discretisation_mode) = (False, static, FE)
+    PS: change nad.yaml in section [state_dim, mode]
     -------------------------------------------------------
     -------------------------------------------------------
     
@@ -208,4 +227,62 @@ if __name__ == "__main__":
     -------------------------------------------------------
     
     go here to see wandb report: https://wandb.ai/aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/reports/Finals--VmlldzoxMjM5MjEwNA
+    
+    
+
+    RESULTs
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+
+    Metrics Comparison for VDP:
+                                            old                      lpv                    static
+    Best Simulation  vdp_fin-old-2 (val=0.09267)  vdp_fin-3 (val=0.03983)  vdp_fin-25 (val=0.03364)
+    _step                      71.0000 ± 39.5980        52.1818 ± 21.1699         52.8889 ± 24.0907
+    best_val                     0.0937 ± 0.0015          0.0576 ± 0.0161           0.0524 ± 0.0140
+    best_epoch                 46.0000 ± 39.5980        31.7273 ± 20.2044         32.0000 ± 25.7294
+    best_test                    0.2186 ± 0.2193          0.1256 ± 0.0730           0.1546 ± 0.1022
+    best_train                   0.0168 ± 0.0148          0.0223 ± 0.0163           0.0264 ± 0.0249
+    time                 28914.4827 ± 26327.1509  43529.4471 ± 17019.0007    25954.0377 ± 9905.1619
+
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+
+    Metrics Comparison for FHN:
+                                            old             BE_stat_true             FE_lpv_false
+    Best Simulation  fhn_fin-old-2 (val=0.01486)    fhn--04 (val=0.01476)    fhn--12 (val=0.01339)
+    _step                      131.0000 ± 7.0711        88.1111 ± 21.5954        43.7500 ± 19.9228
+    best_val                     0.0167 ± 0.0027          0.0239 ± 0.0057          0.0314 ± 0.0147
+    best_epoch                 106.0000 ± 7.0711        66.6667 ± 26.9676        42.2500 ± 19.3628
+    best_test                    0.0258 ± 0.0141          0.0337 ± 0.0086          0.0376 ± 0.0074
+    best_train                   0.0026 ± 0.0004          0.0069 ± 0.0063          0.0175 ± 0.0102
+    time                 40958.6990 ± 20805.0690  60356.5976 ± 18251.3046  45478.9708 ± 26353.0884
+
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+
+    Metrics Comparison for NAD:
+                                      old_stable                  new_stable                        old_big                       new_big
+    Best Simulation  nad_fin-old-2 (val=0.001105)  nad_fin-01 (val=0.0006947)  nad_fin-old-big (val=0.02377)  nad_big_fin-05 (val=0.01123)
+    _step                      151.6667 ± 83.7158            46.7500 ± 8.8761             144.0000 ± 96.9948             53.1250 ± 23.3510
+    best_val                      0.0023 ± 0.0014             0.0012 ± 0.0003                0.0340 ± 0.0103               0.0138 ± 0.0024
+    best_epoch                 139.0000 ± 94.3981           26.1250 ± 12.0646            135.3333 ± 111.1411             42.5000 ± 22.8661
+    best_test                     0.0033 ± 0.0031             0.0012 ± 0.0004                0.0264 ± 0.0080               0.0131 ± 0.0009
+    best_train                    0.0003 ± 0.0001             0.0004 ± 0.0001                0.0020 ± 0.0028               0.0007 ± 0.0002
+    time                  50041.6461 ± 17418.2742      32057.6465 ± 6607.2100        37678.3957 ± 30192.6393       41588.0502 ± 23762.2955
+
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+
+    Metrics Comparison for NAD-sin:
+                                          old_sin                    new_sin                       old_big_sin                   new_big_sin
+    Best Simulation  nad_sin_old-02 (val=0.002201)  nad_sin-02 (val=0.002334)  nad_sin_big_old-01 (val=0.03625)  nad_sin_big-02 (val=0.01526)
+    _step                       127.0000 ± 50.9117           36.3333 ± 4.7258                  30.5000 ± 0.7071             49.3333 ± 24.7857
+    best_val                       0.0034 ± 0.0017            0.0035 ± 0.0013                   0.0398 ± 0.0051               0.0181 ± 0.0027
+    best_epoch                  112.5000 ± 65.7609           18.0000 ± 7.0000                   5.5000 ± 0.7071             44.3333 ± 23.0290
+    best_test                      0.0074 ± 0.0026            0.0028 ± 0.0006                   0.0422 ± 0.0042               0.0179 ± 0.0013
+    best_train                     0.0007 ± 0.0001            0.0010 ± 0.0001                   0.0069 ± 0.0012               0.0016 ± 0.0004
+    time                   89694.7579 ± 41102.4585     50095.3345 ± 5883.4900             24689.9393 ± 270.9701       76024.4838 ± 31793.5136
+
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
     """

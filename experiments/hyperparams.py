@@ -203,7 +203,7 @@ class Hyperparams:
                 "batch_size": 96,                   # {96, 128]    | modified these two 
                 "lr": 0.001,                        # 0.0005 | to smooth the loss              
                 "n_epochs": 200,  
-                "es_patience": 25,                  # 20,          
+                "es_patience": 15,                  # 25,          
                 "es_delta": 1e-07,
                 "sched_patience": 10,               # 10, 8, 5
                 "sched_factor": 3,                  # 3,  2, 1
@@ -254,7 +254,7 @@ class Hyperparams:
                 "batch_size": 96,                   # 96 -> 128
                 "lr": 0.001,                    
                 "n_epochs": 200,  
-                "es_patience": 25,              
+                "es_patience": 15,              
                 "es_delta": 1e-7,
                 "sched_patience": 10,
                 "sched_factor": 3,
@@ -305,7 +305,7 @@ class Hyperparams:
                 "batch_size": 128,
                 "lr": 0.001,             
                 "n_epochs": 200,  
-                "es_patience": 25,        
+                "es_patience": 15,        
                 "es_delta": 1e-07,
                 "sched_patience": 10,           # 5
                 "sched_factor": 3,              # 2
