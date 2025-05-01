@@ -798,7 +798,7 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
 
     return A, B, f_eq, radius
 
-def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.0):                     ### USE THIS!
+def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.0, adp=0):              ### USE THIS!
     x1_eq = param['x1_eq'] + 1.0*0
     x2_eq = param['x2_eq'] - 0.5*0
     u_eq = param['u_eq']
@@ -809,7 +809,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
     b = param['b']
     v_fact = param['v_fact']
 
-    batch_size, _, r_old = const
+    batch_size, rr, r_old = const
 
     #batch_size = u.shape[0]
     x_target = x[0].unsqueeze(1)
@@ -883,7 +883,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
     
     distances = np.linalg.norm(x_target_np - np.mean(x_target_np, axis=0), axis=1)
     r = adaptive_radius(distances)
-    radius = alpha * r_old + (1-alpha) * r
+    radius = (alpha * r_old + (1-alpha) * r) * adp + (1-adp) * rr
     radius = np.clip(radius, 1.5, 3.5)
 
     # 2. Get ellipse axes and center
