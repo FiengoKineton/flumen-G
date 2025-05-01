@@ -124,6 +124,7 @@ class LSTM(nn.Module):
         outputs = torch.empty(batch_size, seq_len, self.z_size, device=device)  # Preallocate tensor | before: torch.zeros
         coefficients = torch.empty(batch_size, seq_len, self.state_dim, device=device)  
         matrices = torch.empty(seq_len, self.state_dim, self.state_dim, device=device)
+        r_old = self.radius
 
         for t in range(seq_len):
             rnn_input_t = rnn_input_unpacked[:, t, :]
@@ -176,7 +177,7 @@ class LSTM(nn.Module):
                 c_list.append(torch.stack(new_c, dim=0))"""
 
             u_dyn = rnn_input_t[:, :1]
-            A_matrix, B_matrix, f_eq = self.linearisation_function(self.param, (batch_size, self.radius), x_prev, u_dyn)
+            A_matrix, B_matrix, f_eq, r_old = self.linearisation_function(self.param, (batch_size, self.radius, r_old), x_prev, u_dyn)
             x_mid = self.discretisation_function(x_prev, (A_matrix, tau_t, self.I, B_matrix, f_eq), u_dyn)   
 
             h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
@@ -704,7 +705,7 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
     dtype = param['dtype']
     mhu = param['mhu']
 
-    batch_size, radius = const
+    batch_size, radius, _ = const
 
     batch_size = u.shape[0]
     x_target = x[0].unsqueeze(1)    # [1, 128, 2] -> [128, 1, 2]
@@ -795,7 +796,7 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
     plt.show()
     # -------------------------------------------"""
 
-    return A, B, f_eq
+    return A, B, f_eq, radius
 
 def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):                                ### USE THIS!
     x1_eq = param['x1_eq'] + 1.0*0
@@ -808,7 +809,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
     b = param['b']
     v_fact = param['v_fact']
 
-    batch_size, _ = const
+    batch_size, _, r_old = const
 
     #batch_size = u.shape[0]
     x_target = x[0].unsqueeze(1)
@@ -881,7 +882,9 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
         else:                       return 2.0
     
     distances = np.linalg.norm(x_target_np - np.mean(x_target_np, axis=0), axis=1)
-    radius = adaptive_radius(distances)
+    r = adaptive_radius(distances)
+    radius = 0.8 * r_old + 0.2 * r
+    radius = np.clip(radius, 1.5, 3.5)
 
     # 2. Get ellipse axes and center
     center = pca.mean_
@@ -921,7 +924,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
 
     
     
-    """# ----------------- PLOTTING -----------------
+    #"""# ----------------- PLOTTING -----------------
     import matplotlib.pyplot as plt
     from matplotlib.patches import Ellipse
 
@@ -987,9 +990,11 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
     plt.legend()
     plt.tight_layout()
     plt.show()
+
+    print(f"\nr_curr: {radius}; r: {r}; r_old: {r_old}")
     # -------------------------------------------"""
     
-    return A, B, f_eq
+    return A, B, f_eq, radius
 
 def linearisation_lpv__NonlinearActivationDynamics(param, const, x, u, epsilon=1e-4):                   # --nope--
     A_base = param['A']
@@ -1000,7 +1005,7 @@ def linearisation_lpv__NonlinearActivationDynamics(param, const, x, u, epsilon=1
     dtype = param['dtype']
     activation = param['activation']
 
-    batch_size, radius = const
+    batch_size, radius, _ = const
 
     #batch_size = u.shape[0]
     state_dim = param['state_dim']
@@ -1068,7 +1073,7 @@ def linearisation_lpv__NonlinearActivationDynamics(param, const, x, u, epsilon=1
     print("B:", B[0])
     print("f_eq:", f_eq[0])
     sys.exit()"""
-    return A, B, f_eq
+    return A, B, f_eq, radius
 
 
 # ═══════════════════════════════════════════════════════════════════════════ #
