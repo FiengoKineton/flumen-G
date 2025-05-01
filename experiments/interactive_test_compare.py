@@ -54,6 +54,7 @@ def parse_args():
     ap.add_argument('--wandb', action='store_true')
     ap.add_argument('--wandb_2', action='store_true')
     ap.add_argument('--time_horizon', type=float, default=None)
+    ap.add_argument('--test_noise_std', type=float, default=0.0, help="Add Gaussian noise to test inputs during evaluation.")
 
     return ap.parse_args()
 
@@ -81,6 +82,7 @@ def get_metadata(wandb, path):
 def main():
     plt.ion()  # Enable interactive mode
     args = parse_args()
+    NOISE_STD = args.test_noise_std
 
     num_times = 2 if args.time_horizon is None else 1          # default 2 | multiplied by the time_span
 
@@ -124,7 +126,13 @@ def main():
     fig1, ax1 = plt.subplots(num+1, 1, sharex=True)   # before | n_plots+1
     fig1.canvas.mpl_connect('close_event', on_close_window)
 
+    fig2, ax2 = plt.subplots(3, 1, sharex=True)  
+    fig2.canvas.mpl_connect('close_event', on_close_window)
+
     time_horizon = args.time_horizon if args.time_horizon else num_times * metadata["data_args"]["time_horizon"]
+
+    sq_errors_1, sq_errors_2 = [], []
+    err_list_1, err_list_2 = [], []
 
     while True:
         time_integrate = time()
@@ -132,6 +140,7 @@ def main():
         time_integrate = time() - time_integrate
 
         time_predict = time()
+        u = u + np.random.randn(*u.shape) * NOISE_STD
         x0_feed, t_feed, u_feed, deltas_feed = pack_model_inputs(x0, t, u, delta)
 
         with torch.no_grad():
@@ -145,17 +154,35 @@ def main():
         
         time_predict = time() - time_predict
 
+        print(f"NOISE_STD: {NOISE_STD}")
         print(f"Timings: {time_integrate}, {time_predict}")
 
         y = y[:, tuple(bool(v) for v in sampler._dyn.mask)]
         sq_error = model.output_dim * np.mean(np.square(y - y_pred))
         sq_error_2 = model.output_dim * np.mean(np.square(y - y_pred_2))
-        print("MSE (advance prediction):", sq_error)
-        print("MSE (default prediction):", sq_error_2, "\n")
+
+        # Store errors
+        sq_errors_1.append(sq_error)
+        sq_errors_2.append(sq_error_2)
+
+        # Compute trend statistics
+        mean_1 = np.mean(sq_errors_1)
+        std_1 = np.std(sq_errors_1)
+
+        mean_2 = np.mean(sq_errors_2)
+        std_2 = np.std(sq_errors_2)
+
+        # Show info
+        print(f"[{len(sq_errors_1)} simulations]")
+        print(f"MSE (advance): {sq_error:.6f} | mean: {mean_1:.6f} ± {std_1:.6f}")
+        print(f"MSE (default): {sq_error_2:.6f} | mean: {mean_2:.6f} ± {std_2:.6f}\n")
 
         # **Clear previous plots and remove insets & connections**
         for ax_ in ax1:
             ax_.cla()            
+
+        for ax_ in ax2:
+            ax_.cla()    
 
         if args.continuous_state:
             ax1[0].pcolormesh(t.squeeze(), xx, y.T)
@@ -171,6 +198,9 @@ def main():
             for k in range(n):
                 err[k] = model.output_dim * np.mean(np.square(y[:, k] - y_pred[:, k]))
                 err_2[k] = model.output_dim * np.mean(np.square(y[:, k] - y_pred_2[:, k]))
+
+            err_list_1.append([err[n-2], err[n-1]])
+            err_list_2.append([err_2[n-2], err_2[n-1]])
 
             for k, ax_ in enumerate(ax1[:n] if n == 2 else [ax1[0]]):   ######
                 # Predicted (Advanced)
@@ -190,6 +220,30 @@ def main():
                 ax_.set_ylabel(f"$x_{{{k+1}}}$")
                 ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
 
+            #"""# === Track and plot the MSE evolution for each x_k ===
+            list_1, list_2 = np.array(err_list_1), np.array(err_list_2)
+            for k, ax_ in enumerate(ax2[:n]):
+                if k==3: break
+
+                if k in [0, 1]:
+                    ax_.plot(range(len(list_1)), list_1[:, k], color=colors[0], linestyle=linestyles[0], 
+                            label=f'Advanced')
+
+                    # Predicted (Default), optional
+                    if args.wandb_2:
+                        ax_.plot(range(len(list_2)), list_2[:, k], color=colors[1], linestyle=linestyles[1],
+                                label=f'Default')
+
+                    ax_.set_ylabel(f"$x_{{{k+1}}}$")
+                    ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
+                    ax_.set_yscale('log')
+
+            ax2[-1].axhline(mean_1, color='darkred', linestyle='-', linewidth=2, label=f'Advanced: {mean_1:.6f} ± {std_1:.6f}')
+            ax2[-1].fill_between(range(len(list_1)), mean_1 - std_1, mean_1 + std_1, color='red', alpha=0.2)
+            ax2[-1].axhline(mean_2, color='navy', linestyle='--', linewidth=2, label=f'Default: {mean_2:.6f} ± {std_2:.6f}')
+            ax2[-1].fill_between(range(len(list_2)), mean_2 - std_2, mean_2 + std_2, color='blue', alpha=0.2)
+            ax2[-1].legend(loc='center right', bbox_to_anchor=(1, 0.5), borderaxespad=0.5)#"""
+            ax2[-1].set_yscale('log')
 
         # **Plot input u**
         ax1[-1].step(np.arange(0., time_horizon, delta), u[:-1], where='post')
@@ -198,6 +252,9 @@ def main():
 
         fig1.tight_layout()
         fig1.subplots_adjust(hspace=0)
+        
+        fig2.tight_layout()
+        fig2.subplots_adjust(hspace=0)
         plt.setp([a.get_xticklabels() for a in fig1.axes[:-1]], visible=False)
 
         plt.show(block=False)       # or plt.draw(block=False)

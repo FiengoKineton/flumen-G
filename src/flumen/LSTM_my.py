@@ -456,7 +456,7 @@ def linearisation_static__VanDerPol(param, const, x, u):                        
     dtype = param['dtype']
     mhu = param['mhu']
 
-    batch_size, _ = const
+    batch_size, _, _ = const
 
     A = dyn_factor* torch.tensor([[0.0, 1.0],
                         [-1.0 - 2 * mhu * x1_eq * x2_eq,
@@ -473,7 +473,7 @@ def linearisation_static__VanDerPol(param, const, x, u):                        
     A = A.unsqueeze(0).expand(batch_size, -1, -1) 
     B = B.unsqueeze(0).expand(batch_size, -1, -1) 
     f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
-    return A, B, f_eq
+    return A, B, f_eq, None
 
 def linearisation_static__FitzHughNagumo(param, const, x, u):                                           # --nope--
     x1_eq = param['x1_eq']
@@ -486,7 +486,7 @@ def linearisation_static__FitzHughNagumo(param, const, x, u):                   
     b = param['b']
     v_fact = param['v_fact']
 
-    batch_size, _ = const
+    batch_size, _, _ = const
 
     v = x1_eq
     w = x2_eq
@@ -511,7 +511,7 @@ def linearisation_static__FitzHughNagumo(param, const, x, u):                   
     B = B.unsqueeze(0).expand(batch_size, -1, -1) 
     f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
 
-    return A, B, f_eq
+    return A, B, f_eq, None
 
 def linearisation_static__NonlinearActivationDynamics(param, const, x, u):                              ### USE THIS!
     A = param['A']
@@ -523,7 +523,7 @@ def linearisation_static__NonlinearActivationDynamics(param, const, x, u):      
     u_eq = param['u_eq']
     state_dim = param['state_dim']
 
-    batch_size, _ = const
+    batch_size, _, _ = const
 
     def sigma_prime(z): 
         sigma = 1 / (1 + torch.exp(-z))
@@ -553,7 +553,7 @@ def linearisation_static__NonlinearActivationDynamics(param, const, x, u):      
     print("B:", B.shape)
     print("f_eq:", f_eq.shape)
     sys.exit() #"""
-    return A, B, f_eq
+    return A, B, f_eq, None
 
 
 # ─────────────────────────────────────────────────────────────────────────── #
@@ -568,7 +568,7 @@ def linearisation_curr__VanDerPol(param, const, x, u):                          
     dtype = param['dtype']
     mhu = param['mhu']
 
-    batch_size, _ = const
+    batch_size, _, _ = const
 
     def f_eq_vdp(x):
         x1 = x[:, 0] - x1_eq
@@ -602,7 +602,7 @@ def linearisation_curr__VanDerPol(param, const, x, u):                          
     B = dyn_factor * torch.tensor([[0.0], [1.0]], dtype=dtype)
     B = B.unsqueeze(0).expand(batch_size, -1, -1) 
 
-    return A, B, f_eq
+    return A, B, f_eq, None
 
 def linearisation_curr__FitzHughNagumo(param, const, x, u):                                             # --nope--
     x1_eq = param['x1_eq']
@@ -615,7 +615,7 @@ def linearisation_curr__FitzHughNagumo(param, const, x, u):                     
     b = param['b']
     v_fact = param['v_fact']
 
-    batch_size, _ = const
+    batch_size, _, _ = const
 
     x_sample = x[0, 0]
     u_sample = u[0]
@@ -643,7 +643,7 @@ def linearisation_curr__FitzHughNagumo(param, const, x, u):                     
     B = B.unsqueeze(0).expand(batch_size, -1, -1) 
     f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
 
-    return A, B, f_eq
+    return A, B, f_eq, None
 
 def linearisation_curr__NonlinearActivationDynamics(param, const, x, u):                                # --nope--
     A = param['A']
@@ -655,7 +655,7 @@ def linearisation_curr__NonlinearActivationDynamics(param, const, x, u):        
     u_eq = param['u_eq']
     state_dim = param['state_dim']
 
-    batch_size, _ = const
+    batch_size, _, _ = const
 
     x_sample = x[0, 0]  # dimensione: [state_dim]
     u_sample = u[0]     # dimensione: [control_dim]
@@ -690,7 +690,7 @@ def linearisation_curr__NonlinearActivationDynamics(param, const, x, u):        
     print("B:", B)
     print("f_eq:", f_eq)
     sys.exit()"""
-    return A, B, f_eq
+    return A, B, f_eq, None
 
 
 # ─────────────────────────────────────────────────────────────────────────── #
@@ -798,7 +798,7 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
 
     return A, B, f_eq, radius
 
-def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.8):                     ### USE THIS!
+def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.0):                     ### USE THIS!
     x1_eq = param['x1_eq'] + 1.0*0
     x2_eq = param['x2_eq'] - 0.5*0
     u_eq = param['u_eq']
