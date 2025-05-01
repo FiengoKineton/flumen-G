@@ -244,7 +244,7 @@ class LSTM(nn.Module):
 
             v_star = fsolve(fhn_equilibrium, 0)[0]
             w_star = (v_star - a) / b
-            u_star = w_star - (v_star - v_star**3)  # from dv = 0 → u* = w* - v* + v*^3
+            u_star = 0.0    # w_star - (v_star - v_star**3)  # from dv = 0 → u* = w* - v* + v*^3
 
             param = {
                 'dyn_factor': dyn_factor,
@@ -777,6 +777,12 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
     circle_x = x_eq_np[0] + radius * np.cos(theta)
     circle_y = x_eq_np[1] + radius * np.sin(theta)
 
+    # Inside stability shape
+    distances = np.linalg.norm(x_target_np - x_eq_np, axis=1)
+    inside_mask = distances <= radius
+    percent_inside = 100.0 * np.sum(inside_mask) / len(x_target_np)
+    print(f"{percent_inside:.2f}% of the x_target points are inside the circle.")
+
     plt.figure(figsize=(6, 6))
     plt.plot(circle_x, circle_y, color='red', linestyle='--', label='Sampling Circle')
     plt.scatter(x_target_np[:, 0], x_target_np[:, 1], color='blue', s=10, label='x_target')
@@ -792,8 +798,8 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
     return A, B, f_eq
 
 def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):                                ### USE THIS!
-    x1_eq = param['x1_eq']
-    x2_eq = param['x2_eq']
+    x1_eq = param['x1_eq'] + 1.0
+    x2_eq = param['x2_eq'] - 0.5
     u_eq = param['u_eq']
     dyn_factor = param['dyn_factor']
     dtype = param['dtype']
@@ -843,7 +849,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
     # Define 8 direction vectors (oval-like)
     angles = np.linspace(0, 2 * np.pi, 9)[:-1]
     deltas = torch.tensor([
-        [radius * np.cos(a), (radius * 2.5/3) * np.sin(a)] for a in angles
+        [radius * np.cos(a), (radius * 0.8/3) * np.sin(a)] for a in angles
     ], dtype=dtype)
 
     # Generate sample points around x_eq
@@ -873,7 +879,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
     A = torch.sum(w_A * A_list, dim=1)                          # A = sum(w * A for w, A in zip(weights, A_list))
     f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)      # f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
 
-    """# ----------------- PLOTTING -----------------
+    #"""# ----------------- PLOTTING -----------------
     import matplotlib.pyplot as plt
     print("------------------------\nA:\n", A[0], "\n\nA_eq:\n", jacobian_fhn(x_eq))
 
@@ -892,9 +898,19 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
     circle_x = x_eq_np[0] + radius_x * np.cos(theta)
     circle_y = x_eq_np[1] + radius_y * np.sin(theta)
 
+    # Inside stability shape
+    x = x_target_np[:, 0]
+    y = x_target_np[:, 1]
+    x0, y0 = x_eq_np
+    a, b = radius_x, radius_y
+    inside_mask = ((x - x0)**2 / a**2) + ((y - y0)**2 / b**2) <= 1
+    percent_inside = 100.0 * np.sum(inside_mask) / len(x_target_np)
+    print(f"{percent_inside:.2f}% of the x_target points are inside the ellipse.")
+
     plt.figure(figsize=(6, 6))
     plt.plot(circle_x, circle_y, color='red', linestyle='--', label='Sampling Circle')
     plt.scatter(x_target_np[:, 0], x_target_np[:, 1], color='blue', s=10, label='x_target')
+    plt.scatter(x_eq_np[0], x_eq_np[1], color='green', s=10, label='x_eq')
     plt.xlabel('x1')
     plt.ylabel('x2')
     plt.title('x_target and Sampling Region')
