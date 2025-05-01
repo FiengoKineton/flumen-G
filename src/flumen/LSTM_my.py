@@ -798,7 +798,7 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
 
     return A, B, f_eq, radius
 
-def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):                                ### USE THIS!
+def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.8):                     ### USE THIS!
     x1_eq = param['x1_eq'] + 1.0*0
     x2_eq = param['x2_eq'] - 0.5*0
     u_eq = param['u_eq']
@@ -883,7 +883,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
     
     distances = np.linalg.norm(x_target_np - np.mean(x_target_np, axis=0), axis=1)
     r = adaptive_radius(distances)
-    radius = 0.8 * r_old + 0.2 * r
+    radius = alpha * r_old + (1-alpha) * r
     radius = np.clip(radius, 1.5, 3.5)
 
     # 2. Get ellipse axes and center
@@ -924,7 +924,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
 
     
     
-    #"""# ----------------- PLOTTING -----------------
+    """# ----------------- PLOTTING -----------------
     import matplotlib.pyplot as plt
     from matplotlib.patches import Ellipse
 
@@ -970,6 +970,12 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
     # -------------------------------------------
     print(f"↪ Adapting radius to r = {radius:.1f} based on robust_dist = {np.percentile(distances, 90):.2f}")
 
+    # Se i punti blu (distanze medie) sono sempre sotto la linea rossa, significa che l’ellisse è "abbastanza grande" da coprire bene la regione di interesse.
+    # Se i punti salgono sopra, potrebbe voler dire che:
+    # l’ellisse è troppo piccola rispetto alla dispersione attuale,
+    # oppure che i x_target si stanno allontanando e servirebbe un raggio più grande.
+    #L’effetto dello smoothing è visibile come una variazione più graduale della linea rossa nel tempo.
+    
     mean_distances = []
     sampled_points = sampled_points.squeeze(1).cpu().detach().numpy()
 
