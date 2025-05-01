@@ -798,8 +798,8 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
     return A, B, f_eq
 
 def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):                                ### USE THIS!
-    x1_eq = param['x1_eq'] + 1.0
-    x2_eq = param['x2_eq'] - 0.5
+    x1_eq = param['x1_eq'] + 1.0*0
+    x2_eq = param['x2_eq'] - 0.5*0
     u_eq = param['u_eq']
     dyn_factor = param['dyn_factor']
     dtype = param['dtype']
@@ -808,11 +808,12 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
     b = param['b']
     v_fact = param['v_fact']
 
-    batch_size, radius = const
+    batch_size, _ = const
 
     #batch_size = u.shape[0]
     x_target = x[0].unsqueeze(1)
     u_target = u
+    x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
 
     # ----------------------------------------------
     B = dyn_factor * torch.tensor([[v_fact], [0.0]], dtype=dtype)
@@ -838,13 +839,17 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
                         [dg_dv, dg_dw]], dtype=dtype)
         return A
     
-    """# Define 8 direction vectors (circle-like)
+    """# Circle or radius r
+    
+    # Define 8 direction vectors (circle-like)
     angles = np.linspace(0, 2 * np.pi, 9)[:-1]
     deltas = torch.tensor([[np.cos(a), np.sin(a)] for a in angles], dtype=dtype)
 
     # Generate sample points around the origin
     x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
     sampled_points = x_eq + radius * deltas  # [8, 2]"""
+
+    """# Elipse
 
     # Define 8 direction vectors (oval-like)
     angles = np.linspace(0, 2 * np.pi, 9)[:-1]
@@ -854,7 +859,42 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
 
     # Generate sample points around x_eq
     x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
-    sampled_points = x_eq + deltas  # [8, 2]
+    sampled_points = x_eq + deltas  # [8, 2]"""
+
+    from sklearn.decomposition import PCA
+
+    # 1. Compute PCA over x_target
+    x_target_np = x_target.squeeze(1).cpu().detach().numpy()
+    pca = PCA(n_components=2)
+    pca.fit(x_target_np)
+
+    # === Adatta il raggio in base alla distanza media ===
+    def adaptive_radius(distances):
+        """
+        Decide il raggio da usare in base a una metrica robusta (percentile 90).
+        """
+        robust_dist = np.percentile(distances, 90)  # Oppure mean + std
+
+        if robust_dist > 3.0:       return 3.5
+        elif robust_dist > 2.5:     return 3.0
+        elif robust_dist > 1.5:     return 2.5
+        else:                       return 2.0
+    
+    distances = np.linalg.norm(x_target_np - np.mean(x_target_np, axis=0), axis=1)
+    radius = adaptive_radius(distances)
+
+    # 2. Get ellipse axes and center
+    center = pca.mean_
+    axes = np.sqrt(pca.explained_variance_) * radius  # Scaled by radius
+    basis = pca.components_
+
+    # 3. Sample 8 points around the ellipse using PCA basis
+    angles = np.linspace(0, 2 * np.pi, 9)[:-1]
+    ellipse_points = np.array([
+        center + axes[0]*np.cos(a)*basis[0] + axes[1]*np.sin(a)*basis[1]
+        for a in angles
+    ], dtype=np.float32)
+    sampled_points = torch.tensor(ellipse_points, dtype=dtype)
 
 
     # Compute A_i and f_i for each sampled point
@@ -879,44 +919,73 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
     A = torch.sum(w_A * A_list, dim=1)                          # A = sum(w * A for w, A in zip(weights, A_list))
     f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)      # f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
 
-    #"""# ----------------- PLOTTING -----------------
+    
+    
+    """# ----------------- PLOTTING -----------------
     import matplotlib.pyplot as plt
-    print("------------------------\nA:\n", A[0], "\n\nA_eq:\n", jacobian_fhn(x_eq))
+    from matplotlib.patches import Ellipse
 
-    # Use CPU and detach for plotting
-    #sampled_np = sampled_points[0].cpu().detach().numpy()
-    x_target_np = x_target.cpu().detach().squeeze(1).numpy()
-    sampled_np = sampled_points[0].cpu().detach().numpy()
-    x_eq_np = np.array([x1_eq, x2_eq])
+    # Convert center and PCA info
+    center = pca.mean_
+    width, height = 2 * axes  # Diametri (2 * semiassi)
+    angle = np.degrees(np.arctan2(basis[0, 1], basis[0, 0]))  # Orientamento
 
-    # Calcola semiassi effettivi dell ovale
-    radius_x = np.max(np.abs(sampled_np[:, 0] - x_eq_np[0]))
-    radius_y = np.max(np.abs(sampled_np[:, 1] - x_eq_np[1]))
-
-    # Genera ovale smooth
-    theta = np.linspace(0, 2 * np.pi, 200)
-    circle_x = x_eq_np[0] + radius_x * np.cos(theta)
-    circle_y = x_eq_np[1] + radius_y * np.sin(theta)
-
-    # Inside stability shape
+    # Dati di input
     x = x_target_np[:, 0]
     y = x_target_np[:, 1]
-    x0, y0 = x_eq_np
-    a, b = radius_x, radius_y
-    inside_mask = ((x - x0)**2 / a**2) + ((y - y0)**2 / b**2) <= 1
-    percent_inside = 100.0 * np.sum(inside_mask) / len(x_target_np)
-    print(f"{percent_inside:.2f}% of the x_target points are inside the ellipse.")
 
-    plt.figure(figsize=(6, 6))
-    plt.plot(circle_x, circle_y, color='red', linestyle='--', label='Sampling Circle')
-    plt.scatter(x_target_np[:, 0], x_target_np[:, 1], color='blue', s=10, label='x_target')
-    plt.scatter(x_eq_np[0], x_eq_np[1], color='green', s=10, label='x_eq')
-    plt.xlabel('x1')
-    plt.ylabel('x2')
-    plt.title('x_target and Sampling Region')
-    plt.legend()
+    # Maschera dei punti dentro l'ellisse (metodo analitico)
+    x0, y0 = center
+    cos_a, sin_a = np.cos(np.radians(angle)), np.sin(np.radians(angle))
+    dx, dy = x - x0, y - y0
+    xp = cos_a * dx + sin_a * dy
+    yp = -sin_a * dx + cos_a * dy
+    inside_mask = (xp / (width / 2))**2 + (yp / (height / 2))**2 <= 1
+    percent_inside = 100.0 * np.sum(inside_mask) / len(x)
+
+    print(f"{percent_inside:.2f}% of the x_target points are inside the PCA-based ellipse.")
+
+    # Plot PCA ellipse and points
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.scatter(x, y, s=10, color='blue', label='x_target')
+    ax.scatter(x0, y0, s=30, color='green', label='PCA center')
+    ax.scatter(x1_eq, x2_eq, s=30, color='red', label='x_eq')
+
+    ellipse_patch = Ellipse(xy=center, width=width, height=height, angle=angle,
+                            edgecolor='red', fc='None', lw=2, linestyle='--', label='PCA Ellipse')
+    ax.add_patch(ellipse_patch)
+
+    ax.set_xlabel('x1')
+    ax.set_ylabel('x2')
+    ax.set_title('x_target and PCA-based LPV Region')
+    ax.axis('equal')
+    ax.grid(True)
+    ax.legend()
+    plt.tight_layout()
+    plt.show()
+
+    # -------------------------------------------
+    print(f"↪ Adapting radius to r = {radius:.1f} based on robust_dist = {np.percentile(distances, 90):.2f}")
+
+    mean_distances = []
+    sampled_points = sampled_points.squeeze(1).cpu().detach().numpy()
+
+    for batch in x_target_np:
+        batch = np.array(batch)
+        dists = np.linalg.norm(batch - sampled_points, axis=1)
+        mean_distances.append(np.mean(dists))
+
+    plt.figure(figsize=(10, 4))
+    plt.plot(mean_distances, marker='o', color='royalblue')
+    #plt.axhline(y=2.0, color='orange', linestyle='--', label='r = 2')
+    #plt.axhline(y=3.0, color='red', linestyle='--', label='r = 3')
+    plt.axhline(y=radius, color='red', linestyle='--', label=f'r = {radius}')
+    plt.title('Mean Distance of x_target from Reference Point')
+    plt.xlabel('Time Step')
+    plt.ylabel('Mean Distance')
     plt.grid(True)
-    plt.axis('equal')
+    plt.legend()
+    plt.tight_layout()
     plt.show()
     # -------------------------------------------"""
     
