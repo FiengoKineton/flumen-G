@@ -259,7 +259,7 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 3,
                 "loss": "mse",                  
-                "discretisation_mode": "TU",        # BE -> FE
+                "discretisation_mode": "FE",        # BE -> FE
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
