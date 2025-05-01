@@ -763,6 +763,32 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
     A = torch.sum(w_A * A_list, dim=1)                      # Size; before | [128, 2, 2]; for w, A in zip(weights, A_list))
     f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)  # Size; before | [128, 2, 1]; for w, f_eq in zip(weights, f_eq_list))
 
+    """# ----------------- PLOTTING -----------------
+    import matplotlib.pyplot as plt
+    print("A:\n", A[0], "\n\nA_eq:\n", jacobian_vdp(x_eq))
+
+    # Use CPU and detach for plotting
+    #sampled_np = sampled_points[0].cpu().detach().numpy()
+    x_target_np = x_target.cpu().detach().squeeze(1).numpy()
+    x_eq_np = np.array([x1_eq, x2_eq])
+
+    # Create a smooth circle around x_eq
+    theta = np.linspace(0, 2 * np.pi, 100)
+    circle_x = x_eq_np[0] + radius * np.cos(theta)
+    circle_y = x_eq_np[1] + radius * np.sin(theta)
+
+    plt.figure(figsize=(6, 6))
+    plt.plot(circle_x, circle_y, color='red', linestyle='--', label='Sampling Circle')
+    plt.scatter(x_target_np[:, 0], x_target_np[:, 1], color='blue', s=10, label='x_target')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('x_target and Sampling Region')
+    plt.legend()
+    plt.grid(True)
+    plt.axis('equal')
+    plt.show()
+    # -------------------------------------------"""
+
     return A, B, f_eq
 
 def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):                                ### USE THIS!
@@ -806,13 +832,24 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
                         [dg_dv, dg_dw]], dtype=dtype)
         return A
     
-    # Define 8 direction vectors (circle-like)
+    """# Define 8 direction vectors (circle-like)
     angles = np.linspace(0, 2 * np.pi, 9)[:-1]
     deltas = torch.tensor([[np.cos(a), np.sin(a)] for a in angles], dtype=dtype)
 
     # Generate sample points around the origin
     x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
-    sampled_points = x_eq + radius * deltas  # [8, 2]
+    sampled_points = x_eq + radius * deltas  # [8, 2]"""
+
+    # Define 8 direction vectors (oval-like)
+    angles = np.linspace(0, 2 * np.pi, 9)[:-1]
+    deltas = torch.tensor([
+        [radius * np.cos(a), (radius * 2.5/3) * np.sin(a)] for a in angles
+    ], dtype=dtype)
+
+    # Generate sample points around x_eq
+    x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
+    sampled_points = x_eq + deltas  # [8, 2]
+
 
     # Compute A_i and f_i for each sampled point
     A_list = [jacobian_fhn(xi) for xi in sampled_points]
@@ -835,6 +872,37 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4):        
 
     A = torch.sum(w_A * A_list, dim=1)                          # A = sum(w * A for w, A in zip(weights, A_list))
     f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)      # f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
+
+    """# ----------------- PLOTTING -----------------
+    import matplotlib.pyplot as plt
+    print("------------------------\nA:\n", A[0], "\n\nA_eq:\n", jacobian_fhn(x_eq))
+
+    # Use CPU and detach for plotting
+    #sampled_np = sampled_points[0].cpu().detach().numpy()
+    x_target_np = x_target.cpu().detach().squeeze(1).numpy()
+    sampled_np = sampled_points[0].cpu().detach().numpy()
+    x_eq_np = np.array([x1_eq, x2_eq])
+
+    # Calcola semiassi effettivi dell ovale
+    radius_x = np.max(np.abs(sampled_np[:, 0] - x_eq_np[0]))
+    radius_y = np.max(np.abs(sampled_np[:, 1] - x_eq_np[1]))
+
+    # Genera ovale smooth
+    theta = np.linspace(0, 2 * np.pi, 200)
+    circle_x = x_eq_np[0] + radius_x * np.cos(theta)
+    circle_y = x_eq_np[1] + radius_y * np.sin(theta)
+
+    plt.figure(figsize=(6, 6))
+    plt.plot(circle_x, circle_y, color='red', linestyle='--', label='Sampling Circle')
+    plt.scatter(x_target_np[:, 0], x_target_np[:, 1], color='blue', s=10, label='x_target')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('x_target and Sampling Region')
+    plt.legend()
+    plt.grid(True)
+    plt.axis('equal')
+    plt.show()
+    # -------------------------------------------"""
     
     return A, B, f_eq
 

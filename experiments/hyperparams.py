@@ -213,9 +213,9 @@ class Hyperparams:
                 "x_update_mode": "entropy",         # {alpha, beta, lamda. relu, switch, entropy}
                 "mode_rnn": "new",                  # {new, old, gru}
                 "mode_dnn": "FFNet",                # {FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder}
-                "linearisation_mode": "static",        # {static, current, lpv}
+                "linearisation_mode": "lpv",        # {static, current, lpv} | either lpv or static
                 "decoder_mode": False,
-                "radius": 3,
+                "radius": 3,                        # default 3
             },
 
             'hyperparams___vdp_old': {
@@ -266,7 +266,7 @@ class Hyperparams:
                 "mode_dnn": "FFNet",
                 "linearisation_mode": "lpv",        # static -> lpv
                 "decoder_mode": False,              # True -> False
-                "radius": 1.0,                      # 1.0
+                "radius": 3.0,                      # 1.0
             },
 
             'hyperparams___fhn_old': {
