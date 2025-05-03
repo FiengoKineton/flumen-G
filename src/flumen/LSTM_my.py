@@ -798,9 +798,9 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
 
     return A, B, f_eq, radius
 
-def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.0, adp=0):              ### USE THIS!
-    x1_eq = param['x1_eq'] + 1.0*0
-    x2_eq = param['x2_eq'] - 0.5*0
+def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.0, adp=0, swift=1):     ### USE THIS!
+    x1_eq = param['x1_eq'] + 1.0*swift
+    x2_eq = param['x2_eq'] - 0.5*swift
     u_eq = param['u_eq']
     dyn_factor = param['dyn_factor']
     dtype = param['dtype']
@@ -841,7 +841,8 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
         return A
     
     """# Circle or radius r
-    
+    radius = rr
+
     # Define 8 direction vectors (circle-like)
     angles = np.linspace(0, 2 * np.pi, 9)[:-1]
     deltas = torch.tensor([[np.cos(a), np.sin(a)] for a in angles], dtype=dtype)
@@ -850,7 +851,8 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
     x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
     sampled_points = x_eq + radius * deltas  # [8, 2]"""
 
-    """# Elipse
+    #"""# Elipse
+    radius = rr
 
     # Define 8 direction vectors (oval-like)
     angles = np.linspace(0, 2 * np.pi, 9)[:-1]
@@ -860,8 +862,9 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
 
     # Generate sample points around x_eq
     x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
-    sampled_points = x_eq + deltas  # [8, 2]"""
+    sampled_points = x_eq + deltas  # [8, 2] #"""
 
+    """ # PCA oval
     from sklearn.decomposition import PCA
 
     # 1. Compute PCA over x_target
@@ -871,9 +874,6 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
 
     # === Adatta il raggio in base alla distanza media ===
     def adaptive_radius(distances):
-        """
-        Decide il raggio da usare in base a una metrica robusta (percentile 90).
-        """
         robust_dist = np.percentile(distances, 90)  # Oppure mean + std
 
         if robust_dist > 3.0:       return 3.5
@@ -897,7 +897,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
         center + axes[0]*np.cos(a)*basis[0] + axes[1]*np.sin(a)*basis[1]
         for a in angles
     ], dtype=np.float32)
-    sampled_points = torch.tensor(ellipse_points, dtype=dtype)
+    sampled_points = torch.tensor(ellipse_points, dtype=dtype)#"""
 
 
     # Compute A_i and f_i for each sampled point
@@ -924,7 +924,41 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
 
     
     
-    """# ----------------- PLOTTING -----------------
+    """
+    # Plot for elipse
+    import matplotlib.pyplot as plt
+
+    # Convert tensors to NumPy
+    x_target_np = x_target.cpu().detach().squeeze(1).numpy()
+    x_eq_np = np.array([x1_eq, x2_eq])
+
+    # Ellipse parameters
+    theta = np.linspace(0, 2 * np.pi, 100)
+    ellipse_x = x_eq_np[0] + radius * np.cos(theta)
+    ellipse_y = x_eq_np[1] + (radius * 0.8 / 3) * np.sin(theta)
+
+    # Check how many points fall inside the ellipse
+    distances = ((x_target_np[:, 0] - x_eq_np[0]) / radius)**2 + \
+                ((x_target_np[:, 1] - x_eq_np[1]) / (radius * 0.8 / 3))**2
+    inside_mask = distances <= 1
+    percent_inside = 100.0 * np.sum(inside_mask) / len(x_target_np)
+    print(f"{percent_inside:.2f}% of the x_target points are inside the ellipse.")
+
+    # Plot
+    plt.figure(figsize=(6, 6))
+    plt.plot(ellipse_x, ellipse_y, color='red', linestyle='--', label='Sampling Ellipse')
+    plt.scatter(x_target_np[:, 0], x_target_np[:, 1], color='blue', s=10, label='x_target')
+    plt.scatter(x_eq[0], x_eq[1], color='green', s=20, label='x_eq')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('x_target and Sampling Region (Ellipse)')
+    plt.legend()
+    plt.grid(True)
+    plt.axis('equal')
+    plt.show() 
+
+
+    # ----------------- PLOTTING -----------------
     import matplotlib.pyplot as plt
     from matplotlib.patches import Ellipse
 

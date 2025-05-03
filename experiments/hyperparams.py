@@ -259,14 +259,14 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 3,
                 "loss": "mse",                  
-                "discretisation_mode": "BE",        # BE -> FE
+                "discretisation_mode": "TU",        # BE -> FE
                 "optimiser_mode": "adam",       
                 "x_update_mode": "entropy",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet",
                 "linearisation_mode": "lpv",        # static -> lpv
                 "decoder_mode": False,              # True -> False
-                "radius": 3.0,                      # 1.0
+                "radius": 2.0,                      # 3.0
             },
 
             'hyperparams___fhn_old': {
