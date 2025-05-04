@@ -38,7 +38,7 @@ def prep_inputs(x0, y, u, lengths, device):
 #   senza aggiornare i pesi del modello.            #
 # ------------------------------------------------- #
 
-def validate(data, loss_fn, model, device):
+def validate(data, loss_fn, model, device, l2_lambda=1e-4):
     vl = 0.
     #total_samples, coeffs_sum = 0, 0    ###############
 
@@ -61,7 +61,16 @@ def validate(data, loss_fn, model, device):
 
     ###mean_coeff = coeffs_sum / total_samples if total_samples > 0 else 0 ###############
 
-    return model.state_dim * vl / len(data)###, mean_coeff ###############
+    base_loss = model.state_dim * vl / len(data)
+
+    # Regularization
+    #l1_norm = sum(p.abs().sum().item() for p in model.parameters() if p.requires_grad)
+    l2_norm = sum(p.pow(2.0).sum().item() for p in model.parameters() if p.requires_grad)
+    reg_term = l2_lambda * l2_norm
+
+    loss = base_loss + reg_term * 0
+
+    return loss ###, mean_coeff ###############
 
 
 
