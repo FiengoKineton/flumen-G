@@ -116,8 +116,9 @@ if __name__ == "__main__":
         },
         'FHN': {
             'old': 'src/flumen/finals/csv/old_fhn.csv',
-            'BE_stat_true': 'src/flumen/finals/csv/fhn-BE_stat_true.csv',
-            'FE_lpv_false': 'src/flumen/finals/csv/fhn-FE_lpv_false_T.csv',
+            'BE_stat': 'src/flumen/finals/csv/fhn-BE_stat_true.csv',
+            'FE_lpv': 'src/flumen/finals/csv/fhn-FE_lpv_false_T.csv',
+            'oval_true': 'src/flumen/finals/csv/fhn-oval_true.csv',
         },
         'NAD': {
             'old_stable': 'src/flumen/finals/csv/old_nad-stable.csv',
@@ -185,12 +186,17 @@ if __name__ == "__main__":
 
     FHN best runs: 
     - old | fhn_fin-old-2: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v1
-    - new | fhn--04: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4
+    - BE_stat | fhn--04: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4
+    - FE_lpv | fhn--12: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-vu6o3roj:v2
+    - oval | fhn_swift-r=2--3: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-rystn8ww:v4
 
-    (fhn.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v1
-    
+    (fhn_stat.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v1
+    (fhn_lpv.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-vu6o3roj:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v1
+    (fhn_oval.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-rystn8ww:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v1
+
     Note: (decoder_mode, linearisation_mode, discretisation_mode) = (True, static, BE)
-    PS: change to True self.decoder_mode in model.py
+    PS: change to True self.decoder_mode in model.py for FE_lpv and set swift=0 and use Circle
+    PPS: use Elipse and set swift=1 for oval
     -------------------------------------------------------
     
     NAD best runs: 
@@ -248,14 +254,14 @@ if __name__ == "__main__":
     ----------------------------------------------------------------------------
 
     Metrics Comparison for FHN:
-                                            old             BE_stat_true             FE_lpv_false
-    Best Simulation  fhn_fin-old-2 (val=0.01486)    fhn--04 (val=0.01476)    fhn--12 (val=0.01339)
-    _step                      131.0000 ± 7.0711        88.1111 ± 21.5954        43.7500 ± 19.9228
-    best_val                     0.0167 ± 0.0027          0.0239 ± 0.0057          0.0314 ± 0.0147
-    best_epoch                 106.0000 ± 7.0711        66.6667 ± 26.9676        42.2500 ± 19.3628
-    best_test                    0.0258 ± 0.0141          0.0337 ± 0.0086          0.0376 ± 0.0074
-    best_train                   0.0026 ± 0.0004          0.0069 ± 0.0063          0.0175 ± 0.0102
-    time                 40958.6990 ± 20805.0690  60356.5976 ± 18251.3046  45478.9708 ± 26353.0884
+                                            old                  BE_stat                   FE_lpv                    oval_true
+    Best Simulation  fhn_fin-old-2 (val=0.01486)    fhn--04 (val=0.01476)    fhn--12 (val=0.01339)  fhn_swift-r=2 (val=0.04399)
+    _step                      131.0000 ± 7.0711        88.1111 ± 21.5954        43.7500 ± 19.9228            40.8571 ± 32.7181
+    best_val                     0.0167 ± 0.0027          0.0239 ± 0.0057          0.0314 ± 0.0147              0.0869 ± 0.0290
+    best_epoch                 106.0000 ± 7.0711        66.6667 ± 26.9676        42.2500 ± 19.3628            35.5714 ± 26.2416
+    best_test                    0.0258 ± 0.0141          0.0337 ± 0.0086          0.0376 ± 0.0074              0.0904 ± 0.0232
+    best_train                   0.0026 ± 0.0004          0.0069 ± 0.0063          0.0175 ± 0.0102              0.0667 ± 0.0242
+    time                 40958.6990 ± 20805.0690  60356.5976 ± 18251.3046  45478.9708 ± 26353.0884      58903.9856 ± 18608.1863
 
     ----------------------------------------------------------------------------
     ----------------------------------------------------------------------------
