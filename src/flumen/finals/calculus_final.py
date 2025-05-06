@@ -180,7 +180,8 @@ if __name__ == "__main__":
 
     (vdp_lpv.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lbz1tnpu:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
     (vdp_static.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lwqp2l3z:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
-    
+    (vdp_sin.pdf)  python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-22h9jfjb:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-sjelftdk:v0
+
     Note: (decoder_mode, linearisation_mode, discretisation_mode) = [(False, lpv, TU) and (False, static, TU)]
     -------------------------------------------------------
 
@@ -254,14 +255,14 @@ if __name__ == "__main__":
     ----------------------------------------------------------------------------
 
     Metrics Comparison for FHN:
-                                            old                  BE_stat                   FE_lpv                    oval_true
-    Best Simulation  fhn_fin-old-2 (val=0.01486)    fhn--04 (val=0.01476)    fhn--12 (val=0.01339)  fhn_swift-r=2 (val=0.04399)
-    _step                      131.0000 ± 7.0711        88.1111 ± 21.5954        43.7500 ± 19.9228            40.8571 ± 32.7181
-    best_val                     0.0167 ± 0.0027          0.0239 ± 0.0057          0.0314 ± 0.0147              0.0869 ± 0.0290
-    best_epoch                 106.0000 ± 7.0711        66.6667 ± 26.9676        42.2500 ± 19.3628            35.5714 ± 26.2416
-    best_test                    0.0258 ± 0.0141          0.0337 ± 0.0086          0.0376 ± 0.0074              0.0904 ± 0.0232
-    best_train                   0.0026 ± 0.0004          0.0069 ± 0.0063          0.0175 ± 0.0102              0.0667 ± 0.0242
-    time                 40958.6990 ± 20805.0690  60356.5976 ± 18251.3046  45478.9708 ± 26353.0884      58903.9856 ± 18608.1863
+                                            old                  BE_stat                   FE_lpv                       oval_true
+    Best Simulation  fhn_fin-old-2 (val=0.01486)    fhn--04 (val=0.01476)    fhn--12 (val=0.01339)  fhn_swift-r=2--3 (val=0.04399)
+    _step                      131.0000 ± 7.0711        88.1111 ± 21.5954        43.7500 ± 19.9228               51.2222 ± 21.4813
+    best_val                     0.0167 ± 0.0027          0.0239 ± 0.0057          0.0314 ± 0.0147                 0.0756 ± 0.0180
+    best_epoch                 106.0000 ± 7.0711        66.6667 ± 26.9676        42.2500 ± 19.3628               43.3333 ± 18.2757
+    best_test                    0.0258 ± 0.0141          0.0337 ± 0.0086          0.0376 ± 0.0074                 0.0805 ± 0.0139
+    best_train                   0.0026 ± 0.0004          0.0069 ± 0.0063          0.0175 ± 0.0102                 0.0524 ± 0.0137
+    time                 40958.6990 ± 20805.0690  60356.5976 ± 18251.3046  45478.9708 ± 26353.0884         79738.1824 ± 18616.5256
 
     ----------------------------------------------------------------------------
     ----------------------------------------------------------------------------
