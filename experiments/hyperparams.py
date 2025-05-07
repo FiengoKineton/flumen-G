@@ -210,7 +210,7 @@ class Hyperparams:
                 "loss": "mse",                      # {mse, huber, l1}
                 "discretisation_mode": "TU",        # {FE, BE, TU, RK4, exact}
                 "optimiser_mode": "adam",           # {adam, tbptt, nesterov, newton}
-                "x_update_mode": "entropy",         # {alpha, beta, lamda. relu, switch, entropy}
+                "x_update_mode": "entropy",         # {alpha, beta, lamda, relu, switch, entropy}
                 "mode_rnn": "new",                  # {new, old, gru}
                 "mode_dnn": "FFNet",                # {FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder}
                 "linearisation_mode": "lpv",        # {static, current, lpv} | either lpv or static
@@ -245,13 +245,13 @@ class Hyperparams:
 
         ### ----------------------------------------------------------
             'hyperparams___fhn': {
-                "control_rnn_size": 48,             # 48 -> 64
+                "control_rnn_size": 64,             # 48 -> 64
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
                 "encoder_depth": 2,  
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
-                "batch_size": 96,                   # 96 -> 128
+                "batch_size": 128,                  # 96 -> 128
                 "lr": 0.001,                    
                 "n_epochs": 200,  
                 "es_patience": 15,              
@@ -261,7 +261,7 @@ class Hyperparams:
                 "loss": "mse",                  
                 "discretisation_mode": "TU",        # BE -> FE
                 "optimiser_mode": "adam",       
-                "x_update_mode": "entropy",
+                "x_update_mode": "beta",            # entropy
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet",
                 "linearisation_mode": "lpv",        # static -> lpv
