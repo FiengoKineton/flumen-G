@@ -261,7 +261,7 @@ class Hyperparams:
                 "loss": "mse",                  
                 "discretisation_mode": "TU",        # BE -> FE
                 "optimiser_mode": "adam",       
-                "x_update_mode": "beta",            # entropy
+                "x_update_mode": "alpha",           # entropy
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet",
                 "linearisation_mode": "lpv",        # static -> lpv
