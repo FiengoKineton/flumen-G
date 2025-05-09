@@ -1,4 +1,4 @@
-import torch, sys
+import torch, sys, time
 import torch.nn as nn
 from torch.nn.utils.rnn import PackedSequence, pad_packed_sequence
 import yaml 
@@ -177,6 +177,7 @@ class LSTM(nn.Module):
                 c_list.append(torch.stack(new_c, dim=0))"""
 
             u_dyn = rnn_input_t[:, :1]
+            ### time.sleep(0.5)         # Debugging
             A_matrix, B_matrix, f_eq, r_old = self.linearisation_function(self.param, (batch_size, self.radius, r_old), x_prev, u_dyn)
             x_mid = self.discretisation_function(x_prev, (A_matrix, tau_t, self.I, B_matrix, f_eq), u_dyn)   
 
@@ -1130,10 +1131,10 @@ def discretisation_FE(x_prev, mat, u):
 
     transform_matrix = I + tau * A 
     input_matrix = tau * B
-    input_matrix = input_matrix.transpose(1, 2)
+    input_matrix = input_matrix.transpose(1, 2)     # should I have it?
 
     ev_lib = torch.bmm(x_prev, transform_matrix)
-    ev_for = torch.bmm(u, input_matrix)
+    ev_for = torch.bmm(u, input_matrix)             # shouldn't be this? (input_matrix, u) 
     f_eq_term = (tau * f_eq).transpose(1, 2)
 
     x_next = ev_lib + ev_for + f_eq_term

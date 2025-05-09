@@ -252,7 +252,7 @@ class Hyperparams:
                 "decoder_size": 2,  
                 "decoder_depth": 2,  
                 "batch_size": 128,                  # 96 -> 128
-                "lr": 0.001,                    
+                "lr": 5e-4,                         # 0.001,                    
                 "n_epochs": 200,  
                 "es_patience": 15,              
                 "es_delta": 1e-7,
@@ -265,7 +265,7 @@ class Hyperparams:
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet",
                 "linearisation_mode": "lpv",        # static -> lpv
-                "decoder_mode": False,              # True -> False
+                "decoder_mode": True,              # True -> False
                 "radius": 2.0,                      # 3.0
             },
 
