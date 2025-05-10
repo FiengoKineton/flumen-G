@@ -84,7 +84,7 @@ def main():
     args = parse_args()
     NOISE_STD = args.test_noise_std
     WANDB_1, WANDB_2 = 'adv_architecture', 'old_architecture'   # 'old_architecture', 'default' 
-    PLOT_ERROR = False
+    PLOT_ERROR = True
 
     num_times = 2 if args.time_horizon is None else 1          # default 2 | multiplied by the time_span
 

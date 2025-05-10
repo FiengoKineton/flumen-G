@@ -77,18 +77,20 @@ def main():
         n_plots = 2
     else:
         n_plots = model.output_dim
+    
+    num = n_plots if n_plots==2 else 1
 
     # First Figure: y_true vs y_pred + Input
-    fig1, ax1 = plt.subplots(n_plots+1, 1, sharex=True)
+    fig1, ax1 = plt.subplots(num+1, 1, sharex=True)
     fig1.canvas.mpl_connect('close_event', on_close_window)
 
     # Second Figure: Delta Plots
-    fig2, ax2 = plt.subplots(n_plots, 1, sharex=True) # 2
+    fig2, ax2 = plt.subplots(num, 1, sharex=True) # 2
     fig2.canvas.mpl_connect('close_event', on_close_window)
 
     # Third Figure: Coefficient Evolution (for alpha, beta, lambda) ###############
     if mode_rnn!="old":
-        fig3, ax3 = plt.subplots(2, 1, sharex=True)
+        fig3, ax3 = plt.subplots(num, 1, sharex=True)
         fig3.canvas.mpl_connect('close_event', on_close_window)
 
     others = True if more and mode_rnn!="old" else False
@@ -96,7 +98,7 @@ def main():
         fig4, ax4 = plt.subplots(2, 1, sharex=True)
         fig4.canvas.mpl_connect('close_event', on_close_window)
                                 
-        fig5, ax5 = plt.subplots(1, 2)
+        fig5, ax5 = plt.subplots(1, num)
         fig5.canvas.mpl_connect('close_event', on_close_window)
 
         fig6, ax6 = plt.subplots(1, 1)
@@ -136,13 +138,20 @@ def main():
         # **Clear previous plots and remove insets & connections**
         for ax_ in ax1:
             ax_.cla()
-        for ax_ in ax2:
-            ax_.cla()
+        if num==2:
+            for ax_ in ax2:
+                ax_.cla()
+        else:
+            ax2.cla()
         if mode_rnn!="old": 
-            for ax_ in ax3: ax_.cla()  ###############
+            if num==2: 
+                for ax_ in ax3: ax_.cla()  ###############
+            else: ax3.cla()
         if others: 
             for ax_ in ax4: ax_.cla()
-            for ax_ in ax5: ax_.cla()
+            if num==2: 
+                for ax_ in ax5: ax_.cla()
+            else: ax5.cla()
             ax6.cla()
             
 
@@ -165,7 +174,7 @@ def main():
             for k, ax_ in enumerate(ax1[:n]):
                 ax_.plot(t, y_pred[:, k], c='orange', label='Model output')
                 ax_.plot(t, y[:, k], 'b--', label='True state')
-                ax_.set_ylabel(f"$x_{k+1}$")
+                ax_.set_ylabel(f"$x_{{{k+1}}}$")
                 ax_.legend()
 
         # **Plot input u**
@@ -174,11 +183,38 @@ def main():
         ax1[-1].set_xlabel("$t$")
 
         # **Plot delta (Error)**
-        for k, ax_ in enumerate(ax2[:n]):
-            ax_.plot(t, y[:, 0] - y_pred[:, k], c='blue') #, label=f'Advanced ({sq_error:.3f})')
-            ax_.set_ylabel(f"$Δx_{k+1}$")
-            ax_.legend()
+        if num==2:
+            for k, ax_ in enumerate(ax2[:n]):
+                ax_.plot(t, y[:, k] - y_pred[:, k], c='blue') #, label=f'Advanced ({sq_error:.3f})')
+                ax_.set_ylabel(f"$Δx_{{{k+1}}}$")
+                ax_.legend()
+        else: 
+            k = model.output_dim-1
+            ax2.plot(t, y[:, k] - y_pred[:, k], c='blue') #, label=f'Advanced ({sq_error:.3f})')
+            ax2.set_ylabel(f"$Δx_{{{k+1}}}$")
+            ax2.legend()
 
+            inset = inset_axes(ax2, width="30%", height="30%", loc="lower right", borderpad=1)
+            inset.plot(t, y[:, k] - y_pred[:, k], color='black')
+
+            # Focus the inset on the first part of the curve
+            inset_xlim = (t[0], t[int(len(t) * 0.05)])
+            inset_ylim = (np.min(y[:int(len(t) * 0.05), k] - y_pred[:int(len(t) * 0.05), k]) * 1.1,
+                        np.max(y[:int(len(t) * 0.05), k] - y_pred[:int(len(t) * 0.05), k]) * 1.1)
+
+            inset.set_xlim(inset_xlim)
+            inset.set_ylim(inset_ylim)
+            inset.grid()
+
+            # Connect inset to the main plot and store references
+            lines = mark_inset(ax2, inset, loc1=2, loc2=4, fc="none", ec="0.5")
+            
+            prev_insets.append(inset)  # Store inset reference
+            prev_markings.extend(lines)  # Store connection line references
+
+            if others: 
+                ax5.hist(coeffs[:, k], bins=30, color="purple", alpha=0.7)
+                ax5.set_title(f'γ distribution')
 
         if n==2:
             # **Plot Coefficients Evolution**   ###############
