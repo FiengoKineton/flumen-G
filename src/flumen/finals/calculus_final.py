@@ -235,7 +235,7 @@ if __name__ == "__main__":
     
     NAD-sin best runs: 
     - old_stable | nad_sin_old-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-ux5pkc68:v2
-    - new_stable | nad_sin-02(03): (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-xvc3v8nf:v0
+    - new_stable | nad_sin-02(03): (wandb) 
     - old_big | nad_sin_big_old-01: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
     - new_big | nad_sin_big-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v1
     

@@ -187,3 +187,4 @@ artifacts/
 
 !run_data/pkl_files/*.pkl
 !src/flumen/finals/*.ipynb
+!src/flumen/finals/*.txt
