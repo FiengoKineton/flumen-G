@@ -48,6 +48,8 @@ python experiments/train_wandb.py data/hhfs_test_data.pkl hhfs_test
 --general---------------------------
 python experiments/train_wandb.py data/{model_name}_test_data.pkl {run_name} 
 {model_name}: [vdp, fhn, twotank, linsys, hhfs, hhffe, greenshields]
+
+Note: to test with smaller DS, use --n_trajectories 150
 """
 
 import os

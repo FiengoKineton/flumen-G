@@ -110,232 +110,105 @@ class SimulationMetrics:
 if __name__ == "__main__":
     sections_gen = {
         'VDP': {
-            'old': 'src/flumen/finals/csv/old_vdp.csv',
-            'lpv': 'src/flumen/finals/csv/vdp-lpv.csv',
-            'static': 'src/flumen/finals/csv/vdp-static.csv',
+            'old': 'src/flumen/finals/csv/VDP/old/default/old_vdp.csv',
+            'lpv': 'src/flumen/finals/csv/VDP/new/vdp-lpv.csv',
+            'static': 'src/flumen/finals/csv/VDP/new/vdp-static.csv',
         },
-        'FHN': {
-            'old': 'src/flumen/finals/csv/old_fhn.csv',
-            'BE_stat': 'src/flumen/finals/csv/fhn-BE_stat_true.csv',
-            'FE_lpv': 'src/flumen/finals/csv/fhn-FE_lpv_false_T.csv',
-            'oval_false': 'src/flumen/finals/csv/fhn-oval_false.csv',
+        'FHN_true': {
+            'old': 'src/flumen/finals/csv/FHN/old/default/old_fhn.csv',
+            'BE_stat': 'src/flumen/finals/csv/FHN/new/True/fhn-BE_stat_true.csv',
+            'FE_lpv': 'src/flumen/finals/csv/FHN/new/True/fhn-FE_lpv_false_T.csv',
+            'alpha_true': 'src/flumen/finals/csv/FHN/new/True/fhn-alpha-T.csv',
+        },
+        'FHN_false': {
+            'old': 'src/flumen/finals/csv/FHN/old/default/old_fhn.csv',
+            'alpha_false': 'src/flumen/finals/csv/FHN/new/fhn-new_method.csv',
+            'oval_false': 'src/flumen/finals/csv/FHN/new/fhn-oval_false.csv',
         },
         'NAD': {
-            'old_stable': 'src/flumen/finals/csv/old_nad-stable.csv',
-            'new_stable': 'src/flumen/finals/csv/nad-stable.csv',
-            'old_big': 'src/flumen/finals/csv/old_nad-big.csv',
-            'new_big': 'src/flumen/finals/csv/nad-big.csv',
+            'old_stable': 'src/flumen/finals/csv/NAD/old/default/old_nad-stable.csv',
+            'new_stable': 'src/flumen/finals/csv/NAD/new/nad-stable.csv',
+            'old_big': 'src/flumen/finals/csv/NAD/old/default/old_nad-big.csv',
+            'new_big': 'src/flumen/finals/csv/NAD/new/nad-big.csv',
         }
     }
 
     sections_sin = {
+        'VDP-sin': {
+            'old_sin': 'src/flumen/finals/csv/VDP/old/sin/old_vdp-sin.csv',
+            'new_sin': 'src/flumen/finals/csv/VDP/new/sin/vdp-sin.csv',
+        },
+        #'FHN-sin': {
+            #'old_sin': 'src/flumen/finals/csv/FHN/old/sin/old_fhn-sin.csv',
+            #'new_sin': 'src/flumen/finals/csv/FHN/new/sin/fhn-sin.csv',
+        #},
         'NAD-sin': {
-            'old_sin': 'src/flumen/finals/csv/old_nad-stable-sin.csv',
-            'new_sin': 'src/flumen/finals/csv/nad-stable-sin.csv',
-            'old_big_sin': 'src/flumen/finals/csv/old_nad-big-sin.csv',
-            'new_big_sin': 'src/flumen/finals/csv/nad-big-sin.csv',
+            'old_sin': 'src/flumen/finals/csv/NAD/old/sin/old_nad-stable-sin.csv',
+            'new_sin': 'src/flumen/finals/csv/NAD/new/sin/nad-stable-sin.csv',
+            'old_big_sin': 'src/flumen/finals/csv/NAD/old/sin/old_nad-big-sin.csv',
+            'new_big_sin': 'src/flumen/finals/csv/NAD/new/sin/nad-big-sin.csv',
         }
     }
 
     sections_DS = {
-        'vdp': {
-            'old': 'src/flumen/finals/csv/old_vdp.csv',
-            'small_DS': 'src/flumen/finals/csv/vdp-small_DS.csv',
+        'vdp-DS': {
+            'old': 'src/flumen/finals/csv/VDP/old/default/old_vdp.csv',
+            'small_DS': 'src/flumen/finals/csv/VDP/new/small_DS/vdp-small_DS.csv',
         },
-        'nad': {
-            'old_big': 'src/flumen/finals/csv/old_nad-big.csv',
-            'small_DS': 'src/flumen/finals/csv/nad-big-small_DS.csv',
+        'fhn-DS': {
+            'old': 'src/flumen/finals/csv/FHN/old/default/old_fhn.csv',
+            'small_DS': 'src/flumen/finals/csv/FHN/new/small_DS/fhn-small_DS.csv',
+        },
+        'nad-DS': {
+            'old_big': 'src/flumen/finals/csv/NAD/old/default/old_nad-big.csv',
+            'small_DS': 'src/flumen/finals/csv/NAD/new/small_DS/nad-big-small_DS.csv',
         }
     }
 
-
-    sections = sections_DS
+    """sections = sections_DS
     sim_metrics = SimulationMetrics(sections)
-    stats = sim_metrics.compute_stats()
+    stats = sim_metrics.compute_stats()"""
+
+    all_sections = {
+        "General": sections_gen,
+        "Sinusoidal": sections_sin,
+        "DS": sections_DS
+    }
+
+    for section_type, sections in all_sections.items():
+        print(f"\n\n====================== {section_type} Sections ======================\n")
+
+        sim_metrics = SimulationMetrics(sections)
+        stats = sim_metrics.compute_stats()
 
 
-    for section, models in stats.items():
+        for section, models in stats.items():
+            print("\n----------------------------------------------------------------------------")
+            print("----------------------------------------------------------------------------")
+            print(f"\nMetrics Comparison for {section}:")
+
+            # Box and trend plots for section
+            sim_metrics.plot_box(section)
+            ###sim_metrics.plot_trend(section)
+
+            # Create table-like structure
+            metrics_df = pd.DataFrame(index=["Best Simulation"] + sim_metrics.metrics)
+
+            best_simulations = sim_metrics.get_best_simulation(section)
+            for model_name, best_row in best_simulations.items():
+                best_sim, best_val = best_row['name'], best_row['best_val']
+                metrics_df.loc["Best Simulation", model_name] = f"{best_sim} (val={best_val:.4g})"
+
+            for model_name, metrics in models.items():
+                for metric, values in metrics.items():
+                    metrics_df.loc[metric, model_name] = f"{values['mean']:.4f} ± {values['std']:.4f}"
+
+            print(metrics_df.to_string())
         print("\n----------------------------------------------------------------------------")
         print("----------------------------------------------------------------------------")
-        print(f"\nMetrics Comparison for {section}:")
-
-        # Box and trend plots for section
-        sim_metrics.plot_box(section)
-        sim_metrics.plot_trend(section)
-
-        # Create table-like structure
-        metrics_df = pd.DataFrame(index=["Best Simulation"] + sim_metrics.metrics)
-
-        best_simulations = sim_metrics.get_best_simulation(section)
-        for model_name, best_row in best_simulations.items():
-            best_sim, best_val = best_row['name'], best_row['best_val']
-            metrics_df.loc["Best Simulation", model_name] = f"{best_sim} (val={best_val:.4g})"
-
-        for model_name, metrics in models.items():
-            for metric, values in metrics.items():
-                metrics_df.loc[metric, model_name] = f"{values['mean']:.4f} ± {values['std']:.4f}"
-
-        print(metrics_df.to_string())
-    print("\n----------------------------------------------------------------------------")
-    print("----------------------------------------------------------------------------")
 
     """ # Plot comparisons for all sections
     sim_metrics.plot_comparison('VDP', ['old', 'lpv', 'static'])
     sim_metrics.plot_comparison('FHN', ['old', 'new'])
     sim_metrics.plot_comparison('NAD', ['old_stable', 'new_stable', 'old_big', 'new_big'])
     # """
-
-
-
-
-    """
-    VDP best runs: 
-    - old | vdp_fin-old-2: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
-    - lpv | vdp_fin-3: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lbz1tnpu:v3
-    - static | vdp_fin-25: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lwqp2l3z:v3
-    - small_DS | vdp_small_DS-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-2rktw7f4:v0
-    
-    (vdp_lpv.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lbz1tnpu:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
-    (vdp_static.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lwqp2l3z:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
-    (vdp_sin.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-22h9jfjb:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-sjelftdk:v0
-    (vdp_small_DS.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-2rktw7f4:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-sjelftdk:v0
-    
-    Note: (decoder_mode, linearisation_mode, discretisation_mode) = [(False, lpv, TU) and (False, static, TU)]
-    -------------------------------------------------------
-
-    FHN best runs: (fhn--32)
-    - old | fhn_fin-old-2: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v1
-    - BE_stat | fhn--04: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4
-    - FE_lpv | fhn--12: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-vu6o3roj:v2
-    - oval | fhn_swift-r=2--3: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-rystn8ww:v4
-
-    (fhn_stat.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v1
-    (fhn_lpv.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-vu6o3roj:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v1
-    (fhn_oval.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-rystn8ww:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v1
-
-    Note: (decoder_mode, linearisation_mode, discretisation_mode) = (True, static, BE)
-    PS: change to True self.decoder_mode in model.py for FE_lpv and set swift=0 and use Circle
-    PPS: use Elipse and set swift=1 for oval
-    -------------------------------------------------------
-    
-    NAD best runs: 
-    - old_stable | nad_fin-old-2: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v1
-    - new_stable | nad_fin-01: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-zshs5333:v0
-    - old_big | nad_fin-old-big: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v0
-    - new_big | nad_big_fin-05: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-3dxiz9gf:v2
-    - small_DS_big | nad_small_DS-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-h5wchall:v2
-
-    (nad_stable.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-zshs5333:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v1
-    (nad_big.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-3dxiz9gf:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v0
-    (nad_small_DS_big.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-h5wchall:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v0
-
-    Note: (decoder_mode, linearisation_mode, discretisation_mode) = (False, static, FE)
-    PS: change nad.yaml in section [state_dim, mode]
-    -------------------------------------------------------
-    
-    NAD-sin best runs: 
-    - old_stable | nad_sin_old-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-ux5pkc68:v2
-    - new_stable | nad_sin-02(03): (wandb) 
-    - old_big | nad_sin_big_old-01: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
-    - new_big | nad_sin_big-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v1
-    
-    (nad_sin.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-xvc3v8nf:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-ux5pkc68:v2
-    (nad_big_sin.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v1 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
-    
-    Note: (decoder_mode, linearisation_mode, discretisation_mode) = (False, static, FE)
-    PS: change nad.yaml in section [state_dim, mode]
-    -------------------------------------------------------
-    -------------------------------------------------------
-    
-    save it in pdf in ./src/flumen/finals/
-
-    run: python experiments/interactive_test_compare.py --wandb (new) --wandb_2 (old)
-    
-    -------------------------------------------------------
-    
-    go here to see wandb report: https://wandb.ai/aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/reports/Finals--VmlldzoxMjM5MjEwNA
-    
-    
-
-    RESULTs
-    ----------------------------------------------------------------------------
-    ----------------------------------------------------------------------------
-
-    Metrics Comparison for VDP:
-                                            old                      lpv                    static
-    Best Simulation  vdp_fin-old-2 (val=0.09267)  vdp_fin-3 (val=0.03983)  vdp_fin-25 (val=0.03364)
-    _step                      71.0000 ± 39.5980        52.1818 ± 21.1699         52.8889 ± 24.0907
-    best_val                     0.0937 ± 0.0015          0.0576 ± 0.0161           0.0524 ± 0.0140
-    best_epoch                 46.0000 ± 39.5980        31.7273 ± 20.2044         32.0000 ± 25.7294
-    best_test                    0.2186 ± 0.2193          0.1256 ± 0.0730           0.1546 ± 0.1022
-    best_train                   0.0168 ± 0.0148          0.0223 ± 0.0163           0.0264 ± 0.0249
-    time                 28914.4827 ± 26327.1509  43529.4471 ± 17019.0007    25954.0377 ± 9905.1619
-
-    ----------------------------------------------------------------------------
-    ----------------------------------------------------------------------------
-
-    Metrics Comparison for vdp:
-                                            old                       small_DS
-    Best Simulation  vdp_fin-old-2 (val=0.09267)  vdp_small_DS-02 (val=0.05734)
-    _step                      71.0000 ± 39.5980               35.0000 ± 2.8284
-    best_val                     0.0937 ± 0.0015                0.0584 ± 0.0014
-    best_epoch                 46.0000 ± 39.5980              27.5000 ± 13.4350
-    best_test                    0.2186 ± 0.2193                0.0932 ± 0.0480
-    best_train                   0.0168 ± 0.0148                0.0172 ± 0.0031
-    time                 28914.4827 ± 26327.1509         89269.7585 ± 4882.9880
-
-    ----------------------------------------------------------------------------
-    ----------------------------------------------------------------------------
-
-    Metrics Comparison for FHN:
-                                            old                  BE_stat                   FE_lpv                      oval_false
-    Best Simulation  fhn_fin-old-2 (val=0.01486)    fhn--04 (val=0.01476)    fhn--12 (val=0.01339)  fhn_swift-r=2--3 (val=0.04399)
-    _step                      131.0000 ± 7.0711        88.1111 ± 21.5954        43.7500 ± 19.9228               76.8889 ± 25.0272
-    best_val                     0.0167 ± 0.0027          0.0239 ± 0.0057          0.0314 ± 0.0147                 0.0649 ± 0.0195
-    best_epoch                 106.0000 ± 7.0711        66.6667 ± 26.9676        42.2500 ± 19.3628               61.8889 ± 25.0272
-    best_test                    0.0258 ± 0.0141          0.0337 ± 0.0086          0.0376 ± 0.0074                 0.0773 ± 0.0190
-    best_train                   0.0026 ± 0.0004          0.0069 ± 0.0063          0.0175 ± 0.0102                 0.0416 ± 0.0179
-    time                 40958.6990 ± 20805.0690  60356.5976 ± 18251.3046  45478.9708 ± 26353.0884        129533.3689 ± 66097.3804
-
-    ----------------------------------------------------------------------------
-    ----------------------------------------------------------------------------
-
-    Metrics Comparison for NAD:
-                                      old_stable                  new_stable                        old_big                       new_big
-    Best Simulation  nad_fin-old-2 (val=0.001105)  nad_fin-01 (val=0.0006947)  nad_fin-old-big (val=0.02377)  nad_big_fin-05 (val=0.01123)
-    _step                      151.6667 ± 83.7158            46.7500 ± 8.8761             144.0000 ± 96.9948             53.1250 ± 23.3510
-    best_val                      0.0023 ± 0.0014             0.0012 ± 0.0003                0.0340 ± 0.0103               0.0138 ± 0.0024
-    best_epoch                 139.0000 ± 94.3981           26.1250 ± 12.0646            135.3333 ± 111.1411             42.5000 ± 22.8661
-    best_test                     0.0033 ± 0.0031             0.0012 ± 0.0004                0.0264 ± 0.0080               0.0131 ± 0.0009
-    best_train                    0.0003 ± 0.0001             0.0004 ± 0.0001                0.0020 ± 0.0028               0.0007 ± 0.0002
-    time                  50041.6461 ± 17418.2742      32057.6465 ± 6607.2100        37678.3957 ± 30192.6393       41588.0502 ± 23762.2955
-
-    ----------------------------------------------------------------------------
-    ----------------------------------------------------------------------------
-
-    Metrics Comparison for nad:
-                                        old_big                       small_DS
-    Best Simulation  nad_fin-old-big (val=0.02377)  nad_small_DS-02 (val=0.01969)
-    _step                       144.0000 ± 96.9948               49.0000 ± 0.0000
-    best_val                       0.0340 ± 0.0103                0.0209 ± 0.0017
-    best_epoch                 135.3333 ± 111.1411               45.5000 ± 4.9497
-    best_test                      0.0264 ± 0.0080                0.0205 ± 0.0008
-    best_train                     0.0020 ± 0.0028                0.0007 ± 0.0000
-    time                   37678.3957 ± 30192.6393          93418.9452 ± 115.1641
-
-    ----------------------------------------------------------------------------    
-    ----------------------------------------------------------------------------
-
-    Metrics Comparison for NAD-sin:
-                                        old_sin                    new_sin                       old_big_sin                   new_big_sin      
-    Best Simulation  nad_sin_old-02 (val=0.002201)  nad_sin-02 (val=0.002334)  nad_sin_big_old-01 (val=0.03625)  nad_sin_big-02 (val=0.01416)      
-    _step                       137.5000 ± 65.7609           41.8000 ± 6.7231                  30.5000 ± 0.7071             68.8000 ± 25.0140      
-    best_val                       0.0034 ± 0.0017            0.0035 ± 0.0011                   0.0398 ± 0.0051               0.0170 ± 0.0020      
-    best_epoch                  112.5000 ± 65.7609           20.8000 ± 7.5631                   5.5000 ± 0.7071             47.8000 ± 19.9424      
-    best_test                      0.0074 ± 0.0026            0.0032 ± 0.0013                   0.0422 ± 0.0042               0.0173 ± 0.0012      
-    best_train                     0.0007 ± 0.0001            0.0009 ± 0.0001                   0.0069 ± 0.0012               0.0016 ± 0.0003      
-    time                   97554.6680 ± 52218.0499    42605.6057 ± 22395.0561             24689.9393 ± 270.9701       71497.5481 ± 49352.4864      
-
-    ----------------------------------------------------------------------------
-    ----------------------------------------------------------------------------
-    """

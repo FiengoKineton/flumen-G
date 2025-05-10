@@ -83,6 +83,8 @@ def main():
     plt.ion()  # Enable interactive mode
     args = parse_args()
     NOISE_STD = args.test_noise_std
+    WANDB_1, WANDB_2 = 'adv_architecture', 'old_architecture'   # 'old_architecture', 'default' 
+    PLOT_ERROR = False
 
     num_times = 2 if args.time_horizon is None else 1          # default 2 | multiplied by the time_span
 
@@ -126,8 +128,9 @@ def main():
     fig1, ax1 = plt.subplots(num+1, 1, sharex=True)   # before | n_plots+1
     fig1.canvas.mpl_connect('close_event', on_close_window)
 
-    fig2, ax2 = plt.subplots(3, 1, sharex=True)  
-    fig2.canvas.mpl_connect('close_event', on_close_window)
+    if PLOT_ERROR:
+        fig2, ax2 = plt.subplots(3, 1, sharex=True)  
+        fig2.canvas.mpl_connect('close_event', on_close_window)
 
     time_horizon = args.time_horizon if args.time_horizon else num_times * metadata["data_args"]["time_horizon"]
 
@@ -181,8 +184,9 @@ def main():
         for ax_ in ax1:
             ax_.cla()            
 
-        for ax_ in ax2:
-            ax_.cla()    
+        if PLOT_ERROR:
+            for ax_ in ax2:
+                ax_.cla()    
 
         if args.continuous_state:
             ax1[0].pcolormesh(t.squeeze(), xx, y.T)
@@ -206,12 +210,12 @@ def main():
                 # Predicted (Advanced)
                 if num!=2: k=n-1
                 ax_.plot(t, y_pred[:, k], color=colors[0], linestyle=linestyles[0], 
-                        label=f'Advanced ({err[k]:.6f})')
+                        label=f'{WANDB_1} ({err[k]:.6f})')
 
                 # Predicted (Default), optional
                 if args.wandb_2:
                     ax_.plot(t, y_pred_2[:, k], color=colors[1], linestyle=linestyles[1],
-                            label=f'Default ({err_2[k]:.6f})')
+                            label=f'{WANDB_2} ({err_2[k]:.6f})')
 
                 # True state trajectory
                 ax_.plot(t, y[:, k], color=colors[2], linestyle=linestyles[2], 
@@ -220,30 +224,31 @@ def main():
                 ax_.set_ylabel(f"$x_{{{k+1}}}$")
                 ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
 
-            #"""# === Track and plot the MSE evolution for each x_k ===
-            list_1, list_2 = np.array(err_list_1), np.array(err_list_2)
-            for k, ax_ in enumerate(ax2[:n]):
-                if k==3: break
+            if PLOT_ERROR:
+                #"""# === Track and plot the MSE evolution for each x_k ===
+                list_1, list_2 = np.array(err_list_1), np.array(err_list_2)
+                for k, ax_ in enumerate(ax2[:n]):
+                    if k==3: break
 
-                if k in [0, 1]:
-                    ax_.plot(range(len(list_1)), list_1[:, k], color=colors[0], linestyle=linestyles[0], 
-                            label=f'Advanced')
+                    if k in [0, 1]:
+                        ax_.plot(range(len(list_1)), list_1[:, k], color=colors[0], linestyle=linestyles[0], 
+                                label=f'{WANDB_1}')
 
-                    # Predicted (Default), optional
-                    if args.wandb_2:
-                        ax_.plot(range(len(list_2)), list_2[:, k], color=colors[1], linestyle=linestyles[1],
-                                label=f'Default')
+                        # Predicted (Default), optional
+                        if args.wandb_2:
+                            ax_.plot(range(len(list_2)), list_2[:, k], color=colors[1], linestyle=linestyles[1],
+                                    label=f'{WANDB_2}')
 
-                    ax_.set_ylabel(f"$x_{{{k+1}}}$")
-                    ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
-                    ax_.set_yscale('log')
+                        ax_.set_ylabel(f"$x_{{{k+1}}}$")
+                        ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
+                        ax_.set_yscale('log')
 
-            ax2[-1].axhline(mean_1, color='darkred', linestyle='-', linewidth=2, label=f'Advanced: {mean_1:.6f} ± {std_1:.6f}')
-            ax2[-1].fill_between(range(len(list_1)), mean_1 - std_1, mean_1 + std_1, color='red', alpha=0.2)
-            ax2[-1].axhline(mean_2, color='navy', linestyle='--', linewidth=2, label=f'Default: {mean_2:.6f} ± {std_2:.6f}')
-            ax2[-1].fill_between(range(len(list_2)), mean_2 - std_2, mean_2 + std_2, color='blue', alpha=0.2)
-            ax2[-1].legend(loc='center right', bbox_to_anchor=(1, 0.5), borderaxespad=0.5)#"""
-            ax2[-1].set_yscale('log')
+                ax2[-1].axhline(mean_1, color='darkred', linestyle='-', linewidth=2, label=f'{WANDB_1}: {mean_1:.6f} ± {std_1:.6f}')
+                ax2[-1].fill_between(range(len(list_1)), mean_1 - std_1, mean_1 + std_1, color='red', alpha=0.2)
+                ax2[-1].axhline(mean_2, color='navy', linestyle='--', linewidth=2, label=f'{WANDB_2}: {mean_2:.6f} ± {std_2:.6f}')
+                ax2[-1].fill_between(range(len(list_2)), mean_2 - std_2, mean_2 + std_2, color='blue', alpha=0.2)
+                ax2[-1].legend(loc='center right', bbox_to_anchor=(1, 0.5), borderaxespad=0.5)#"""
+                ax2[-1].set_yscale('log')
 
         # **Plot input u**
         ax1[-1].step(np.arange(0., time_horizon, delta), u[:-1], where='post')
@@ -253,8 +258,9 @@ def main():
         fig1.tight_layout()
         fig1.subplots_adjust(hspace=0)
         
-        fig2.tight_layout()
-        fig2.subplots_adjust(hspace=0)
+        if PLOT_ERROR:
+            fig2.tight_layout()
+            fig2.subplots_adjust(hspace=0)
         plt.setp([a.get_xticklabels() for a in fig1.axes[:-1]], visible=False)
 
         plt.show(block=False)       # or plt.draw(block=False)
