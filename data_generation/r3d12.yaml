@@ -10,7 +10,8 @@ dynamics:
     m: 1.0
     l: 1.0
 sequence_generator: 
-  name: GaussianSqWave
+  name: SinusoidalSequence  # GaussianSqWave
   args: 
-    period: 5
+    # period: 5
+    max_freq: 0.2
 control_delta: 0.2

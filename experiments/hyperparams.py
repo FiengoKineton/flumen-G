@@ -372,7 +372,7 @@ class Hyperparams:
             },
 
             'hyperparams___r3d12_old': {
-                "control_rnn_size": 32,         # Reduced to limit overfitting
+                "control_rnn_size": 44,         # Reduced to limit overfitting
                 "control_rnn_depth": 1,         
                 "encoder_size": 1,              # Reduced from 2 to 1
                 "encoder_depth": 1,             # Reduced from 2 to 1
