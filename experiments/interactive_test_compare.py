@@ -83,8 +83,9 @@ def main():
     plt.ion()  # Enable interactive mode
     args = parse_args()
     NOISE_STD = args.test_noise_std
-    WANDB_1, WANDB_2 = 'adv_architecture', 'old_architecture'   # 'old_architecture', 'default' 
+    WANDB_1, WANDB_2 = 'new_architecture', 'default_architecture'   # 'old_architecture', 'default' 
     PLOT_ERROR = True
+    test_sin = True
 
     num_times = 2 if args.time_horizon is None else 1          # default 2 | multiplied by the time_span
 
@@ -113,6 +114,15 @@ def main():
         model_2.load_state_dict(state_dict_2)
         model_2.eval()
 
+    if test_sin: 
+        # Override the input signal for testing (e.g., Sinusoidal)
+        metadata["data_settings"]["sequence_generator"] = {
+            "name": "SinusoidalSequence",
+            "args": {
+                "max_freq": 0.2
+            }
+    }
+        
     sampler = make_trajectory_sampler(metadata["data_settings"])
     sampler.reset_rngs()
     delta = sampler._delta

@@ -456,6 +456,69 @@ class NonlinearActivationDynamics(Dynamics):
     def _dx(self, x, u):
         return -x + self._sigma(self.A @ x + self.B @ u)
 
+class R3D12(Dynamics):
+    def __init__(self, state_dim=12, control_dim=1, a=2.0, b=5.0, k=10.0, g=9.81, m=1.0, l=1.0):
+        super().__init__(state_dim=int(state_dim), control_dim=int(control_dim))
+        self.a = a
+        self.b = b
+        self.k = k
+        self.g = g
+        self.m = m
+        self.l = l
+
+        print(f"R3D12 initialized with: a={a}, b={b}, k={k}, g={g}, m={m}, l={l}")
+        print(f"R3D12 dimensions: state_dim={state_dim}, control_dim={control_dim}")
+
+    def _tau(self, z, theta):
+        return self.k * np.tanh(z - theta)
+
+    def _M(self, theta):
+        cos_theta = np.cos(theta[1])
+        l2, l3 = self.l, self.l
+        m1, m2, m3 = self.m, self.m, self.m
+
+        M11 = m1*self.l**2 + m2*(self.l**2 + l2**2 + 2*self.l*l2*cos_theta) + m3*(self.l**2 + l2**2 + l3**2)
+        M12 = m2*(l2**2 + self.l*l2*cos_theta) + m3*(l2**2 + l3**2)
+        M13 = m3*(l3**2)
+
+        return np.array([
+            [M11, M12, M13],
+            [M12, M12, M13],
+            [M13, M13, M13]
+        ])
+
+    def _C(self, theta, dtheta):
+        s1 = np.sin(theta[1])
+        return np.array([
+            [-self.m*self.l*self.l*s1*dtheta[1], 0, 0],
+            [self.m*self.l*self.l*s1*dtheta[0], 0, 0],
+            [0, 0, 0]
+        ])
+
+    def _G(self, theta):
+        return np.array([
+            (3 * self.m) * self.g * self.l * np.sin(theta[0]),
+            (2 * self.m) * self.g * self.l * np.sin(theta[1]),
+            self.m * self.g * self.l * np.sin(theta[2])
+        ])
+
+    def _dx(self, x, u):
+        theta = x[0:3]
+        dtheta = x[3:6]
+        z = x[6:9]
+        dz = x[9:12]
+
+        tau = self._tau(z, theta)
+        M = self._M(theta)
+        C = self._C(theta, dtheta)
+        G = self._G(theta)
+
+        ddtheta = np.linalg.inv(M) @ (tau - C @ dtheta - G)
+        ddz = -self.a * dz - self.b * np.tanh(z - theta) + u
+
+        return np.concatenate([dtheta, ddtheta, dz, ddz])
+
+
 
 
 _dynamics_names = {
@@ -471,6 +534,7 @@ _dynamics_names = {
     "GreenshieldsTraffic": GreenshieldsTraffic,
     "TwoTank": TwoTank,
     "NonlinearActivationDynamics": NonlinearActivationDynamics,
+    "R3D12": R3D12,
 }
 
 

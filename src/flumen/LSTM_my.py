@@ -316,6 +316,40 @@ class LSTM(nn.Module):
                 'u_eq': u_star,
             }
 
+        elif model_name == "R3D12":
+            state_dim = self.data["dynamics"]["args"]["state_dim"]
+            control_dim = self.data["dynamics"]["args"]["control_dim"]
+            a = self.data["dynamics"]["args"]["a"]
+            b = self.data["dynamics"]["args"]["b"]
+            k = self.data["dynamics"]["args"]["k"]
+            g = self.data["dynamics"]["args"]["g"]
+            m = self.data["dynamics"]["args"]["m"]
+            l = self.data["dynamics"]["args"]["l"]
+
+            # equilibrium: zero velocity, theta = z | even with scipy.optimize.fsolve, we get zeros with no input
+            theta_eq = torch.zeros(3)
+            dtheta_eq = torch.zeros(3)
+            z_eq = torch.zeros(3)
+            dz_eq = torch.zeros(3)
+
+            u_eq = torch.zeros(control_dim)      # no control input needed
+            x_eq = torch.concatenate([theta_eq, dtheta_eq, z_eq, dz_eq])
+
+            param = {
+                "a": a,
+                "b": b,
+                "k": k,
+                "g": g,
+                "m": m,
+                "l": l,
+                "dyn_factor": dyn_factor,
+                "dtype": self.dtype,
+                "x_eq": torch.tensor(x_eq, dtype=self.dtype),
+                "u_eq": torch.tensor(u_eq, dtype=self.dtype),
+                "state_dim": state_dim,
+                "control_dim": control_dim
+            }            
+
         else:
             raise ValueError(f"Unknown model name: {model_name}")
         
@@ -339,6 +373,7 @@ class LSTM(nn.Module):
         elif self.model_name == "LinearSys": model_ID = "linsys"
         elif self.model_name == "TwoTank": model_ID = "twotank"
         elif self.model_name == "NonlinearActivationDynamics": model_ID = "nad"
+        elif self.model_name == "R3D12": model_ID = "r3d12"
         else: model_ID = ""
 
         # Define the file path
@@ -554,6 +589,74 @@ def linearisation_static__NonlinearActivationDynamics(param, const, x, u):      
     print("B:", B.shape)
     print("f_eq:", f_eq.shape)
     sys.exit() #"""
+    return A, B, f_eq, None
+
+def linearisation_static__R3D12(param, const, x, u):
+    # === Parametri dinamici ===
+    state_dim = param['state_dim']
+    control_dim = param['control_dim']
+    a = param['a']
+    b = param['b']
+    k = param['k']
+    g = param['g']
+    m = param['m']
+    l = param['l']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    batch_size, _, _ = const
+
+    # === Matrice di inerzia e sua inversa (calcolata a theta=0) ===
+    M = torch.tensor([
+        [m * l**2 * 6, m * l**2 * 5, m * l**2 * 1],
+        [m * l**2 * 5, m * l**2 * 5, m * l**2 * 1],
+        [m * l**2 * 1, m * l**2 * 1, m * l**2 * 1]
+    ], dtype=dtype)
+    Minv = torch.linalg.inv(M)
+
+    # === Matrice A ===
+    A = torch.zeros((12, 12), dtype=dtype)
+
+    # dtheta/dt = dtheta
+    A[0:3, 3:6] = torch.eye(3, dtype=dtype)
+
+    # ddtheta/dtheta and ddtheta/dz
+    A[3:6, 0:3] = Minv @ (-k * torch.eye(3, dtype=dtype))
+    A[3:6, 6:9] = Minv @ (k * torch.eye(3, dtype=dtype))
+
+    # dz/dt = dz
+    A[6:9, 9:12] = torch.eye(3, dtype=dtype)
+
+    # ddz/dtheta, ddz/dz, ddz/ddz
+    A[9:12, 0:3] = b * torch.eye(3, dtype=dtype)
+    A[9:12, 6:9] = -b * torch.eye(3, dtype=dtype)
+    A[9:12, 9:12] = -a * torch.eye(3, dtype=dtype)
+
+    # === Matrice B ===
+    B = torch.zeros((12, control_dim), dtype=dtype)
+    B[9:12, 0] = 1.0
+
+    # === Valore del campo vettoriale in equilibrio ===
+    f_eq = torch.zeros((12, 1), dtype=dtype)
+
+    # === Batch expand ===
+    A = torch.tensor(A, dtype=dtype)
+    B = torch.tensor(B, dtype=dtype)
+    f_eq = torch.tensor(f_eq, dtype=dtype)
+
+    """print(f'A dim: {A.shape}')
+    print(f'B dim: {B.shape}')
+    print(f'f_eq dim: {f_eq.shape}')
+
+    print('\n\nA1'), pprint(A[0:6, 0:6])
+    print('\n\nA2'), pprint(A[6:12, 0:6])
+    print('\n\nA3'), pprint(A[0:6, 6:12])
+    print('\n\nA4'), pprint(A[6:12, 6:12])
+    print('\n\nB'), pprint(B)
+    print('\n\nf_eq'), pprint(f_eq)"""
+
+    A = (dyn_factor * A).unsqueeze(0).expand(batch_size, -1, -1)
+    B = (dyn_factor * B).unsqueeze(0).expand(batch_size, -1, -1)
+    f_eq = (dyn_factor * f_eq).unsqueeze(0).expand(batch_size, -1, -1)
     return A, B, f_eq, None
 
 
@@ -1114,6 +1217,193 @@ def linearisation_lpv__NonlinearActivationDynamics(param, const, x, u, epsilon=1
     print("B:", B[0])
     print("f_eq:", f_eq[0])
     sys.exit()"""
+    return A, B, f_eq, radius
+
+def linearisation_lpv__R3D12(param, const, x, u, epsilon=1e-4):
+    from torch import tensor, eye
+
+    # Extract model parameters
+    a = param['a']
+    b = param['b']
+    k = param['k']
+    g = param['g']
+    m = param['m']
+    l = param['l']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+
+    batch_size, radius, _ = const
+    state_dim = param['state_dim']
+    control_dim = param['control_dim']
+
+    # Reference equilibrium
+    x_eq = param['x_eq']
+    u_eq = param['u_eq']
+
+    # Expand x and u
+    x_target = x[0].unsqueeze(1)  # [1, 128, 12] -> [128, 1, 12]
+    u_target = u                 # [128, 3]
+
+    # ==== Static B matrix ====
+    B = torch.zeros((state_dim, control_dim), dtype=dtype)
+    B[9:12, 0] = 1.0
+    B = (dyn_factor * B).unsqueeze(0).expand(batch_size, -1, -1)  # [B, 12, 3]
+
+    # === Define Jacobian at a single point ===
+    def jacobian_r3d12(x):
+        theta = x[0:3]
+        dtheta = x[3:6]
+        z = x[6:9]
+        dz = x[9:12]
+        dtype = x.dtype
+
+        delta = 1 - torch.tanh(z - theta)**2  # ∂tanh/∂x = 1 - tanh²
+        D = torch.diag(delta)
+
+        # Mass matrix and inverse
+        M = torch.tensor([
+            [m * l**2 * 6, m * l**2 * 5, m * l**2 * 1],
+            [m * l**2 * 5, m * l**2 * 5, m * l**2 * 1],
+            [m * l**2 * 1, m * l**2 * 1, m * l**2 * 1]
+        ], dtype=dtype)
+        Minv = torch.linalg.inv(M)
+
+        # Coriolis matrix C(theta, dtheta)
+        s1 = torch.sin(theta[1])
+        C = torch.tensor([
+            [-m * l**2 * s1 * dtheta[1], 0, 0],
+            [ m * l**2 * s1 * dtheta[0], 0, 0],
+            [0, 0, 0]
+        ], dtype=dtype)
+
+        # Build Jacobian A
+        A = torch.zeros((12, 12), dtype=dtype)
+
+        # theta_dot = dtheta
+        A[0:3, 3:6] = torch.eye(3, dtype=dtype)
+
+        # ddtheta/dtheta
+        A[3:6, 0:3] = Minv @ (-k * D)
+
+        # ddtheta/d(dtheta)
+        A[3:6, 3:6] = -Minv @ C
+
+        # ddtheta/dz
+        A[3:6, 6:9] = Minv @ (k * D)
+
+        # dz_dot = dz
+        A[6:9, 9:12] = torch.eye(3, dtype=dtype)
+
+        # ddz/dtheta and ddz/dz
+        A[9:12, 0:3] = b * D
+        A[9:12, 6:9] = -b * D
+        A[9:12, 9:12] = -a * torch.eye(3, dtype=dtype)
+
+        return dyn_factor * A
+
+
+    def f_eq_r3d12(xi):
+        theta = xi[0:3]
+        dtheta = xi[3:6]
+        z = xi[6:9]
+        dz = xi[9:12]
+
+        G = torch.tensor([
+            3 * m * g * l * torch.sin(theta[0]),
+            2 * m * g * l * torch.sin(theta[1]),
+            m * g * l * torch.sin(theta[2])
+        ], dtype=dtype)
+
+        tau = k * torch.tanh(z - theta)
+        M = torch.tensor([
+            [m * l**2 * 6, m * l**2 * 5, m * l**2 * 1],
+            [m * l**2 * 5, m * l**2 * 5, m * l**2 * 1],
+            [m * l**2 * 1, m * l**2 * 1, m * l**2 * 1]
+        ], dtype=dtype)
+        Minv = torch.linalg.inv(M)
+
+        ddtheta = Minv @ (tau - G)
+        ddz = -a * dz - b * torch.tanh(z - theta)
+
+        return dyn_factor * torch.cat([dtheta, ddtheta, dz, ddz], dim=0).unsqueeze(-1)
+
+    # === Sample points around equilibrium ===
+    angles = np.linspace(0, 2 * np.pi, 9)[:-1]
+    directions = np.stack([np.cos(angles), np.sin(angles)], axis=1)  # shape (8, 2)
+    deltas = torch.tensor(directions, dtype=dtype)
+
+    x_eq_short = x_eq[0:2]  # we sample only in first 2 dims
+    sampled_points = x_eq_short + radius * deltas  # [8, 2]
+
+    # Expand to 12D points (copy rest from x_eq)
+    sampled_points_full = []
+    for i in range(sampled_points.shape[0]):
+        xi = x_eq.clone()
+        xi[0:2] = sampled_points[i]
+        sampled_points_full.append(xi)
+    sampled_points_full = torch.stack(sampled_points_full, dim=0)  # [8, 12]
+
+    # === Compute A_i and f_i ===
+    A_list = [jacobian_r3d12(xi) for xi in sampled_points_full]
+    A_list = torch.stack(A_list, dim=0)  # [8, 12, 12]
+    A_list = A_list.unsqueeze(0).expand(batch_size, -1, -1, -1)  # [B, 8, 12, 12]
+
+    f_list = [f_eq_r3d12(xi) for xi in sampled_points_full]
+    f_list = torch.stack(f_list, dim=0).squeeze(-1)  # [8, 12]
+    f_list = f_list.unsqueeze(0).expand(batch_size, -1, -1)  # [B, 8, 12]
+
+    # === Weights based on distance ===
+    sampled_points_short = sampled_points.unsqueeze(0).expand(batch_size, -1, -1)  # [B, 8, 2]
+    distances = torch.norm(x_target[:, :, 0:2] - sampled_points_short, dim=2)  # [B, 8]
+    weights = torch.exp(-(distances**2 + epsilon))  # [B, 8]
+    weights = weights / weights.sum(dim=1, keepdim=True)
+
+    # === Weighted sum ===
+    w_A = weights.unsqueeze(-1).unsqueeze(-1)  # [B, 8, 1, 1]
+    w_f = weights.unsqueeze(-1)               # [B, 8, 1]
+
+    A = torch.sum(w_A * A_list, dim=1)        # [B, 12, 12]
+    f_eq = torch.sum(w_f * f_list, dim=1).unsqueeze(-1)  # [B, 12, 1]
+
+    #print(A.shape, B.shape, f_eq.shape), sys.exit()
+
+    """# ----------------- PLOTTING -----------------
+    import matplotlib.pyplot as plt
+    print(A.shape, B.shape, f_eq.shape)
+    diff = A - jacobian_r3d12(x_eq).unsqueeze(0)  # Broadcast A_ref to shape [128, 12, 12]
+    mae_per_matrix = diff.abs().mean(dim=(1, 2))  # Shape: [128]
+
+    # Stampiamo le prime differenze
+    print("Errore medio per le prime 5 matrici A rispetto ad A_ref:")
+    print(mae_per_matrix[:5])
+
+    # Use CPU and detach for plotting
+    #sampled_np = sampled_points[0].cpu().detach().numpy()
+    x_target_np = x_target.cpu().detach().squeeze(1).numpy()
+    x_eq_np = np.array(x_eq)
+
+    # Create a smooth circle around x_eq
+    theta = np.linspace(0, 2 * np.pi, 100)
+    circle_x = x_eq_np[0] + radius * np.cos(theta)
+    circle_y = x_eq_np[1] + radius * np.sin(theta)
+
+    # Inside stability shape
+    distances = np.linalg.norm(x_target_np - x_eq_np, axis=1)
+    inside_mask = distances <= radius
+    percent_inside = 100.0 * np.sum(inside_mask) / len(x_target_np)
+    print(f"{percent_inside:.2f}% of the x_target points are inside the circle.")
+
+    plt.figure(figsize=(6, 6))
+    plt.plot(circle_x, circle_y, color='red', linestyle='--', label='Sampling Circle')
+    plt.scatter(x_target_np[:, 0], x_target_np[:, 1], color='blue', s=10, label='x_target')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('x_target and Sampling Region')
+    plt.legend()
+    plt.grid(True)
+    plt.axis('equal')
+    plt.show()
+    # -------------------------------------------"""
     return A, B, f_eq, radius
 
 

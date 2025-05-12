@@ -24,7 +24,7 @@ class RawTrajectoryDataset(Dataset):
 
         n_traj = len(data)
         self.state_dim = state_dim
-        self.control_dim = control_dim
+        self.control_dim = int(control_dim)     ################### Modified | bofore no int()
         self.output_dim = output_dim
         self.delta = delta
         self.mask = output_mask

@@ -1,0 +1,16 @@
+dynamics: 
+  name: R3D12
+  args: 
+    state_dim: 12
+    control_dim: 1  # actually 3 but used the same one
+    a: 2.0
+    b: 5.0
+    k: 10.0
+    g: 9.81
+    m: 1.0
+    l: 1.0
+sequence_generator: 
+  name: GaussianSqWave
+  args: 
+    period: 5
+control_delta: 0.2

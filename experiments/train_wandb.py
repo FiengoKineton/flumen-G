@@ -23,18 +23,23 @@ import sys
 # --------------------------------------------------------------------------- #
 """
 COMMANDs:
+--noise_std 10%
 
 --VDP-------------------------------    vdp_test3-data3 / vdp_TEST-r_3 / 026___default-code-same-dim / vdp_fin-old
-python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 --noise_std 0.2 data_generation/vdp.yaml vdp_test_data
 python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
 
 --FHN-------------------------------    fhn_data2 / fhn_001--set_4-old
-python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/fhn.yaml fhn_test_data
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 --noise_std 0.1 data_generation/fhn.yaml fhn_test_data
 python experiments/train_wandb.py data/fhn_test_data.pkl fhn_test 
 
 --nad-------------------------------    nad_old / nad_FE_stat / nad_fin-01
-python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/nad.yaml nad_test_data
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 --noise_std 0.05 data_generation/nad.yaml nad_test_data
 python.exe experiments/train_wandb.py data/nad_test_data.pkl nad
+
+--r3d12-----------------------------    ...
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/r3d12.yaml r3d12_test_data
+python.exe experiments/train_wandb.py data/r3d12_test_data.pkl r3d12
 
 --linsys----------------------------
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/linsys.yaml linsys_test_data
@@ -60,7 +65,7 @@ import torch_optimizer as optim
 
 from hyperparams import Hyperparams  
 
-os.environ["WANDB_MODE"] = "online"  # Set to "online" for real-time logging, "offline" for local logging
+os.environ["WANDB_MODE"] = "offline"  # Set to "online" for real-time logging, "offline" for local logging
 
 # ------ Current Run Settings ----------------------------------------------- #
 hp_manager = Hyperparams()  
@@ -70,9 +75,11 @@ sets = {
     'vdp': 'hyperparams___vdp',             # use TU and lpv!
     'nad': 'hyperparams___nad',             # use FE and static!
     'fhn': 'hyperparams___fhn',             # in progress
+    'r3d12': 'hyperparams___r3d12',         # new
     'vdp_old': 'hyperparams___vdp_old', 
     'fhn_old': 'hyperparams___fhn_old', 
-    'nad_old': 'hyperparams___nad_old'
+    'nad_old': 'hyperparams___nad_old',
+    'r3d12_old': 'hyperparams___r3d12_old',
 }
 
 sweeps = {
@@ -87,7 +94,7 @@ sweeps = {
 }
 
 
-name_set = sets['fhn']     # vdp, fhn, nad
+name_set = sets['r3d12']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['fhn']
