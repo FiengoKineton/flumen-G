@@ -30,6 +30,7 @@ class LSTM(nn.Module):
 
     # -------------------------------------------
         self.input_size = input_size
+        self.control_dim = input_size -1
         self.z_size = z_size
         self.hidden_size = z_size - state_dim
         self.num_layers = num_layers
@@ -100,9 +101,23 @@ class LSTM(nn.Module):
             ])#"""
 
     # -------------------------------------------
-        self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
-        torch.nn.init.xavier_uniform_(self.alpha_gate.weight)
-        if bias: torch.nn.init.constant_(self.alpha_gate.bias, 0.0)
+        if x_update_mode=='new': 
+            self.alpha_gate = nn.Sequential(
+                nn.Linear(self.hidden_size + self.state_dim + self.control_dim, 64),
+                nn.ReLU(),
+                nn.Linear(64, self.state_dim),
+                nn.Sigmoid()
+            )
+            # Inizializza solo i Linear
+            for layer in self.alpha_gate:
+                if isinstance(layer, nn.Linear):
+                    torch.nn.init.xavier_uniform_(layer.weight)
+                    if bias:
+                        torch.nn.init.constant_(layer.bias, 0.0)
+        else: 
+            self.alpha_gate = nn.Linear(self.hidden_size, self.state_dim, bias=bias)  # Gate function
+            torch.nn.init.xavier_uniform_(self.alpha_gate.weight)
+            if bias: torch.nn.init.constant_(self.alpha_gate.bias, 0.0)
 
         self.W__h_to_x = nn.Linear(self.hidden_size, self.state_dim, bias=bias)   # Mapping function
         torch.nn.init.xavier_uniform_(self.W__h_to_x.weight)
@@ -182,8 +197,8 @@ class LSTM(nn.Module):
             x_mid = self.discretisation_function(x_prev, (A_matrix, tau_t, self.I, B_matrix, f_eq), u_dyn)   
 
             h, c = torch.stack(h_list, dim=0), torch.stack(c_list, dim=0)
-            x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x)      
-
+            x_next, coeff = self.x_update_function(x_mid, h, self.alpha_gate, self.W__h_to_x, x_prev.squeeze(0), u_dyn)      
+            ##print('\nalpha mean norm:', coeff.norm(dim=1).mean().item())
             z, c_z = torch.cat((x_next, h), dim=-1), torch.cat((c_x, c), dim=-1)
             outputs[:, t, :].copy_(z[-1])
             coefficients[:, t, :].copy_(coeff)  
@@ -902,7 +917,7 @@ def linearisation_lpv__VanDerPol(param, const, x, u, epsilon=1e-4):             
 
     return A, B, f_eq, radius
 
-def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.0, adp=0, swift=1):     ### USE THIS!
+def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.0, adp=0, swift=0):     ### USE THIS!
     x1_eq = param['x1_eq'] + 1.0*swift
     x2_eq = param['x2_eq'] - 0.5*swift
     u_eq = param['u_eq']
@@ -944,7 +959,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
                         [dg_dv, dg_dw]], dtype=dtype)
         return A
     
-    """# Circle or radius r
+    #"""# Circle or radius r
     radius = rr
 
     # Define 8 direction vectors (circle-like)
@@ -955,7 +970,7 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
     x_eq = torch.tensor([x1_eq, x2_eq], dtype=dtype)
     sampled_points = x_eq + radius * deltas  # [8, 2]"""
 
-    #"""# Elipse
+    """# Elipse
     radius = rr
 
     # Define 8 direction vectors (oval-like)
@@ -1026,7 +1041,14 @@ def linearisation_lpv__FitzHughNagumo(param, const, x, u, epsilon=1e-4, alpha=0.
     A = torch.sum(w_A * A_list, dim=1)                          # A = sum(w * A for w, A in zip(weights, A_list))
     f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)      # f_eq = sum(w * f_eq for w, f_eq in zip(weights, f_eq_list))
 
-    
+    """# Norma di A (per elemento nel batch)
+    A_l2 = A.view(A.shape[0], -1).norm(dim=1)           # [batch_size]
+    print("\n\n‖A‖ batch avg:", A_l2.mean().item())
+
+    # Norma di f_eq (per elemento nel batch)
+    f_eq_l2 = f_eq.view(f_eq.shape[0], -1).norm(dim=1)  # [batch_size]
+    print("‖f_eq‖ batch avg:", f_eq_l2.mean().item())
+    #time.sleep(0.5)"""
     
     """
     # Plot for elipse
@@ -1446,6 +1468,13 @@ def discretisation_BE(x_prev, mat, u):
     ev_for = torch.linalg.solve(A_neg, u_effect_scaled)
 
     x_next = ev_lib + ev_for
+    """# Norme batch
+    norm_ev_lib = ev_lib.view(batch_size, -1).norm(dim=1).mean().item()
+    norm_ev_for= ev_for.view(batch_size, -1).norm(dim=1).mean().item()
+
+    print(f"\n‖ev_lib‖ (from x_prev): {norm_ev_lib:.4f}")
+    print(f"‖ev_for‖ (from Bu):      {norm_ev_for:.4f}")
+    time.sleep(0.5)#"""
     return x_next.squeeze(2).unsqueeze(0)
 
 def discretisation_TU(x_prev, mat, u):
@@ -1514,7 +1543,7 @@ def discretisation_exact(x_prev, mat, u):
 # ---------------- x_update_mode -------------------------------------------- #
 # ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈ #
 
-def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):      # GOOD results, balanced
+def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x, x_prev, u):      # GOOD results, balanced
     """
     Alpha-based update rule (Sigmoid function, bounded between 0 and 1).
     
@@ -1530,7 +1559,7 @@ def x_update_mode__alpha(x_mid, h, alpha_gate, W__h_to_x):      # GOOD results, 
     x_next = (1 - alpha) * x_mid + alpha * W__h_to_x(h[-1])
     return x_next, alpha    ###############
 
-def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):       # good but beta can get negative
+def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x, x_prev, u):       # good but beta can get negative
     """
     Beta-based update rule (Tanh function, bounded between -1 and 1).
     
@@ -1547,7 +1576,7 @@ def x_update_mode__beta(x_mid, h, alpha_gate, W__h_to_x):       # good but beta 
     x_next = beta * x_mid + (1 - beta) * W__h_to_x(h[-1])
     return x_next, beta ###############
 
-def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):      # not that efficient
+def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x, x_prev, u):      # not that efficient
     """
     Lambda-based update rule (Adaptive scaling, bounded between ~0.1 and 0.9).
     
@@ -1567,7 +1596,7 @@ def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x):      # not that effic
     return x_next, lambda_factor    ###############
 
 
-def x_update_mode__relu(x_mid, h, alpha_gate, W__h_to_x):       # coeff super small
+def x_update_mode__relu(x_mid, h, alpha_gate, W__h_to_x, x_prev, u):       # coeff super small
     """
     ReLU-based gate: values above 0 are passed, below 0 are zeroed.
     
@@ -1579,7 +1608,7 @@ def x_update_mode__relu(x_mid, h, alpha_gate, W__h_to_x):       # coeff super sm
     x_next = (1 - gate) * x_mid + gate * W__h_to_x(h[-1])
     return x_next, gate
 
-def x_update_mode__switch(x_mid, h, alpha_gate, W__h_to_x):     # coeff either 0 or 1
+def x_update_mode__switch(x_mid, h, alpha_gate, W__h_to_x, x_prev, u):     # coeff either 0 or 1
     """
     Hard switch: Uses a threshold to select between x_mid and transformed input.
     
@@ -1592,7 +1621,7 @@ def x_update_mode__switch(x_mid, h, alpha_gate, W__h_to_x):     # coeff either 0
     x_next = (1 - thresholded) * x_mid + thresholded * W__h_to_x(h[-1])
     return x_next, thresholded
 
-def x_update_mode__entropy(x_mid, h, alpha_gate, W__h_to_x):    # GOOD
+def x_update_mode__entropy(x_mid, h, alpha_gate, W__h_to_x, x_prev, u):    # GOOD
     """
     Gate based on entropy of softmax over hidden state projection.
     
@@ -1609,3 +1638,19 @@ def x_update_mode__entropy(x_mid, h, alpha_gate, W__h_to_x):    # GOOD
     gate = 1 - entropy  # High entropy = rely on x_mid
     x_next = gate * x_mid + (1 - gate) * W__h_to_x(h[-1])
     return x_next, gate
+
+def x_update_mode__new(x_mid, h, alpha_gate, W__h_to_x, x_prev, u):
+    """
+    x_prev: shape [batch_size, state_dim]
+    u:       shape [batch_size, control_dim]
+    """
+    # h[-1] shape:  [B, H]
+    # x_prev:       [B, S]
+    # u:            [B, U]
+
+    alpha_input = torch.cat([h[-1], x_prev, u], dim=1)  # shape: [B, H + S + U]
+    alpha = torch.sigmoid(alpha_gate(alpha_input))      # shape: [B, S]
+    alpha = alpha.unsqueeze(0)                          # [1, B, S]
+
+    x_next = (1 - alpha) * x_mid + alpha * W__h_to_x(h[-1])
+    return x_next, alpha.squeeze(0) 

@@ -94,7 +94,7 @@ sweeps = {
 }
 
 
-name_set = sets['r3d12']     # vdp, fhn, nad
+name_set = sets['fhn']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['fhn']
@@ -356,6 +356,7 @@ def main(sweep):
         __linearisation_mode = config.linearisation_mode
         __decoder_mode = config.decoder_mode
         __radius = config.radius
+        __reg = config.get("reg", 0.0)
     else:
         __control_rnn_size = wandb.config["control_rnn_size"]
         __control_rnn_depth = wandb.config["control_rnn_depth"]
@@ -379,7 +380,8 @@ def main(sweep):
         __linearisation_mode = wandb.config["linearisation_mode"]
         __decoder_mode = wandb.config["decoder_mode"]
         __radius = wandb.config["radius"]
-
+        __reg = wandb.config.get("reg", 0.0)
+    print(f'reg: {__reg}')
 
     model_args = {
         'state_dim': train_data.state_dim,
@@ -499,7 +501,7 @@ def main(sweep):
         for example in train_dl:        # for i in range 190
             ###print("check")
             #_, mean_coeff = 
-            train_step(example, loss, model, optimiser, device)
+            train_step(example, loss, model, optimiser, device, reg=__reg)
 
             #tot_coeff += mean_coeff
     
@@ -525,6 +527,7 @@ def main(sweep):
 
         if early_stop.best_model:
             torch.save(model.state_dict(), model_save_dir / "state_dict.pth")
+            run.log_model(model_save_dir.as_posix(), name=model_name)           ####################################################################################
 
             if epoch > last_save_epoch + sys_args.model_log_rate:                   # not pulled from flumen
                 if sweep: 

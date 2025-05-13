@@ -35,9 +35,9 @@ dynamics:
     b_b: [[0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [1.]]
 
 sequence_generator:
-  name: SinusoidalSequence
+  name: GaussianSqWave
   args:
-    # period: 5           # for GaussianSqWave
-    max_freq: 0.2       # for SinusoidalSequence | (Nyquist-Shannon sampling theorem) f_max < f_s / 2 = 1 / (2 * control_delta) = 2.5Hz
+    period: 5           # for GaussianSqWave
+    # max_freq: 0.2       # for SinusoidalSequence | (Nyquist-Shannon sampling theorem) f_max < f_s / 2 = 1 / (2 * control_delta) = 2.5Hz
 
 control_delta: 0.2

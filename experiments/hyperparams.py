@@ -245,28 +245,29 @@ class Hyperparams:
 
         ### ----------------------------------------------------------
             'hyperparams___fhn': {
-                "control_rnn_size": 64,             # 48 -> 64
+                "control_rnn_size": 64,
                 "control_rnn_depth": 1,         
-                "encoder_size": 2,   
+                "encoder_size": 16,                 # 2
                 "encoder_depth": 2,  
-                "decoder_size": 2,  
+                "decoder_size": 16,                 # 2
                 "decoder_depth": 2,  
-                "batch_size": 128,                  # 96 -> 128
-                "lr": 5e-4,                         # 0.001,                    
+                "batch_size": 128,
+                "lr": 5e-4,                         # 0.001 | to try if I want to speed things up                   
                 "n_epochs": 200,  
                 "es_patience": 15,              
-                "es_delta": 1e-7,
+                "es_delta": 1e-6,                   # 1e-7 | changed to stop before if plateau occurs
                 "sched_patience": 10,
                 "sched_factor": 3,
                 "loss": "mse",                  
-                "discretisation_mode": "TU",        # BE -> FE
+                "discretisation_mode": "BE",
                 "optimiser_mode": "adam",       
-                "x_update_mode": "alpha",           # entropy
+                "x_update_mode": "new",             # alpha
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet",
-                "linearisation_mode": "lpv",        # static -> lpv
-                "decoder_mode": True,              # True -> False
-                "radius": 2.0,                      # 3.0
+                "linearisation_mode": "lpv",
+                "decoder_mode": False,
+                "radius": 2.0,
+                "reg": 1.0,
             },
 
             'hyperparams___fhn_old': {

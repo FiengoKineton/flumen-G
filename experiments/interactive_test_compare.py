@@ -134,10 +134,14 @@ def main():
         n_plots = model.output_dim
 
     # First Figure: y_true vs y_pred + Input
-    num = n_plots if n_plots==2 else 1
+    if n_plots==2:      num = n_plots
+    elif n_plots==12:   num = 3
+    else:               num = 1
+    #num = n_plots if n_plots==2 else 1
     fig1, ax1 = plt.subplots(num+1, 1, sharex=True)   # before | n_plots+1
     fig1.canvas.mpl_connect('close_event', on_close_window)
 
+    if PLOT_ERROR and num==12: PLOT_ERROR=False
     if PLOT_ERROR:
         fig2, ax2 = plt.subplots(3, 1, sharex=True)  
         fig2.canvas.mpl_connect('close_event', on_close_window)
@@ -146,6 +150,7 @@ def main():
 
     sq_errors_1, sq_errors_2 = [], []
     err_list_1, err_list_2 = [], []
+    model_name = metadata['data_settings']['dynamics']['name']
 
     while True:
         time_integrate = time()
@@ -216,24 +221,33 @@ def main():
             err_list_1.append([err[n-2], err[n-1]])
             err_list_2.append([err_2[n-2], err_2[n-1]])
 
-            for k, ax_ in enumerate(ax1[:n] if n == 2 else [ax1[0]]):   ######
-                # Predicted (Advanced)
-                if num!=2: k=n-1
-                ax_.plot(t, y_pred[:, k], color=colors[0], linestyle=linestyles[0], 
-                        label=f'{WANDB_1} ({err[k]:.6f})')
+            if n!=12:
+                for k, ax_ in enumerate(ax1[:n] if n == 2 else [ax1[0]]):   ######
+                    # Predicted (Advanced)
+                    if num!=2: k=n-1
+                    ax_.plot(t, y_pred[:, k], color=colors[0], linestyle=linestyles[0], 
+                            label=f'{WANDB_1} ({err[k]:.6f})')
 
-                # Predicted (Default), optional
-                if args.wandb_2:
-                    ax_.plot(t, y_pred_2[:, k], color=colors[1], linestyle=linestyles[1],
-                            label=f'{WANDB_2} ({err_2[k]:.6f})')
+                    # Predicted (Default), optional
+                    if args.wandb_2:
+                        ax_.plot(t, y_pred_2[:, k], color=colors[1], linestyle=linestyles[1],
+                                label=f'{WANDB_2} ({err_2[k]:.6f})')
 
-                # True state trajectory
-                ax_.plot(t, y[:, k], color=colors[2], linestyle=linestyles[2], 
-                        label='True state')
+                    # True state trajectory
+                    ax_.plot(t, y[:, k], color=colors[2], linestyle=linestyles[2], 
+                            label='True state')
 
-                ax_.set_ylabel(f"$x_{{{k+1}}}$")
-                ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
-
+                    ax_.set_ylabel(f"$x_{{{k+1}}}$")
+                    ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
+            else: 
+                for k in range(num):
+                    m = n-1-k
+                    ax1[k].plot(t, y_pred[:, m], color=colors[0], linestyle=linestyles[0], label=f'{WANDB_1} ({err[m]:.6f})')
+                    ax1[k].plot(t, y_pred_2[:, m], color=colors[1], linestyle=linestyles[1], label=f'{WANDB_2} ({err_2[k]:.6f})')
+                    ax1[k].plot(t, y[:, m], color=colors[2], linestyle=linestyles[2], label='True state')
+                    ax1[k].set_ylabel(f"$x_{{{m+1}}}$")
+                    ax1[k].legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
+            
             if PLOT_ERROR:
                 #"""# === Track and plot the MSE evolution for each x_k ===
                 list_1, list_2 = np.array(err_list_1), np.array(err_list_2)
@@ -264,6 +278,7 @@ def main():
         ax1[-1].step(np.arange(0., time_horizon, delta), u[:-1], where='post')
         ax1[-1].set_ylabel("$u$")
         ax1[-1].set_xlabel("$t$")
+        ax1[0].set_title(f'{model_name} dynamics ($x \\in \\mathcal{{R}}^{n}$)')
 
         fig1.tight_layout()
         fig1.subplots_adjust(hspace=0)

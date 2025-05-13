@@ -84,13 +84,24 @@ def validate(data, loss_fn, model, device, l2_lambda=1e-4):
 torch.autograd.set_detect_anomaly(True)     # --- ADDED for LSTM_my!
 # ---------------------------------------------------------------- #
 
-def train_step(example, loss_fn, model, optimiser, device):
+def train_step(example, loss_fn, model, optimiser, device, reg=0.0, l2_lambda=1e-4, alpha_lambda=0.01):
     x0, y, u, deltas = prep_inputs(*example, device)
 
     optimiser.zero_grad()
 
-    y_pred, *_ = model(x0, u, deltas)
+    y_pred, _, alpha = model(x0, u, deltas)
     loss = model.state_dim * loss_fn(y, y_pred)       
+
+    # Add L2 regularization manually
+    l2_norm = sum(p.pow(2.0).sum() for p in model.parameters() if p.requires_grad)
+    l2_reg = l2_lambda * l2_norm
+
+    # Optional: Alpha regularization
+    alpha_reg = alpha_lambda * ((alpha - 0.5)**2).mean()
+
+    # Total loss
+    loss = loss + (l2_reg + alpha_reg)*reg
+
 
     #print(model.linear.weight.grad)
     loss.backward()
