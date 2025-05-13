@@ -62,7 +62,10 @@ def plot_s_to_z_mapping_ultra(T=0.2, N=2000):
     ):
         Z = method_func(S, T)
         z_imm = method_func(1j * np.linspace(-100, 100, N), T)
-        poli_z = method_func(poli_s, T)
+
+        vdp_poles, fhn_poles = poli_s[:2], poli_s[2:]
+        #poli_z = method_func(poli_s, T)
+        vdp_z, fhn_z = method_func(vdp_poles, T), method_func(fhn_poles, T)
 
         ax.set_title(f"{title} Mapping {formula}")
         ax.axvline(0, color='black', lw=0.5)
@@ -75,7 +78,17 @@ def plot_s_to_z_mapping_ultra(T=0.2, N=2000):
 
         ax.plot(np.real(unit_circle), np.imag(unit_circle), 'k--', label='Unit Circle')
         ax.plot(np.real(z_imm), np.imag(z_imm), 'r', lw=1.5, label='Im(s)-axis')
-        ax.plot(np.real(poli_z), np.imag(poli_z), 'rx', markersize=8, label='Mapped Poles')
+        #ax.plot(np.real(poli_z), np.imag(poli_z), 'rx', markersize=8, label='Mapped Poles')
+        ax.plot(np.real(vdp_z), np.imag(vdp_z), 'rx', markersize=8, label='VDP Poles')
+        ax.plot(np.real(fhn_z), np.imag(fhn_z), 'bo', markersize=6, label='FHN Poles')
+
+        for z in fhn_z:
+            if np.real(z) > 2:
+                ax.annotate('→ FHN pole', xy=(2, np.imag(z)), xytext=(2.1, np.imag(z)),
+                            textcoords='data', ha='left', va='center', color='blue',
+                            arrowprops=dict(arrowstyle='->', color='blue'))
+        print(f'VDP ({method_func}): {vdp_z}')
+        print(f'FHN ({method_func}): {fhn_z}')
 
         # Regione stabile: Re(s) < 0
         stable_mask = np.real(S) < 0
@@ -111,9 +124,15 @@ def plot_s_to_z_mapping_ultra(T=0.2, N=2000):
     # Area instabile Re(s)>0 → rosa (corrispondente alla zona "ingannevolmente stabile" nel dominio z)
     #ax_s.fill_betweenx(y, 0, x[-1], color='mistyrose', alpha=0.4, label='Re(s) > 0')
 
-    ax_s.plot(np.real(poli_s), np.imag(poli_s), 'rx', markersize=8, label='Poles')
+    #ax_s.plot(np.real(poli_s), np.imag(poli_s), 'rx', markersize=8, label='Poles')
+    ax_s.plot(np.real(vdp_poles), np.imag(vdp_poles), 'rx', markersize=8, label='VDP Poles')
+    ax_s.plot(np.real(fhn_poles), np.imag(fhn_poles), 'bo', markersize=6, label='FHN Poles')
+
     ax_s.plot([x[0], 0], [0, 0], 'r', lw=2)
     ax_s.legend()
+
+    print('VDP (CT):', vdp_poles)
+    print('FHN (CT):', fhn_poles)
 
     plt.tight_layout()
     plt.show()

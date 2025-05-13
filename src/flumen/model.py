@@ -53,6 +53,9 @@ class CausalFlowModel(nn.Module):
 
         self.mode_rnn = mode_rnn                            # {"new", "old", "gru"} | if new then h0_stack, else h0
         self.mode_dnn = mode_dnn                            # if True then old dnn  | better always True
+        if self.decoder_mode==None and self.mode_rnn=='new': self.decoder_mode = False
+        if self.decoder_mode==None and self.mode_rnn=='old': self.decoder_mode = True
+
         print("\n\nmode_rnn:", self.mode_rnn, "\nmode_dnn:", self.mode_dnn, "\ndecoder_mode:", self.decoder_mode, "\n\n")
 
         function_name = f"mode_rnn_{self.mode_rnn}"
