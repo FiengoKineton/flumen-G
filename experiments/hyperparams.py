@@ -210,12 +210,13 @@ class Hyperparams:
                 "loss": "mse",                      # {mse, huber, l1}
                 "discretisation_mode": "TU",        # {FE, BE, TU, RK4, exact}
                 "optimiser_mode": "adam",           # {adam, tbptt, nesterov, newton}
-                "x_update_mode": "entropy",         # {alpha, beta, lamda, relu, switch, entropy}
+                "x_update_mode": "new",             # before entropy | {alpha, beta, lamda, relu, switch, entropy, new}
                 "mode_rnn": "new",                  # {new, old, gru}
                 "mode_dnn": "FFNet",                # {FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder}
                 "linearisation_mode": "lpv",        # {static, current, lpv} | either lpv or static
                 "decoder_mode": False,
                 "radius": 3,                        # default 3
+                "reg": 0.0,                         # default 0.0
             },
 
             'hyperparams___vdp_old': {
@@ -241,6 +242,7 @@ class Hyperparams:
                 "linearisation_mode": None, 
                 "decoder_mode": True,
                 "radius": None,
+                "reg": 0.0,
             },
 
         ### ----------------------------------------------------------
@@ -293,6 +295,7 @@ class Hyperparams:
                 "linearisation_mode": None,
                 "decoder_mode": True,
                 "radius": None,
+                "reg": 0.0,
             },
 
         ### ----------------------------------------------------------
@@ -313,12 +316,13 @@ class Hyperparams:
                 "loss": "mse",                  
                 "discretisation_mode": "FE",    # {BE, FE}
                 "optimiser_mode": "adam",       
-                "x_update_mode": "entropy",
+                "x_update_mode": "new",         # before entropy
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet", 
                 "linearisation_mode": "static",
                 "decoder_mode": False,          # set to True if mode_rnn is 'old'
                 "radius": 3,
+                "reg": 0.0,
             },
 
             'hyperparams___nad_old': {
@@ -344,6 +348,7 @@ class Hyperparams:
                 "linearisation_mode": None,
                 "decoder_mode": True,
                 "radius": None,
+                "reg": 0.0,
             },
 
         ### ----------------------------------------------------------
@@ -370,6 +375,7 @@ class Hyperparams:
                 "linearisation_mode": "static",
                 "decoder_mode": False,          # set to True if mode_rnn is 'old'
                 "radius": 1,
+                "reg": 0.0,
             },
 
             'hyperparams___r3d12_old': {
@@ -395,6 +401,7 @@ class Hyperparams:
                 "linearisation_mode": None,
                 "decoder_mode": True,
                 "radius": None,
+                "reg": 0.0,
             },
 
         ### ----------------------------------------------------------

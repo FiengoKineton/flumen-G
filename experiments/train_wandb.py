@@ -94,7 +94,7 @@ sweeps = {
 }
 
 
-name_set = sets['fhn']     # vdp, fhn, nad
+name_set = sets['vdp']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['fhn']
