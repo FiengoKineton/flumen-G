@@ -213,23 +213,35 @@ class LSTM(nn.Module):
             outputs[:, t, :].copy_(z[-1])
             coefficients[:, t, :].copy_(coeff)  
             matrices[t, :, :].copy_(A_matrix[0])
-
+            #if t==5: break
             ###print("checkpoint"), sys.exit()     # Debugging
 
         if self.use_decoder: 
             if self.decode_every_timestep:
                 # Decode every z_t in outputs: [B, T, z_size]
-                z_all = outputs.reshape(-1, self.z_size)                   # [B*T, z_size]
-                h_all = z_all[:, self.state_dim:]                         # [B*T, hidden]
-                x_all = self.decoder(z_all)                               # [B*T, state]
-                z_corrected = torch.cat((x_all, h_all), dim=-1)           # [B*T, z_size]
-                outputs = z_corrected.view(batch_size, seq_len, -1)       # [B, T, z_size]
+                B, T, Z = outputs.shape
+
+                z_all = outputs.reshape(-1, Z)                      # [B*T, z_size]
+                h_all = z_all[:, self.state_dim:]                  # [B*T, hidden]
+                x_all = self.decoder(z_all)                        # [B*T, state_dim]
+                z_corrected = torch.cat((x_all, h_all), dim=-1)    # [B*T, z_size]
+
+                # Ricostruisci outputs senza overwrite in-place
+                outputs = z_corrected.view(B, T, Z).contiguous()
+
             else:
+                #print(f'outputs: {outputs.shape}')
                 z_fin = outputs[:, -1, :]
                 h_fin = z_fin[:, self.state_dim:]
                 x_fin = self.decoder(z_fin)
+                #print(f'z_fin: {outputs.shape} --- h_fin: {h_fin.shape} --- x_fin: {x_fin.shape}')
                 z_adj = torch.cat((x_fin, h_fin), dim=-1)
-                outputs[:, -1, :].copy_(z_adj)
+                #print(f'z_adj: {z_adj.shape}')
+                outputs = torch.cat([
+                    outputs[:, :-1, :],                      # tutti i timestep tranne l’ultimo
+                    z_adj.unsqueeze(1)                 # ultimo timestep corretto
+                ], dim=1)
+                #print(f'outputs: {outputs.shape}')
 
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         out = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)

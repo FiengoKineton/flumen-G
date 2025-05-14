@@ -270,8 +270,8 @@ class Hyperparams:
                 "decoder_mode": False,
                 "radius": 2.0,
                 "reg": 1.0,
-                "use_decoder": True, 
-                "decode_every_timestep": False,
+                "use_decoder": False, 
+                "decode_every_timestep": True,
             },
 
             'hyperparams___fhn_old': {
