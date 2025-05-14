@@ -113,24 +113,34 @@ if __name__ == "__main__":
             'old': 'src/flumen/finals/csv/VDP/old/default/old_vdp.csv',
             'lpv': 'src/flumen/finals/csv/VDP/new/vdp-lpv.csv',
             'static': 'src/flumen/finals/csv/VDP/new/vdp-static.csv',
+            'upd_new': 'src/flumen/finals/csv/VDP/new/vdp-upd_new.csv',
         },
-        'FHN_true': {
-            'old': 'src/flumen/finals/csv/FHN/old/default/old_fhn.csv',
-            'BE_stat': 'src/flumen/finals/csv/FHN/new/True/fhn-BE_stat_true.csv',
-            'FE_lpv': 'src/flumen/finals/csv/FHN/new/True/fhn-FE_lpv_false_T.csv',
-            'alpha_true': 'src/flumen/finals/csv/FHN/new/True/fhn-alpha-T.csv',
-        },
+        #'FHN_true': {
+            #'old': 'src/flumen/finals/csv/FHN/old/default/old_fhn.csv',
+            #'BE_stat': 'src/flumen/finals/csv/FHN/new/True/fhn-BE_stat_true.csv',
+            #'FE_lpv': 'src/flumen/finals/csv/FHN/new/True/fhn-FE_lpv_false_T.csv',
+            #'alpha_true': 'src/flumen/finals/csv/FHN/new/True/fhn-alpha-T.csv',
+        #},
         'FHN_false': {
             'old': 'src/flumen/finals/csv/FHN/old/default/old_fhn.csv',
             'alpha_false': 'src/flumen/finals/csv/FHN/new/fhn-new_method.csv',
             'oval_false': 'src/flumen/finals/csv/FHN/new/fhn-oval_false.csv',
+            'upd_new': 'src/flumen/finals/csv/FHN/new/fhn-upd_new.csv',
         },
-        'NAD': {
-            'old_stable': 'src/flumen/finals/csv/NAD/old/default/old_nad-stable.csv',
-            'new_stable': 'src/flumen/finals/csv/NAD/new/nad-stable.csv',
+        'NAD_small': {
+            'old_small': 'src/flumen/finals/csv/NAD/old/default/old_nad-stable.csv',
+            'new_small': 'src/flumen/finals/csv/NAD/new/nad-stable.csv',
+            'upd_new_small': 'src/flumen/finals/csv/NAD/new/nad-stable-upd_new.csv',
+        },
+        'NAD_big': {
             'old_big': 'src/flumen/finals/csv/NAD/old/default/old_nad-big.csv',
             'new_big': 'src/flumen/finals/csv/NAD/new/nad-big.csv',
-        }
+            'upd_new_big': 'src/flumen/finals/csv/NAD/new/nad-big-upd_new.csv',
+        },
+        'R3D12': {
+            'old': 'src/flumen/finals/csv/R3D12/r3d12-old.csv',
+            'new': 'src/flumen/finals/csv/R3D12/r3d12.csv',
+        },
     }
 
     sections_sin = {
@@ -171,8 +181,8 @@ if __name__ == "__main__":
 
     all_sections = {
         "General": sections_gen,
-        "Sinusoidal": sections_sin,
-        "DS": sections_DS
+        #"Sinusoidal": sections_sin,
+        #"DS": sections_DS
     }
 
     for section_type, sections in all_sections.items():

@@ -527,7 +527,7 @@ def main(sweep):
 
         if early_stop.best_model:
             torch.save(model.state_dict(), model_save_dir / "state_dict.pth")
-            run.log_model(model_save_dir.as_posix(), name=model_name)           ####################################################################################
+            #run.log_model(model_save_dir.as_posix(), name=model_name)           ####################################################################################
 
             if epoch > last_save_epoch + sys_args.model_log_rate:                   # not pulled from flumen
                 if sweep: 

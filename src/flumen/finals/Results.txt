@@ -21,18 +21,20 @@ VDP best runs:
 
 - lpv | vdp_fin-3: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lbz1tnpu:v3
 - static | vdp_fin-25: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lwqp2l3z:v3
+- upd_new | _: (wandb) _
 
 - small_DS | vdp_small_DS-01: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-jkbw3la3:v2
 
-- old_sin | vdp_sin-old: (wandb_2) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-sjelftdk:v0
-- sin | vdp_sin-01: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-22h9jfjb:v0
+### - old_sin | vdp_sin-old: (wandb_2) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-sjelftdk:v0
+### - sin | vdp_sin-01: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-22h9jfjb:v0
 
 
 ❌ (default.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flow_model-vdp_test_data-vdp_test-p7avyn10:v21
 ✔️ (vdp_lpv.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lbz1tnpu:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
 ✔️ (vdp_static.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lwqp2l3z:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
 ✔️ (vdp_small_DS.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-jkbw3la3:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
-🛠️ (vdp_sin.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-22h9jfjb:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-sjelftdk:v0
+### 🛠️ (vdp_sin.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-22h9jfjb:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-sjelftdk:v0
+🛠️ (vdp_upd_new.pdf) python experiments/interactive_test_compare.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
 
 
 Note: (decoder_mode, linearisation_mode, discretisation_mode) = [(False, lpv, TU) and (False, static, TU)]
@@ -45,13 +47,12 @@ FHN best runs: (fhn--32)
 - BE_stat | fhn--04: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4
 - FE_lpv | fhn--12: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-vu6o3roj:v2
 - alpha_true | fhn-01-T: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-sbn9fh7p:v2
+
 - oval_false | fhn_swift-r=2--3: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-rystn8ww:v4
 - alpha_false | fhn---02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-bnz9skhi:v4
+- upd_new | _: (wandb) _
 
 - small_DS | fhn-01-T-small_DS: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-krfpnxea:v4
-
-- old_sin | _: (wandb_2)
-- sin | _: (wandb)
 
 
 ✔️ (fhn_stat_true.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
@@ -60,7 +61,7 @@ FHN best runs: (fhn--32)
 🛠️ (fhn_oval_false.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-rystn8ww:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
 🛠️ (fhn_al_false.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-bnz9skhi:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
 🛠️ (fhn_small_DS.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-krfpnxea:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
-❌ (fhn_sin.pdf) python.exe .\experiments\interactive_test_compare.py --wandb _ --wandb_2 _
+🛠️ (fhn_upd_new.pdf) python experiments/interactive_test_compare.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
 
 
 Note: (decoder_mode, linearisation_mode, discretisation_mode) = (True, static, BE)
@@ -70,42 +71,55 @@ PPS: use Elipse and set swift=1 for oval
 
 NAD-big best runs: 
 - old_big | nad_fin-old-big: (wandb_2) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10
+
 - new_big | nad_big_fin-05: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-3dxiz9gf:v2
+- upd_new | _: (wandb) _
 
 - small_DS_big | nad_small_DS-02 (01--no artifact): (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-8ciuv2r3:v3
 
-- old_big-sin | nad_sin_big_old-01: (wandb_2) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
-- new_big-sin | nad_sin_big-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v3
+### - old_big-sin | nad_sin_big_old-01: (wandb_2) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
+### - new_big-sin | nad_sin_big-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v3
 
 
 ✔️ (nad_big.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-3dxiz9gf:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10
 ✔️ (nad_small_DS_big.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-8ciuv2r3:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10
-✔️ (nad_big_sin.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
+### ✔️ (nad_big_sin.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
+🛠️ (nad_big_upd_new.pdf) python experiments/interactive_test_compare.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10
 
 
 Note: (decoder_mode, linearisation_mode, discretisation_mode) = (False, static, FE)
 PS: change nad.yaml in section [state_dim, mode]
 --------------------------------------------------------------------------------------------------------------
 
-NAD-stable best runs: 
+NAD-small best runs: 
 - old_stable | nad_fin-old-2: (wandb_2) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10
+
 - new_stable | nad_fin-01: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-zshs5333:v0
+- upd_new | nad_small-x_update__new: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-siq3pyyf:v8
 
 - small_DS_stable | _: (wandb)
 
-- old_sin | nad_sin_old-02: (wandb_2) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-ux5pkc68:v2
-- new_sin | nad_sin-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-6kxg8in6:v0
+### - old_sin | nad_sin_old-02: (wandb_2) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-ux5pkc68:v2
+### - new_sin | nad_sin-02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-6kxg8in6:v0
 
 
 ✔️ (nad_stable.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-zshs5333:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10
 ❌ (nad_small_DS_stable.pdf) python.exe .\experiments\interactive_test_compare.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10
-✔️ (nad_stable_sin.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-6kxg8in6:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-ux5pkc68:v2
+### ✔️ (nad_stable_sin.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-6kxg8in6:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-ux5pkc68:v2
+✔️ (nad_stable_upd_new.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-siq3pyyf:v8 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10
 
 
 Note: (decoder_mode, linearisation_mode, discretisation_mode) = (False, static, FE)
 PS: change nad.yaml in section [state_dim, mode]
+--------------------------------------------------------------------------------------------------------------
 
+R3D12:
+- r3d12_old | r3d12-gaussian-old: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-gaciweh0:v0
+- r3d12_static | r3d12-gaussian-static: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-ku1s1thr:v1
+- r3d12_upd_new | _: (wandb) _
 
+(r3d12_static) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-ku1s1thr:v1 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-gaciweh0:v0
+(r3d12_upd_new) python.exe .\experiments\interactive_test_compare.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-gaciweh0:v0
 
 
 ___________________________________________________________________________________________________________________________________________
@@ -158,48 +172,41 @@ time                 40958.6990 ± 20805.0690  35880.9298 ± 2156.5427        12
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
-Metrics Comparison for NAD:
-                                old_stable                  new_stable                        old_big                       new_big
-Best Simulation  nad_fin-old-2 (val=0.001105)  nad_fin-01 (val=0.0006947)  nad_fin-old-big (val=0.02377)  nad_big_fin-05 (val=0.01123)
-_step                      151.6667 ± 83.7158            46.7500 ± 8.8761             144.0000 ± 96.9948             53.1250 ± 23.3510
-best_val                      0.0023 ± 0.0014             0.0012 ± 0.0003                0.0340 ± 0.0103               0.0138 ± 0.0024
-best_epoch                 139.0000 ± 94.3981           26.1250 ± 12.0646            135.3333 ± 111.1411             42.5000 ± 22.8661
-best_test                     0.0033 ± 0.0031             0.0012 ± 0.0004                0.0264 ± 0.0080               0.0131 ± 0.0009
-best_train                    0.0003 ± 0.0001             0.0004 ± 0.0001                0.0020 ± 0.0028               0.0007 ± 0.0002
-time                  50041.6461 ± 17418.2742      32057.6465 ± 6607.2100        37678.3957 ± 30192.6393       41588.0502 ± 23762.2955
+Metrics Comparison for NAD_small:
+                                    old_small                   new_small                           upd_new_small
+Best Simulation  nad_fin-old-2 (val=0.001105)  nad_fin-01 (val=0.0006947)  nad_small-x_update__new (val=0.001606)    
+_step                      151.6667 ± 83.7158            46.7500 ± 8.8761                           24.0000 ± nan    
+best_val                      0.0023 ± 0.0014             0.0012 ± 0.0003                            0.0016 ± nan    
+best_epoch                 139.0000 ± 94.3981           26.1250 ± 12.0646                            9.0000 ± nan    
+best_test                     0.0033 ± 0.0031             0.0012 ± 0.0004                            0.0012 ± nan    
+best_train                    0.0003 ± 0.0001             0.0004 ± 0.0001                            0.0005 ± nan    
+time                  50041.6461 ± 17418.2742      32057.6465 ± 6607.2100                        24944.1854 ± nan    
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
-
-====================== Sinusoidal Sections ======================
-
-
-----------------------------------------------------------------------------
-----------------------------------------------------------------------------
-
-Metrics Comparison for VDP-sin:
-                                old_sin                  new_sin
-Best Simulation  vdp_sin-old (val=0.3615)  vdp_sin-01 (val=0.4322)
-_step                       31.0000 ± nan         17.0000 ± 0.0000
-best_val                     0.3615 ± nan          0.4922 ± 0.0848
-best_epoch                   6.0000 ± nan          2.0000 ± 0.0000
-best_test                    1.3065 ± nan          1.2921 ± 0.0456
-best_train                   0.2392 ± nan          0.5152 ± 0.0364
-time                      4700.0315 ± nan      10258.1850 ± 3.3037
+Metrics Comparison for NAD_big:
+                                       old_big                       new_big                          upd_new_big
+Best Simulation  nad_fin-old-big (val=0.02377)  nad_big_fin-05 (val=0.01123)  nad_big-x_update__new (val=0.02408)    
+_step                       144.0000 ± 96.9948             53.1250 ± 23.3510                        35.0000 ± nan    
+best_val                       0.0340 ± 0.0103               0.0138 ± 0.0024                         0.0241 ± nan    
+best_epoch                 135.3333 ± 111.1411             42.5000 ± 22.8661                        35.0000 ± nan    
+best_test                      0.0264 ± 0.0080               0.0131 ± 0.0009                         0.0142 ± nan    
+best_train                     0.0020 ± 0.0028               0.0007 ± 0.0002                         0.0008 ± nan    
+time                   37678.3957 ± 30192.6393       41588.0502 ± 23762.2955                     37600.3932 ± nan    
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
-Metrics Comparison for NAD-sin:
-                                    old_sin                    new_sin                       old_big_sin                   new_big_sin
-Best Simulation  nad_sin_old-02 (val=0.002201)  nad_sin-02 (val=0.002334)  nad_sin_big_old-01 (val=0.03625)  nad_sin_big-02 (val=0.01416)      
-_step                       137.5000 ± 65.7609           41.8000 ± 6.7231                  30.5000 ± 0.7071             68.8000 ± 25.0140      
-best_val                       0.0034 ± 0.0017            0.0035 ± 0.0011                   0.0398 ± 0.0051               0.0170 ± 0.0020      
-best_epoch                  112.5000 ± 65.7609           20.8000 ± 7.5631                   5.5000 ± 0.7071             47.8000 ± 19.9424      
-best_test                      0.0074 ± 0.0026            0.0032 ± 0.0013                   0.0422 ± 0.0042               0.0173 ± 0.0012      
-best_train                     0.0007 ± 0.0001            0.0009 ± 0.0001                   0.0069 ± 0.0012               0.0016 ± 0.0003      
-time                   97554.6680 ± 52218.0499    42605.6057 ± 22395.0561             24689.9393 ± 270.9701       71497.5481 ± 49352.4864      
+Metrics Comparison for R3D12:
+                                           old                             new
+Best Simulation  r3d12-gaussian-old (val=11.1)  r3d12-x_update__new (val=8.76)
+_step                            39.0000 ± nan               33.0000 ± 32.5269
+best_val                         11.0991 ± nan                 9.1143 ± 0.5004
+best_epoch                       14.0000 ± nan               17.5000 ± 20.5061
+best_test                        11.5832 ± nan                11.8453 ± 4.6604
+best_train                        5.6562 ± nan                 6.0492 ± 5.7897
+time                          67710.3413 ± nan         77384.2843 ± 75189.7232
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------

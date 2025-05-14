@@ -242,11 +242,12 @@ def main():
             else: 
                 for k in range(num):
                     m = n-1-k
-                    ax1[k].plot(t, y_pred[:, m], color=colors[0], linestyle=linestyles[0], label=f'{WANDB_1} ({err[m]:.6f})')
-                    ax1[k].plot(t, y_pred_2[:, m], color=colors[1], linestyle=linestyles[1], label=f'{WANDB_2} ({err_2[k]:.6f})')
-                    ax1[k].plot(t, y[:, m], color=colors[2], linestyle=linestyles[2], label='True state')
-                    ax1[k].set_ylabel(f"$x_{{{m+1}}}$")
-                    ax1[k].legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
+                    j = num-1-k
+                    ax1[j].plot(t, y_pred[:, m], color=colors[0], linestyle=linestyles[0], label=f'{WANDB_1} ({err[m]:.6f})')
+                    ax1[j].plot(t, y_pred_2[:, m], color=colors[1], linestyle=linestyles[1], label=f'{WANDB_2} ({err_2[m]:.6f})')
+                    ax1[j].plot(t, y[:, m], color=colors[2], linestyle=linestyles[2], label='True state')
+                    ax1[j].set_ylabel(f"$x_{{{m+1}}}$")
+                    ax1[j].legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
             
             if PLOT_ERROR:
                 #"""# === Track and plot the MSE evolution for each x_k ===
@@ -278,7 +279,7 @@ def main():
         ax1[-1].step(np.arange(0., time_horizon, delta), u[:-1], where='post')
         ax1[-1].set_ylabel("$u$")
         ax1[-1].set_xlabel("$t$")
-        ax1[0].set_title(f'{model_name} dynamics ($x \\in \\mathcal{{R}}^{n}$)')
+        ax1[0].set_title(f'{model_name} dynamics ($x \\in \\mathcal{{R}}^{{{n}}}$)')
 
         fig1.tight_layout()
         fig1.subplots_adjust(hspace=0)

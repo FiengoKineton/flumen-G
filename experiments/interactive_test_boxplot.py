@@ -21,15 +21,24 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 RUNS: 
 
 VDP----------------
-(lpv) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lbz1tnpu:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
-(static) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lwqp2l3z:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0
+(lpv) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lbz1tnpu:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0 --note lpv
+(static) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lwqp2l3z:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0 --note static
+(upd_new) python .\experiments\interactive_test_boxplot.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10 --note upd_new
 
 FHN----------------
-(stat) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
+(stat) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6 --note static
+(upd_new) python.exe .\experiments\interactive_test_boxplot.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6 --note upd_new
 
 NAD----------------
 (big) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-3dxiz9gf:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10
+(big_upd_new) python.exe .\experiments\interactive_test_boxplot.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10 --note upd_new
 (small) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-zshs5333:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10
+(small_upd_new) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-siq3pyyf:v8 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10 --note upd_new
+
+R3D12--------------
+(r3d12_static) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-ku1s1thr:v1 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-gaciweh0:v0
+(r3d12_upd_new) python.exe .\experiments\interactive_test_boxplot.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-gaciweh0:v0
+
 """
 
 
@@ -43,7 +52,7 @@ def parse_args():
     ap.add_argument('--wandb_2', action='store_true')
     ap.add_argument('--time_horizon', type=float, default=None)
     ap.add_argument('--test_noise_std', type=float, default=0.0, help="Add Gaussian noise to test inputs during evaluation.")
-
+    ap.add_argument('--note', type=str, default=None)
     return ap.parse_args()
 
 
@@ -70,6 +79,7 @@ def get_metadata(wandb, path):
 def main():
     plt.ion()  # Enable interactive mode
     args = parse_args()
+    NOTE = args.note
     NOISE_STD = args.test_noise_std
     WANDB_1, WANDB_2 = 'new_architecture', 'default_architecture'   # 'old_architecture', 'default' 
     test_sin = True
@@ -110,10 +120,17 @@ def main():
     model_name = metadata['data_settings']['dynamics']['name']
 
 
-    time_horizon = args.time_horizon if args.time_horizon else num_times * metadata["data_args"]["time_horizon"]
     err_list_1, err_list_2 = [], []
 
-    n = n_plots if n_plots==2 else 1
+    if n_plots==2:      n = n_plots
+    elif n_plots==12:   n = 3
+    else:               n = 1
+
+    if args.time_horizon: 
+        time_horizon = args.time_horizon 
+    else: 
+        time_horizon = num_times * metadata["data_args"]["time_horizon"] if n!=3 else metadata["data_args"]["time_horizon"]
+
     print(f'output dimension for {model_name}: {n}')
     stop = False
     while not stop:
@@ -145,6 +162,9 @@ def main():
         if n==2:
             err_list_1.append([err[n-2], err[n-1]])
             err_list_2.append([err_2[n-2], err_2[n-1]])
+        elif n==3:
+            err_list_1.append([err[n-3], err[n-2], err[n-1]])
+            err_list_2.append([err_2[n-3], err_2[n-2], err_2[n-1]])
         else: 
             err_list_1.append([err[n-1]])
             err_list_2.append([err_2[n-1]])
@@ -166,6 +186,19 @@ def main():
 
         # Labels for x-axis
         labels = [f'{WANDB_1} $x_1$', f'{WANDB_2} $x_1$', f'{WANDB_1} $x_2$', f'{WANDB_2} $x_2$']
+    elif n==3:
+        data_to_plot = [
+            err_array_1[:, 0],  # x10 errors - method 1
+            err_array_2[:, 0],  # x10 errors - method 2
+            err_array_1[:, 1],  # x11 errors - method 1
+            err_array_2[:, 1],  # x11 errors - method 2
+            err_array_1[:, 2],  # x12 errors - method 1
+            err_array_2[:, 2],  # x12 errors - method 2
+        ]
+
+        # Labels for x-axis
+        m = model.output_dim
+        labels = [f'{WANDB_1} $x_{{{m-2}}}$', f'{WANDB_2} $x_{{{m-2}}}$', f'{WANDB_1} $x_{{{m-1}}}$', f'{WANDB_2} $x_{{{m-1}}}$', f'{WANDB_1} $x_{{{m}}}$', f'{WANDB_2} $x_{{{m}}}$']
     else:
         data_to_plot = [
             err_array_1[:, 0],  # x_15 errors - method 1
@@ -173,7 +206,7 @@ def main():
         ]
 
         m = model.output_dim
-        labels = [f'{WANDB_1} $x_{m}$', f'{WANDB_2} $x_{m}$']
+        labels = [f'{WANDB_1} $x_{{{m}}}$', f'{WANDB_2} $x_{{{m}}}$']
 
     fig, ax = plt.subplots(1, 1, sharex=True)
     fig.canvas.mpl_connect('close_event', on_close_window)
@@ -183,6 +216,7 @@ def main():
 
     # Set x-axis labels
     if n==2: ax.set_xticks([1, 2, 3, 4])
+    elif n==3: ax.set_xticks([1, 2, 3, 4, 5, 6])
     else: ax.set_xticks([1, 2])
 
     ax.set_xticklabels(labels, rotation=15)
@@ -190,7 +224,8 @@ def main():
     # Optional: log scale for y-axis if the values span multiple orders
     ax.set_yscale('log')
     ax.set_ylabel('MSE')
-    ax.set_title(f'{model_name} error distributions over {N} runs')
+    if NOTE is None:    ax.set_title(f'{model_name} error distributions over {N} runs')
+    else:               ax.set_title(f'{model_name} error distributions over {N} runs ({NOTE})')
 
     plt.tight_layout()
     plt.show(block=True)
