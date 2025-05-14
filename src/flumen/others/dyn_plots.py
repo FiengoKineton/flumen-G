@@ -32,14 +32,14 @@ class Dynamics:
 
 
         # -------------------------------
-        term_time = []    # [28]    #[1, 12, 28, 80, 150]
+        term_time = [3]    # [28]    #[1, 12, 28, 80, 150]
         for t in term_time:
             self.t_span = (0, t) 
             self.t_eval = np.linspace(*self.t_span, 1000)
             self.u_array = self.generate_input(self.t_eval, step_size=self.step_size, max_freq=self.max_freq)
 
             self.init_config()
-            #self.plot(both)
+            self.plot(both)
 
         models = []   # ['vdp', 'fhn', 'nad']
         if stab: 
@@ -62,41 +62,39 @@ class Dynamics:
     # -------------------------------
     # Grafici
     def plot(self, both):
-        plt.figure(figsize=(16, 8))
-
+        plt.figure(figsize=(12, 6))
+        n = 2
         # Van der Pol
-        plt.subplot(4, 1, 1)
-        if both: plt.plot(self.sol_vdp.t, self.sol_vdp.y[0], label='Nonlinear: p')
+        plt.subplot(n, 1, 1)
+        """if both: plt.plot(self.sol_vdp.t, self.sol_vdp.y[0], label='Nonlinear: p')
         plt.plot(self.sol_lin_vdp.t, self.sol_lin_vdp.y[0], '--', label='Linearized: p')
         plt.title('Van der Pol Oscillator')
-        plt.xlabel('Time')
         plt.ylabel('Position p')
         plt.legend()
-        plt.grid()
+        plt.grid()#"""
 
-        # FitzHugh-Nagumo
-        plt.subplot(4, 1, 2)
+        #"""# FitzHugh-Nagumo
+        plt.subplot(n, 1, 1)
         if both: plt.plot(self.sol_fhn.t, self.sol_fhn.y[0], label='Nonlinear: v')
         plt.plot(self.sol_lin_fhn.t, self.sol_lin_fhn.y[0], '--', label='Linearized: v')
         plt.title('FitzHugh-Nagumo Model')
-        plt.xlabel('Time')
         plt.ylabel('Excitation v')
         plt.legend()
-        plt.grid()
+        plt.grid()#"""
 
-        # LinearSystem
-        plt.subplot(4, 1, 3)
+        """# LinearSystem
+        plt.subplot(n, 1, 3)
         plt.plot(self.sol_linsys.t, self.sol_linsys.y[0], label='Linear: x')
         plt.title('Linear Model')
-        plt.xlabel('Time')
         plt.ylabel('State x')
         plt.legend()
-        plt.grid()
+        plt.grid()#"""
 
         # Ingresso
-        plt.subplot(4, 1, 4)
+        plt.subplot(n, 1, n)
         plt.plot(self.t_eval, self.u_array, label='u(t)')
-        plt.title('Ingresso randomico a gradini')
+        #plt.title('Ingresso randomico a gradini')
+        plt.xlabel('Time')
         plt.ylabel('u(t)')
         plt.grid()
 
@@ -104,7 +102,7 @@ class Dynamics:
         plt.show()
 
     # --------------------------------------------------------------
-        plt.figure(figsize=(14, 12))
+        """plt.figure(figsize=(14, 12))
 
         plt.subplot(6, 1, 1)
         if both: plt.plot(self.sol_nad.t, self.sol_nad.y[0], label='Nonlinear: x1')
@@ -149,7 +147,7 @@ class Dynamics:
         plt.grid()
 
         plt.tight_layout()
-        plt.show()
+        plt.show()#"""
 
 
 
@@ -543,7 +541,7 @@ if __name__ == "__main__":
     u_mode = 'rnd'  # [rnd, sin]
     dyn = Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab, method=args.method, u_mode=u_mode)
 
-    dyn.high_dim_ode()
+    #dyn.high_dim_ode()
     """
     A_big = np.array([[-1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
         [ 0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],

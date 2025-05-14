@@ -28,7 +28,9 @@ class CausalFlowModel(nn.Module):
                  linearisation_mode=None, 
                  decoder_mode=None,
                  batch_size=128, 
-                 radius=3, ):
+                 radius=3, 
+                 use_decoder=False,
+                 decode_every_timestep=False,):
         super(CausalFlowModel, self).__init__()
 
         self.state_dim = state_dim
@@ -78,6 +80,8 @@ class CausalFlowModel(nn.Module):
                 linearisation_mode=linearisation_mode_passed,
                 batch_size=batch_size,
                 radius=radius,
+                use_decoder=use_decoder, 
+                decode_every_timestep=decode_every_timestep,
             ) 
         elif self.mode_rnn=='old': 
             self.u_rnn = torch.nn.LSTM(

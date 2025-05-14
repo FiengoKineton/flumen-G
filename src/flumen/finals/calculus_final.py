@@ -138,8 +138,12 @@ if __name__ == "__main__":
             'upd_new_big': 'src/flumen/finals/csv/NAD/new/nad-big-upd_new.csv',
         },
         'R3D12': {
-            'old': 'src/flumen/finals/csv/R3D12/r3d12-old.csv',
-            'new': 'src/flumen/finals/csv/R3D12/r3d12.csv',
+            'old': 'src/flumen/finals/csv/Others/r3d12-old.csv',
+            'new': 'src/flumen/finals/csv/Others/r3d12.csv',
+        },
+        'HD_ODE': {
+            'old': 'src/flumen/finals/csv/Others/hdode-old.csv',
+            'new': 'src/flumen/finals/csv/Others/hdode.csv',
         },
     }
 

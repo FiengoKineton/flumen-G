@@ -100,7 +100,7 @@ sweeps = {
 }
 
 
-name_set = sets['hdode']     # vdp, fhn, nad
+name_set = sets['fhn']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['fhn']
@@ -363,6 +363,8 @@ def main(sweep):
         __decoder_mode = config.decoder_mode
         __radius = config.radius
         __reg = config.get("reg", 0.0)
+        __use_decoder = config.get("use_decoder", False)
+        __decode_every_timestep = config.get("decode_every_timestep", False)
     else:
         __control_rnn_size = wandb.config["control_rnn_size"]
         __control_rnn_depth = wandb.config["control_rnn_depth"]
@@ -387,6 +389,8 @@ def main(sweep):
         __decoder_mode = wandb.config["decoder_mode"]
         __radius = wandb.config["radius"]
         __reg = wandb.config.get("reg", 0.0)
+        __use_decoder = wandb.config.get("use_decoder", False)
+        __decode_every_timestep = wandb.config.get("decode_every_timestep", False)
     print(f'reg: {__reg}')
 
     model_args = {
@@ -409,6 +413,8 @@ def main(sweep):
         'batch_size': __batch_size,
         'decoder_mode': __decoder_mode,
         'radius': __radius,
+        'use_decoder': __use_decoder, 
+        'decode_every_timestep': __decode_every_timestep,
     }
 
     model_metadata = {

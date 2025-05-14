@@ -25,7 +25,8 @@ class LSTM(nn.Module):
     def __init__(self, input_size, z_size, num_layers=1, output_size=None,
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
                  state_dim=None, discretisation_mode=None, x_update_mode=None, 
-                 model_name=None, linearisation_mode=None, batch_size=128, radius=None):
+                 model_name=None, linearisation_mode=None, batch_size=128, radius=None, 
+                 use_decoder=False, decode_every_timestep=False):
         super(LSTM, self).__init__()
 
     # -------------------------------------------
@@ -42,6 +43,8 @@ class LSTM(nn.Module):
         self.state_dim = state_dim
         self.batch_size = batch_size
         self.radius = radius
+        self.use_decoder = use_decoder
+        self.decode_every_timestep = decode_every_timestep
 
         #self.num_directions = 2 if bidirectional else 1
 
@@ -122,6 +125,14 @@ class LSTM(nn.Module):
         torch.nn.init.xavier_uniform_(self.W__h_to_x.weight)
         if bias: torch.nn.init.constant_(self.W__h_to_x.bias, 0.0)
 
+        if self.use_decoder:
+            self.decoder = nn.Sequential(
+                nn.Linear(self.z_size, self.z_size * 2),
+                nn.Tanh(),
+                nn.Linear(self.z_size * 2, self.state_dim)
+            )
+
+            print(f'\nuse_decoder: {use_decoder} --- decode_every_timestep: {decode_every_timestep}\n')
     # -------------------------------------------
         #self.fc = nn.Linear(self.hidden_size * self.num_directions, output_size) if output_size is not None else None
 
@@ -204,6 +215,21 @@ class LSTM(nn.Module):
             matrices[t, :, :].copy_(A_matrix[0])
 
             ###print("checkpoint"), sys.exit()     # Debugging
+
+        if self.use_decoder: 
+            if self.decode_every_timestep:
+                # Decode every z_t in outputs: [B, T, z_size]
+                z_all = outputs.reshape(-1, self.z_size)                   # [B*T, z_size]
+                h_all = z_all[:, self.state_dim:]                         # [B*T, hidden]
+                x_all = self.decoder(z_all)                               # [B*T, state]
+                z_corrected = torch.cat((x_all, h_all), dim=-1)           # [B*T, z_size]
+                outputs = z_corrected.view(batch_size, seq_len, -1)       # [B, T, z_size]
+            else:
+                z_fin = outputs[:, -1, :]
+                h_fin = z_fin[:, self.state_dim:]
+                x_fin = self.decoder(z_fin)
+                z_adj = torch.cat((x_fin, h_fin), dim=-1)
+                outputs[:, -1, :].copy_(z_adj)
 
         #if torch.isnan(outputs).any() or torch.isinf(outputs).any(): sys.exit()
         out = torch.nn.utils.rnn.pack_padded_sequence(outputs, lengths, batch_first=self.batch_first, enforce_sorted=False)

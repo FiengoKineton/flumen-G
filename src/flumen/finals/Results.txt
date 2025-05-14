@@ -73,7 +73,7 @@ NAD-big best runs:
 - old_big | nad_fin-old-big: (wandb_2) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10
 
 - new_big | nad_big_fin-05: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-3dxiz9gf:v2
-- upd_new | nad_big-x_update__new: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-se8qltc2:v25
+- upd_new | nad_big-x_update__new: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-se8qltc2:v31
 
 - small_DS_big | nad_small_DS-02 (01--no artifact): (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-8ciuv2r3:v3
 
@@ -84,7 +84,7 @@ NAD-big best runs:
 ✔️ (nad_big.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-3dxiz9gf:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10
 ✔️ (nad_small_DS_big.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-8ciuv2r3:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10 --note DS
 ### ✔️ (nad_big_sin.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-orysyc0y:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-rm7wha0k:v0
-🛠️ (nad_big_upd_new.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-se8qltc2:v25 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10 --note upd_new
+✔️ (nad_big_upd_new.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-se8qltc2:v31 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10 --note upd_new
 
 
 Note: (decoder_mode, linearisation_mode, discretisation_mode) = (False, static, FE)
@@ -120,6 +120,13 @@ R3D12:
 
 🛠️ (r3d12_static) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-ku1s1thr:v1 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-gaciweh0:v0
 🛠️ (r3d12_upd_new) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-j3ukwu1p:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-gaciweh0:v0 --note upd_new
+--------------------------------------------------------------------------------------------------------------
+
+HD_ODE:
+- hdode_old | r3d12-gaussian-old: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-hdode_test_data-8lc2id1u:v0
+- hdode | r3d12-gaussian-static: (wandb) _
+
+🛠️ (hdode) python.exe .\experiments\interactive_test_compare.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-hdode_test_data-8lc2id1u:v0
 
 
 ___________________________________________________________________________________________________________________________________________
@@ -147,14 +154,14 @@ time                 28914.4827 ± 26327.1509  43529.4471 ± 17019.0007    25954
 ----------------------------------------------------------------------------
 
 Metrics Comparison for FHN_false:
-                                         old             alpha_false                      oval_false                          upd_new
-Best Simulation  fhn_fin-old-2 (val=0.01486)  fhn---02 (val=0.05617)  fhn_swift-r=2--3 (val=0.04399)  fhn-x_update__new (val=0.05545)
-_step                      131.0000 ± 7.0711        88.0000 ± 5.6569               76.8889 ± 25.0272                    77.0000 ± nan
-best_val                     0.0167 ± 0.0027         0.0627 ± 0.0092                 0.0649 ± 0.0195                     0.0555 ± nan
-best_epoch                 106.0000 ± 7.0711        73.0000 ± 5.6569               61.8889 ± 25.0272                    73.0000 ± nan
-best_test                    0.0258 ± 0.0141         0.0753 ± 0.0029                 0.0773 ± 0.0190                     0.0745 ± nan
-best_train                   0.0026 ± 0.0004         0.0382 ± 0.0008                 0.0416 ± 0.0179                     0.0463 ± nan
-time                 40958.6990 ± 20805.0690  35880.9298 ± 2156.5427        129533.3689 ± 66097.3804                 38906.5434 ± nan
+                                         old             alpha_false                      oval_false                          upd_new       
+Best Simulation  fhn_fin-old-2 (val=0.01486)  fhn---02 (val=0.05617)  fhn_swift-r=2--3 (val=0.04399)  fhn-x_update__new (val=0.05028)       
+_step                      131.0000 ± 7.0711        88.0000 ± 5.6569               76.8889 ± 25.0272                   132.0000 ± nan       
+best_val                     0.0167 ± 0.0027         0.0627 ± 0.0092                 0.0649 ± 0.0195                     0.0503 ± nan       
+best_epoch                 106.0000 ± 7.0711        73.0000 ± 5.6569               61.8889 ± 25.0272                   125.0000 ± nan       
+best_test                    0.0258 ± 0.0141         0.0753 ± 0.0029                 0.0773 ± 0.0190                     0.0739 ± nan       
+best_train                   0.0026 ± 0.0004         0.0382 ± 0.0008                 0.0416 ± 0.0179                     0.0330 ± nan       
+time                 40958.6990 ± 20805.0690  35880.9298 ± 2156.5427        129533.3689 ± 66097.3804                 70317.5161 ± nan       
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
@@ -173,14 +180,14 @@ time                  50041.6461 ± 17418.2742      32057.6465 ± 6607.2100     
 ----------------------------------------------------------------------------
 
 Metrics Comparison for NAD_big:
-                                       old_big                       new_big                          upd_new_big
-Best Simulation  nad_fin-old-big (val=0.02377)  nad_big_fin-05 (val=0.01123)  nad_big-x_update__new (val=0.02299)
-_step                       144.0000 ± 96.9948             53.1250 ± 23.3510                        60.0000 ± nan
-best_val                       0.0340 ± 0.0103               0.0138 ± 0.0024                         0.0230 ± nan
-best_epoch                 135.3333 ± 111.1411             42.5000 ± 22.8661                        60.0000 ± nan
-best_test                      0.0264 ± 0.0080               0.0131 ± 0.0009                         0.0140 ± nan
-best_train                     0.0020 ± 0.0028               0.0007 ± 0.0002                         0.0004 ± nan
-time                   37678.3957 ± 30192.6393       41588.0502 ± 23762.2955                     51499.9237 ± nan
+                                       old_big                       new_big                         upd_new_big
+Best Simulation  nad_fin-old-big (val=0.02377)  nad_big_fin-05 (val=0.01123)  nad_big-x_update__new (val=0.0226)
+_step                       144.0000 ± 96.9948             53.1250 ± 23.3510                       98.0000 ± nan
+best_val                       0.0340 ± 0.0103               0.0138 ± 0.0024                        0.0226 ± nan
+best_epoch                 135.3333 ± 111.1411             42.5000 ± 22.8661                       83.0000 ± nan
+best_test                      0.0264 ± 0.0080               0.0131 ± 0.0009                        0.0139 ± nan
+best_train                     0.0020 ± 0.0028               0.0007 ± 0.0002                        0.0004 ± nan
+time                   37678.3957 ± 30192.6393       41588.0502 ± 23762.2955                    72510.3776 ± nan
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
@@ -188,12 +195,25 @@ time                   37678.3957 ± 30192.6393       41588.0502 ± 23762.2955  
 Metrics Comparison for R3D12:
                                            old                              new
 Best Simulation  r3d12-gaussian-old (val=11.1)  r3d12-x_update__new (val=8.403)
-_step                            39.0000 ± nan                39.0000 ± 25.4558
+_step                            39.0000 ± nan                48.0000 ± 12.7279
 best_val                         11.0991 ± nan                  8.9355 ± 0.7532
 best_epoch                       14.0000 ± nan                23.0000 ± 12.7279
 best_test                        11.5832 ± nan                 11.6754 ± 4.4201
 best_train                        5.6562 ± nan                  3.6377 ± 2.3794
-time                          67710.3413 ± nan          85186.8097 ± 66885.0194
+time                          67710.3413 ± nan          96045.5832 ± 51528.3946
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+Metrics Comparison for HD_ODE:
+                                   old               new
+Best Simulation  hdode-old (val=67.47)  hdode (val=69.8)
+_step                    36.0000 ± nan     17.0000 ± nan
+best_val                 67.4722 ± nan     69.7992 ± nan
+best_epoch               11.0000 ± nan      4.0000 ± nan
+best_test                68.3029 ± nan     69.5058 ± nan
+best_train               55.6284 ± nan     63.1452 ± nan
+time                  12342.6990 ± nan  19825.9453 ± nan
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
