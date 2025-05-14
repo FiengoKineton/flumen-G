@@ -55,6 +55,7 @@ def parse_args():
     ap.add_argument('--wandb_2', action='store_true')
     ap.add_argument('--time_horizon', type=float, default=None)
     ap.add_argument('--test_noise_std', type=float, default=0.0, help="Add Gaussian noise to test inputs during evaluation.")
+    ap.add_argument('--note', type=str, default=None)
 
     return ap.parse_args()
 
@@ -82,6 +83,7 @@ def get_metadata(wandb, path):
 def main():
     plt.ion()  # Enable interactive mode
     args = parse_args()
+    NOTE = args.note
     NOISE_STD = args.test_noise_std
     WANDB_1, WANDB_2 = 'new_architecture', 'default_architecture'   # 'old_architecture', 'default' 
     PLOT_ERROR = False
@@ -141,12 +143,15 @@ def main():
     fig1, ax1 = plt.subplots(num+1, 1, sharex=True)   # before | n_plots+1
     fig1.canvas.mpl_connect('close_event', on_close_window)
 
-    if PLOT_ERROR and num==12: PLOT_ERROR=False
+    if PLOT_ERROR and n_plots==12: PLOT_ERROR=False
     if PLOT_ERROR:
         fig2, ax2 = plt.subplots(3, 1, sharex=True)  
         fig2.canvas.mpl_connect('close_event', on_close_window)
 
     time_horizon = args.time_horizon if args.time_horizon else num_times * metadata["data_args"]["time_horizon"]
+    if n_plots==12: 
+        time_horizon = 10
+        print(time_horizon)
 
     sq_errors_1, sq_errors_2 = [], []
     err_list_1, err_list_2 = [], []
@@ -279,7 +284,8 @@ def main():
         ax1[-1].step(np.arange(0., time_horizon, delta), u[:-1], where='post')
         ax1[-1].set_ylabel("$u$")
         ax1[-1].set_xlabel("$t$")
-        ax1[0].set_title(f'{model_name} dynamics ($x \\in \\mathcal{{R}}^{{{n}}}$)')
+        if NOTE is None:    ax1[0].set_title(f'{model_name} dynamics ($x \\in \\mathcal{{R}}^{{{n}}}$)')
+        else:               ax1[0].set_title(f'{model_name} dynamics ($x \\in \\mathcal{{R}}^{{{n}}}$) -- {NOTE}')
 
         fig1.tight_layout()
         fig1.subplots_adjust(hspace=0)

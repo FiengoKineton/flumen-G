@@ -1,10 +1,10 @@
 dynamics:
   name: NonlinearActivationDynamics
   args:
-    state_dim: 15 # 15 if big else 5
+    state_dim: 5 # 15 if big else 5
     control_dim: 1
     activation: sigmoid   # or "sigmoid", "relu", "tanh"
-    mode: big    # or "stable", "marginal", "big"
+    mode: stable    # or "stable", "marginal", "big"
     a_s: [[-1.0,  0.3,  0.0,  0.0,  0.0],
             [ 0.0, -1.0,  0.3,  0.0,  0.0],
             [ 0.0,  0.0, -1.0,  0.3,  0.0],
