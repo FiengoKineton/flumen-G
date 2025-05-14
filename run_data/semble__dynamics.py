@@ -519,6 +519,33 @@ class R3D12(Dynamics):
         return np.concatenate([dtheta, ddtheta, dz, ddz])
 
 
+class HD_ODE(Dynamics): 
+    def __init__(self, state_dim=12, control_dim=1, a=0.5, b=1.0, k=0.3, idx=None):
+        super().__init__(state_dim=int(state_dim), control_dim=int(control_dim))
+        self.a = a
+        self.b = b
+        self.k = k
+        self.n = state_dim
+
+        print(f"HD_ODE initialized with: a={a}, b={b}, k={k}")
+        print(f"HD_ODE dimensions: state_dim={state_dim}, control_dim={control_dim}")
+
+        self.W = np.zeros((self.n, self.n))
+        for i in range(self.n):
+            if i > 0:
+                self.W[i, i - 1] = self.k
+            if i < self.n - 1:
+                self.W[i, i + 1] = -self.k
+        
+        self.B = np.zeros(self.n)
+        if idx==None:   self.B[::4] = 1
+        else:           self.B[idx] = 1
+    
+    def _dx(self, x, u): 
+        f_x = -self.a * x + self.b * np.tanh(x) + self.W @ np.tanh(x)
+        return f_x + self.B * u
+
+
 
 
 _dynamics_names = {
@@ -535,6 +562,7 @@ _dynamics_names = {
     "TwoTank": TwoTank,
     "NonlinearActivationDynamics": NonlinearActivationDynamics,
     "R3D12": R3D12,
+    "HD_ODE": HD_ODE,
 }
 
 

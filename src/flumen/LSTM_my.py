@@ -65,7 +65,6 @@ class LSTM(nn.Module):
             self.linearisation_function = globals().get(f"linearisation_lpv__{self.model_name}")
             print("lpv radius:", self.radius)
 
-
         print("'lin_mode':", self.linearisation_function)
         print("'dis_mode':", self.discretisation_function)
         print("'upt_mode':", self.x_update_function)
@@ -365,6 +364,46 @@ class LSTM(nn.Module):
                 "control_dim": control_dim
             }            
 
+        elif model_name == "HD_ODE": 
+            state_dim = self.data["dynamics"]["args"]["state_dim"]
+            control_dim = self.data["dynamics"]["args"]["control_dim"]
+            a = self.data["dynamics"]["args"]["a"]
+            b = self.data["dynamics"]["args"]["b"]
+            k = self.data["dynamics"]["args"]["k"]
+            idx = self.data["dynamics"]["args"]["idx"]
+
+            n = state_dim
+            W = np.zeros((n, n))
+            for i in range(n):
+                if i > 0:
+                    W[i, i - 1] = k
+                if i < n - 1:
+                    W[i, i + 1] = -k
+
+            def f(x):
+                return -a * x + b * np.tanh(x) + W @ np.tanh(x)
+
+            B = np.zeros(n)
+            B[idx] = 1
+
+
+            from scipy.optimize import fsolve
+            x_eq = fsolve(f, np.zeros(n)) 
+            u_eq = 0.0
+
+            param = {
+                "a": a,
+                "b": b,
+                "W": W,
+                "B": B, 
+                "dyn_factor": dyn_factor,
+                "dtype": self.dtype,
+                "x_eq": x_eq,
+                "u_eq": u_eq,
+                "state_dim": state_dim,
+                "control_dim": control_dim
+            }
+
         else:
             raise ValueError(f"Unknown model name: {model_name}")
         
@@ -389,6 +428,7 @@ class LSTM(nn.Module):
         elif self.model_name == "TwoTank": model_ID = "twotank"
         elif self.model_name == "NonlinearActivationDynamics": model_ID = "nad"
         elif self.model_name == "R3D12": model_ID = "r3d12"
+        elif self.model_name == "HD_ODE": model_ID = "hdode"
         else: model_ID = ""
 
         # Define the file path
@@ -674,6 +714,35 @@ def linearisation_static__R3D12(param, const, x, u):
     f_eq = (dyn_factor * f_eq).unsqueeze(0).expand(batch_size, -1, -1)
     return A, B, f_eq, None
 
+def linearisation_static__HD_ODE(param, const, x, u): 
+    # === Parametri dinamici ===
+    n = param['state_dim']
+    control_dim = param['control_dim']
+    a = param['a']
+    b = param['b']
+    W = param['W']
+    B = param['B']
+    x_eq = param['x_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    batch_size, _, _ = const
+
+    def jacobian(x_eq):
+        diag_tanh = np.diag(1 - np.tanh(x_eq) ** 2)
+        J = -a * np.eye(n) + b * diag_tanh + W @ diag_tanh
+        J = dyn_factor * torch.tensor(J, dtype=dtype)
+        return J
+    A = jacobian(x_eq)
+
+    f_eq = -a * x_eq + b * np.tanh(x_eq) + W @ np.tanh(x_eq) + B * u_eq
+    f_eq = dyn_factor * torch.tensor(f_eq, dtype=dtype).reshape(-1, 1)
+    B = torch.tensor(B, dtype=dtype).reshape(-1, 1)
+
+    A = (dyn_factor * A).unsqueeze(0).expand(batch_size, -1, -1)
+    B = (dyn_factor * B).unsqueeze(0).expand(batch_size, -1, -1)
+    f_eq = (dyn_factor * f_eq).unsqueeze(0).expand(batch_size, -1, -1)
+    return A, B, f_eq, None
 
 # ─────────────────────────────────────────────────────────────────────────── #
 # ---------------- Linearisation functions ---------------------------------- #

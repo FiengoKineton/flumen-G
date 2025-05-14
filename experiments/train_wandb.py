@@ -41,6 +41,10 @@ python.exe experiments/train_wandb.py data/nad_test_data.pkl nad
 python experiments/semble_generate.py --n_trajectories 300 --n_samples 200 --time_horizon 15 data_generation/r3d12.yaml r3d12_test_data
 python.exe experiments/train_wandb.py data/r3d12_test_data.pkl r3d12
 
+--hdode-----------------------------    ...
+python experiments/semble_generate.py --n_trajectories 300 --n_samples 200 --time_horizon 15 data_generation/hdode.yaml hdode_test_data
+python.exe experiments/train_wandb.py data/hdode_test_data.pkl hdode
+
 --linsys----------------------------
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/linsys.yaml linsys_test_data
 python experiments/train_wandb.py data/linsys_test_data.pkl linsys_test 
@@ -76,10 +80,12 @@ sets = {
     'nad': 'hyperparams___nad',             # use FE and static!
     'fhn': 'hyperparams___fhn',             # in progress
     'r3d12': 'hyperparams___r3d12',         # new
+    'hdode': 'hyperparams___hdode',         # new
     'vdp_old': 'hyperparams___vdp_old', 
     'fhn_old': 'hyperparams___fhn_old', 
     'nad_old': 'hyperparams___nad_old',
     'r3d12_old': 'hyperparams___r3d12_old',
+    'hdode_old': 'hyperparams___hdode_old',
 }
 
 sweeps = {
@@ -94,7 +100,7 @@ sweeps = {
 }
 
 
-name_set = sets['vdp']     # vdp, fhn, nad
+name_set = sets['hdode']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['fhn']

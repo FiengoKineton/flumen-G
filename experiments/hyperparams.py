@@ -405,6 +405,59 @@ class Hyperparams:
             },
 
         ### ----------------------------------------------------------
+            'hyperparams___hdode': {
+                "control_rnn_size": 32,         # {48, 64, 80} 
+                "control_rnn_depth": 1,         
+                "encoder_size": 1,              # 8
+                "encoder_depth": 1,  
+                "decoder_size": 1,              # 8
+                "decoder_depth": 1,  
+                "batch_size": 64,
+                "lr": 0.0003,             
+                "n_epochs": 200,  
+                "es_patience": 25,        
+                "es_delta": 1e-07,
+                "sched_patience": 10,           # 5
+                "sched_factor": 3,              # 2
+                "loss": "mse",                  
+                "discretisation_mode": "BE",    # {BE, FE}
+                "optimiser_mode": "adam",       
+                "x_update_mode": "entropy",
+                "mode_rnn": "new", 
+                "mode_dnn": "FFNet", 
+                "linearisation_mode": "static",
+                "decoder_mode": False,          # set to True if mode_rnn is 'old'
+                "radius": 1,
+                "reg": 0.0,
+            },
+
+            'hyperparams___hdode_old': {
+                "control_rnn_size": 64,         # Reduced to limit overfitting
+                "control_rnn_depth": 1,         
+                "encoder_size": 1,              # Reduced from 2 to 1
+                "encoder_depth": 2,             # Reduced from 2 to 1
+                "decoder_size": 1,              # Reduced from 2 to 1
+                "decoder_depth": 2,             # Reduced from 2 to 1
+                "batch_size": 64,               # Smaller batch to add training noise
+                "lr": 0.0003,                   # Lower learning rate for smoother convergence
+                "n_epochs": 200,  
+                "es_patience": 25,        
+                "es_delta": 1e-5,               # Less strict early stopping
+                "sched_patience": 10,
+                "sched_factor": 3,
+                "loss": "mse",                  
+                "discretisation_mode": None,
+                "optimiser_mode": "adam",       
+                "x_update_mode": None,
+                "mode_rnn": "old", 
+                "mode_dnn": "FFNet", 
+                "linearisation_mode": None,
+                "decoder_mode": True,
+                "radius": None,
+                "reg": 0.0,
+            },
+        
+        ### ----------------------------------------------------------
             'hyperparams___linsys': {
 
             },

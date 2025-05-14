@@ -291,7 +291,6 @@ class Dynamics:
 
         return u_t
     
-
     def generate_sinusoidal_input(self, t_eval, step_size=2.0, max_freq=1.0, amp_mean=1.0, amp_std=1.0, seed=42):
         np.random.seed(seed)
         t_min, t_max = t_eval[0], t_eval[-1]
@@ -464,15 +463,88 @@ class Dynamics:
             raise ValueError(f"Unknown method: {method}")
 
 
+    # -------------------------------
+    def high_dim_ode(self):
+        n = 32
+        t_span = (0, 100) 
+        t_eval = np.linspace(*t_span, 1000)
+        u_array = self.generate_input(t_eval, step_size=self.step_size, max_freq=self.max_freq)
+        alpha = 0.5
+        beta = 1.0
+        k = 0.3
 
+        W = np.zeros((n, n))
+        for i in range(n):
+            if i > 0:
+                W[i, i - 1] = k
+            if i < n - 1:
+                W[i, i + 1] = -k
+
+        def f(x):
+            return -alpha * x + beta * np.tanh(x) + W @ np.tanh(x)
+
+        B = np.zeros(n)
+        B[::4] = 1
+        np.random.seed(42)
+        idx = np.random.choice(n, size=n//4, replace=False)
+        B[idx] = 1
+        print(idx)
+
+        x_eq = fsolve(f, np.zeros(n))  # starting from 0
+        def jacobian(x_eq):
+            diag_tanh = np.diag(1 - np.tanh(x_eq) ** 2)
+            J = -alpha * np.eye(n) + beta * diag_tanh + W @ diag_tanh
+            return J
+        A = jacobian(x_eq)
+
+        mu_inf = self.mu_infinity(A)
+        controllable, rank = self.is_controllable(A, B)
+        stable, _ = self.is_stable(A)
+
+        print(f"dim: {A.shape[0]}")
+        print(f"x_eq: {x_eq}")
+        print(f"Controllability of A: {controllable}, rank: {rank}")
+        print(f"Mu infinity of A: {mu_inf}")
+        print(f"Stable: {stable}")
+
+        from scipy.integrate import solve_ivp
+
+        def dyn_func(t, x):
+            u = np.interp(t, t_eval, u_array)
+            return f(x) + (B * u).flatten()
+
+        x0 = np.zeros(n)
+        m = n-1
+
+        # Simulate system
+        sol = solve_ivp(dyn_func, t_span, x0, t_eval=t_eval)
+
+        for m in range(n):
+            # Plot only the last state
+            plt.figure(figsize=(10, 6))
+            plt.subplot(2, 1, 1)
+            plt.plot(sol.t, sol.y[m], label=f'$x_{{{m+1}}}$')
+            plt.grid()
+            plt.legend()
+            plt.title(f'x_{{{m+1}}}')
+
+            plt.subplot(2, 1, 2)
+            plt.plot(t_eval, u_array, label='Input u(t)', color='gray')
+            plt.grid()
+            plt.legend()
+            plt.title('Input signal')
+
+            plt.tight_layout()
+            plt.show()
 
 # --------------------------------------------------------------
 if __name__ == "__main__":
     args = Dynamics.parse_arguments()
-    u_mode = 'sin'  # [rnd, sin]
+    u_mode = 'rnd'  # [rnd, sin]
     dyn = Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab, method=args.method, u_mode=u_mode)
 
-    #"""
+    dyn.high_dim_ode()
+    """
     A_big = np.array([[-1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
         [ 0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
         [ 0. ,  0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
