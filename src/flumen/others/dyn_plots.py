@@ -8,7 +8,7 @@ from scipy.linalg import block_diag
 
 
 class Dynamics: 
-    def __init__(self, mhu=1, k=50, c=-1, both=False, stab=False, method="FE", u_mode='rnd'):
+    def __init__(self, mhu=1, k=50, c=-1, both=False, stab=False, method="TU", u_mode='rnd'):
         # -------------------------------
         # Parametri
         self.mu = mhu       # <0, try -1
@@ -32,7 +32,7 @@ class Dynamics:
 
 
         # -------------------------------
-        term_time = [3]    # [28]    #[1, 12, 28, 80, 150]
+        term_time = []    # [28]    #[1, 12, 28, 80, 150]
         for t in term_time:
             self.t_span = (0, t) 
             self.t_eval = np.linspace(*self.t_span, 1000)
@@ -64,16 +64,16 @@ class Dynamics:
     def plot(self, both):
         plt.figure(figsize=(12, 6))
         n = 2
-        # Van der Pol
+        #"""# Van der Pol
         plt.subplot(n, 1, 1)
-        """if both: plt.plot(self.sol_vdp.t, self.sol_vdp.y[0], label='Nonlinear: p')
+        if both: plt.plot(self.sol_vdp.t, self.sol_vdp.y[0], label='Nonlinear: p')
         plt.plot(self.sol_lin_vdp.t, self.sol_lin_vdp.y[0], '--', label='Linearized: p')
         plt.title('Van der Pol Oscillator')
         plt.ylabel('Position p')
         plt.legend()
         plt.grid()#"""
 
-        #"""# FitzHugh-Nagumo
+        """# FitzHugh-Nagumo
         plt.subplot(n, 1, 1)
         if both: plt.plot(self.sol_fhn.t, self.sol_fhn.y[0], label='Nonlinear: v')
         plt.plot(self.sol_lin_fhn.t, self.sol_lin_fhn.y[0], '--', label='Linearized: v')
@@ -462,8 +462,7 @@ class Dynamics:
 
 
     # -------------------------------
-    def high_dim_ode(self):
-        n = 32
+    def high_dim_ode(self, n=32):
         t_span = (0, 100) 
         t_eval = np.linspace(*t_span, 1000)
         u_array = self.generate_input(t_eval, step_size=self.step_size, max_freq=self.max_freq)
@@ -482,20 +481,36 @@ class Dynamics:
             return -alpha * x + beta * np.tanh(x) + W @ np.tanh(x)
 
         B = np.zeros(n)
-        B[::4] = 1
+        B[-1] = 1
+        """B[::4] = 1
         np.random.seed(42)
         idx = np.random.choice(n, size=n//4, replace=False)
         B[idx] = 1
-        print(idx)
+        print(idx)"""
 
-        x_eq = fsolve(f, np.zeros(n))  # starting from 0
+        x_eq = fsolve(f, 0.1 * np.ones(n))  # starting from 0
         def jacobian(x_eq):
             diag_tanh = np.diag(1 - np.tanh(x_eq) ** 2)
             J = -alpha * np.eye(n) + beta * diag_tanh + W @ diag_tanh
             return J
         A = jacobian(x_eq)
 
-        mu_inf = self.mu_infinity(A)
+        from numpy.linalg import matrix_rank, eigvals
+        # Check controllability
+        ctrb = B.reshape(-1,1)
+        for i in range(1, n):
+            ctrb = np.hstack([ctrb, A @ ctrb[:, [-1]]])
+        rank = matrix_rank(ctrb)
+
+        # Check stability
+        stable = np.all(np.real(eigvals(A)) < 0)
+
+        print(f"dim: {A.shape[0]}")
+        print("x_eq =", x_eq.round(4))
+        print("rank =", rank, "of", n)
+        print("Stable:", stable)
+
+        """mu_inf = self.mu_infinity(A)
         controllable, rank = self.is_controllable(A, B)
         stable, _ = self.is_stable(A)
 
@@ -503,7 +518,7 @@ class Dynamics:
         print(f"x_eq: {x_eq}")
         print(f"Controllability of A: {controllable}, rank: {rank}")
         print(f"Mu infinity of A: {mu_inf}")
-        print(f"Stable: {stable}")
+        print(f"Stable: {stable}")"""
 
         from scipy.integrate import solve_ivp
 
@@ -533,7 +548,7 @@ class Dynamics:
             plt.title('Input signal')
 
             plt.tight_layout()
-            plt.show()
+            plt.show()#"""
 
 # --------------------------------------------------------------
 if __name__ == "__main__":
@@ -541,7 +556,7 @@ if __name__ == "__main__":
     u_mode = 'rnd'  # [rnd, sin]
     dyn = Dynamics(mhu=args.mhu, k=args.k, c=args.c, both=args.both, stab=args.stab, method=args.method, u_mode=u_mode)
 
-    #dyn.high_dim_ode()
+    #for n in [21]: dyn.high_dim_ode(n=n)
     """
     A_big = np.array([[-1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
         [ 0. , -1. ,  0.3,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
@@ -582,18 +597,43 @@ if __name__ == "__main__":
                 A_n[i, j] = 1.5 * np.random.uniform(-0.05, 0.05)
     #print('n:', n), print('\nA:', A_n), print('\nB:', B_n)
 
-    #A, B = A_stable, B_stable
-    A, B = A_big, B_big
+    #W, B = A_stable, B_stable
+    W, B = A_big, B_big
     #A, B = A_n, B_n
+    n = W.shape[0]
+    def sigma(z):
+        return 1 / (1 + np.exp(-z))
 
-    mu_inf = dyn.mu_infinity(A)
-    controllable_nad, rank_nad = dyn.is_controllable(A, B)
-    stable, eigvals = dyn.is_stable(A)
+    def sigma_prime(z):
+        s = sigma(z)
+        return s * (1 - s)
+    
+    def nad_equilibrium(z):
+        x = z[:n]
+        u = z[n:]
+        eq_x = -x + sigma(W @ x + B.flatten() * u)
+        eq_u = -u
+        return np.concatenate([eq_x, eq_u])
 
-    print(f"dim: {A.shape[0]}")
+    x0 = np.zeros(n + 1)
+    eq = fsolve(nad_equilibrium, x0)
+    x_star, u_star = eq[:n], eq[n:]
+
+    # --- Linearisation ---
+    z = W @ x_star + B.flatten() * u_star
+    S = np.diag(sigma_prime(z))
+
+    A_lin = -np.eye(n) + S @ W
+    B_lin = S @ B
+
+    mu_inf = dyn.mu_infinity(W)
+    controllable_nad, rank_nad = dyn.is_controllable(A_lin, B_lin)
+    stable, eigvals = dyn.is_stable(A_lin)
+
+    print(f"dim: {W.shape[0]}")
     print(f"Controllability of A_nad: {controllable_nad}, Rank: {rank_nad}")
     print(f"Mu infinity of A_nad: {mu_inf}")
     print(f"Stable: {stable} | Eigenvalues: {eigvals}")
 
-    for f in [1.0, 1.5, 2.0]: dyn.nad(A, B, m=A.shape[0]-1, k=30, max_freq=f)
+    #for f in [1.0, 1.5, 2.0]: dyn.nad(A, B, m=A.shape[0]-1, k=30, max_freq=f)
     #"""

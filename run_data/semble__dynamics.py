@@ -520,7 +520,7 @@ class R3D12(Dynamics):
 
 
 class HD_ODE(Dynamics): 
-    def __init__(self, state_dim=12, control_dim=1, a=0.5, b=1.0, k=0.3, idx=None):
+    def __init__(self, state_dim=21, control_dim=1, a=0.5, b=1.0, k=0.3):
         super().__init__(state_dim=int(state_dim), control_dim=int(control_dim))
         self.a = a
         self.b = b
@@ -538,8 +538,7 @@ class HD_ODE(Dynamics):
                 self.W[i, i + 1] = -self.k
         
         self.B = np.zeros(self.n)
-        if idx==None:   self.B[::4] = 1
-        else:           self.B[idx] = 1
+        self.B[-1] = 1
     
     def _dx(self, x, u): 
         f_x = -self.a * x + self.b * np.tanh(x) + self.W @ np.tanh(x)

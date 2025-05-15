@@ -1,12 +1,11 @@
 dynamics: 
   name: HD_ODE
   args: 
-    state_dim: 32
+    state_dim: 21
     control_dim: 1  # actually 3 but used the same one
     a: 0.5
     b: 1.0
     k: 0.3
-    idx: [29, 15, 24, 17, 8, 9, 30, 25]
 sequence_generator: 
   name: GaussianSqWave  # GaussianSqWave or SinusoidalSequence
   args: 

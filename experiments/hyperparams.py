@@ -425,13 +425,14 @@ class Hyperparams:
                 "loss": "mse",                  
                 "discretisation_mode": "BE",    # {BE, FE}
                 "optimiser_mode": "adam",       
-                "x_update_mode": "entropy",
+                "x_update_mode": "new",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet", 
                 "linearisation_mode": "static",
                 "decoder_mode": False,          # set to True if mode_rnn is 'old'
                 "radius": 1,
                 "reg": 0.0,
+                "decode_every_timestep": True,
             },
 
             'hyperparams___hdode_old': {

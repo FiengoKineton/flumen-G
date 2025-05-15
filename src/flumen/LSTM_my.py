@@ -412,7 +412,6 @@ class LSTM(nn.Module):
             a = self.data["dynamics"]["args"]["a"]
             b = self.data["dynamics"]["args"]["b"]
             k = self.data["dynamics"]["args"]["k"]
-            idx = self.data["dynamics"]["args"]["idx"]
 
             n = state_dim
             W = np.zeros((n, n))
@@ -426,7 +425,7 @@ class LSTM(nn.Module):
                 return -a * x + b * np.tanh(x) + W @ np.tanh(x)
 
             B = np.zeros(n)
-            B[idx] = 1
+            B[-1] = 1
 
 
             from scipy.optimize import fsolve
@@ -1714,7 +1713,7 @@ def x_update_mode__lamda(x_mid, h, alpha_gate, W__h_to_x, x_prev, u):      # not
     - When **h[-1] is large**, lambda is low → the system relies on learned influence.
     """
     x_norm = torch.norm(x_mid, dim=-1, keepdim=True).clamp_min(1e-5)
-    h_norm = torch.norm(h[-1], dim=-1, keepdim=True).clamp_min(1e-5)
+    h_norm = torch.norm(alpha_gate(h[-1]), dim=-1, keepdim=True).clamp_min(1e-5)
 
     lambda_factor = x_norm / (x_norm + h_norm).clamp(0.1, 0.9)
     x_next = lambda_factor * x_mid + (1 - lambda_factor) * W__h_to_x(h[-1])

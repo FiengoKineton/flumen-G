@@ -42,7 +42,7 @@ python experiments/semble_generate.py --n_trajectories 300 --n_samples 200 --tim
 python.exe experiments/train_wandb.py data/r3d12_test_data.pkl r3d12
 
 --hdode-----------------------------    ...
-python experiments/semble_generate.py --n_trajectories 300 --n_samples 200 --time_horizon 15 data_generation/hdode.yaml hdode_test_data
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/hdode.yaml hdode_test_data
 python.exe experiments/train_wandb.py data/hdode_test_data.pkl hdode
 
 --linsys----------------------------
@@ -69,7 +69,7 @@ import torch_optimizer as optim
 
 from hyperparams import Hyperparams  
 
-os.environ["WANDB_MODE"] = "offline"  # Set to "online" for real-time logging, "offline" for local logging
+os.environ["WANDB_MODE"] = "online"  # Set to "online" for real-time logging, "offline" for local logging
 
 # ------ Current Run Settings ----------------------------------------------- #
 hp_manager = Hyperparams()  
@@ -100,7 +100,7 @@ sweeps = {
 }
 
 
-name_set = sets['fhn']     # vdp, fhn, nad
+name_set = sets['hdode']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['fhn']
