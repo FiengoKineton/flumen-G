@@ -125,7 +125,7 @@ class LSTM(nn.Module):
         torch.nn.init.xavier_uniform_(self.W__h_to_x.weight)
         if bias: torch.nn.init.constant_(self.W__h_to_x.bias, 0.0)
 
-        if self.use_decoder:
+        if self.use_decoder or self.decode_every_timestep:
             self.decoder = nn.Sequential(
                 nn.Linear(self.z_size, self.z_size * 2),
                 nn.Tanh(),
@@ -216,7 +216,7 @@ class LSTM(nn.Module):
             #if t==5: break
             ###print("checkpoint"), sys.exit()     # Debugging
 
-        if self.use_decoder: 
+        if self.use_decoder or self.decode_every_timestep: 
             if self.decode_every_timestep:
                 # Decode every z_t in outputs: [B, T, z_size]
                 B, T, Z = outputs.shape
@@ -229,7 +229,7 @@ class LSTM(nn.Module):
                 # Ricostruisci outputs senza overwrite in-place
                 outputs = z_corrected.view(B, T, Z).contiguous()
 
-            else:
+            if self.use_decoder:
                 #print(f'outputs: {outputs.shape}')
                 z_fin = outputs[:, -1, :]
                 h_fin = z_fin[:, self.state_dim:]
