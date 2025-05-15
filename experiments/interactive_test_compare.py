@@ -68,7 +68,7 @@ def get_metadata(wandb, path):
         model_path = Path(model_artifact.download())
 
         model_run = model_artifact.logged_by()
-        print(model_run.summary)
+        print(model_run.summary), print(model_path)
     else:
         model_path = Path(path)
 

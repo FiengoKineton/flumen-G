@@ -26,7 +26,7 @@ class LSTM(nn.Module):
                  bias=True, batch_first=True, dropout=0.0, bidirectional=False, 
                  state_dim=None, discretisation_mode=None, x_update_mode=None, 
                  model_name=None, linearisation_mode=None, batch_size=128, radius=None, 
-                 use_decoder=False, decode_every_timestep=False):
+                 use_decoder=False, decode_every_timestep=False, residual=False):
         super(LSTM, self).__init__()
 
     # -------------------------------------------
@@ -45,6 +45,7 @@ class LSTM(nn.Module):
         self.radius = radius
         self.use_decoder = use_decoder
         self.decode_every_timestep = decode_every_timestep
+        self.residual = residual
 
         #self.num_directions = 2 if bidirectional else 1
 
@@ -125,14 +126,17 @@ class LSTM(nn.Module):
         torch.nn.init.xavier_uniform_(self.W__h_to_x.weight)
         if bias: torch.nn.init.constant_(self.W__h_to_x.bias, 0.0)
 
-        if self.use_decoder or self.decode_every_timestep:
-            self.decoder = nn.Sequential(
-                nn.Linear(self.z_size, self.z_size * 2),
-                nn.Tanh(),
-                nn.Linear(self.z_size * 2, self.state_dim)
-            )
+        if self.use_decoder or self.decode_every_timestep or self.residual:
+            if self.residual: 
+                self.decoder = Residual(self.z_size, self.state_dim)
+            else:
+                self.decoder = nn.Sequential(
+                    nn.Linear(self.z_size, self.z_size * 2),
+                    nn.Tanh(),
+                    nn.Linear(self.z_size * 2, self.state_dim)
+                )
 
-            print(f'\nuse_decoder: {use_decoder} --- decode_every_timestep: {decode_every_timestep}\n')
+            print(f'\nuse_decoder: {use_decoder} --- decode_every_timestep: {decode_every_timestep} --- residual: {residual}\n')
     # -------------------------------------------
         #self.fc = nn.Linear(self.hidden_size * self.num_directions, output_size) if output_size is not None else None
 
@@ -216,8 +220,8 @@ class LSTM(nn.Module):
             #if t==5: break
             ###print("checkpoint"), sys.exit()     # Debugging
 
-        if self.use_decoder or self.decode_every_timestep: 
-            if self.decode_every_timestep:
+        if self.use_decoder or self.decode_every_timestep or self.residual: 
+            if self.decode_every_timestep or self.residual:
                 # Decode every z_t in outputs: [B, T, z_size]
                 B, T, Z = outputs.shape
 
@@ -229,7 +233,7 @@ class LSTM(nn.Module):
                 # Ricostruisci outputs senza overwrite in-place
                 outputs = z_corrected.view(B, T, Z).contiguous()
 
-            if self.use_decoder:
+            elif self.use_decoder and not self.decode_every_timestep and not self.residual:
                 #print(f'outputs: {outputs.shape}')
                 z_fin = outputs[:, -1, :]
                 h_fin = z_fin[:, self.state_dim:]
@@ -522,6 +526,20 @@ class LSTM(nn.Module):
 
 
 # ---------------- LSTMCell ------------------------------------------------- #
+
+class Residual(nn.Module):
+    def __init__(self, z_size, state_dim):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(z_size, z_size * 2),
+            nn.Tanh(),
+            nn.Linear(z_size * 2, state_dim)
+        )
+        self.state_dim = state_dim
+
+    def forward(self, z):
+        # Skip connection: x_hat = x_from_z + correction
+        return z[:, :self.state_dim] + self.net(z)
 
 class LSTMCell(nn.Module):
     def __init__(self, input_size: int, hidden_size: int, bias: bool=True):

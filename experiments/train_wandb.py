@@ -69,7 +69,7 @@ import torch_optimizer as optim
 
 from hyperparams import Hyperparams  
 
-os.environ["WANDB_MODE"] = "online"  # Set to "online" for real-time logging, "offline" for local logging
+os.environ["WANDB_MODE"] = "offline"  # Set to "online" for real-time logging, "offline" for local logging
 
 # ------ Current Run Settings ----------------------------------------------- #
 hp_manager = Hyperparams()  
@@ -365,6 +365,7 @@ def main(sweep):
         __reg = config.get("reg", 0.0)
         __use_decoder = config.get("use_decoder", False)
         __decode_every_timestep = config.get("decode_every_timestep", False)
+        __residual = config.get("residual", False)
     else:
         __control_rnn_size = wandb.config["control_rnn_size"]
         __control_rnn_depth = wandb.config["control_rnn_depth"]
@@ -391,6 +392,7 @@ def main(sweep):
         __reg = wandb.config.get("reg", 0.0)
         __use_decoder = wandb.config.get("use_decoder", False)
         __decode_every_timestep = wandb.config.get("decode_every_timestep", False)
+        __residual = wandb.config.get("residual", False)
     print(f'reg: {__reg}')
 
     model_args = {
@@ -415,6 +417,7 @@ def main(sweep):
         'radius': __radius,
         'use_decoder': __use_decoder, 
         'decode_every_timestep': __decode_every_timestep,
+        'residual': __residual,
     }
 
     model_metadata = {
