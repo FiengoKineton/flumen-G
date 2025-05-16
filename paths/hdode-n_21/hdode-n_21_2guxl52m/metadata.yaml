@@ -1,0 +1,49 @@
+args:
+  batch_size: 64
+  control_dim: 1
+  control_rnn_depth: 1
+  control_rnn_size: 32
+  decode_every_timestep: true
+  decoder_depth: 1
+  decoder_mode: false
+  decoder_size: 1
+  discretisation_mode: BE
+  encoder_depth: 1
+  encoder_size: 1
+  linearisation_mode: static
+  mode_dnn: FFNet
+  mode_rnn: new
+  model_name: HD_ODE
+  output_dim: 21
+  radius: 1
+  residual: false
+  state_dim: 21
+  use_batch_norm: false
+  use_decoder: false
+  x_update_mode: new
+data_args:
+  data_split:
+  - 20
+  - 20
+  n_samples: 200
+  n_trajectories: 200
+  noise_seed: null
+  noise_std: 0.0
+  output_name: hdode_test_data
+  settings: data_generation/hdode.yaml
+  time_horizon: 15.0
+data_path: C:/Users/g7fie/OneDrive/Documenti/GitHub/flumen-G/data/hdode_test_data.pkl
+data_settings:
+  control_delta: 0.2
+  dynamics:
+    args:
+      a: 0.5
+      b: 1.0
+      control_dim: 1
+      k: 0.3
+      state_dim: 21
+    name: HD_ODE
+  sequence_generator:
+    args:
+      period: 5
+    name: GaussianSqWave

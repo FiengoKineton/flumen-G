@@ -1,0 +1,49 @@
+args:
+  batch_size: 128
+  control_dim: 1
+  control_rnn_depth: 1
+  control_rnn_size: 64
+  decode_every_timestep: false
+  decoder_depth: 2
+  decoder_mode: false
+  decoder_size: 16
+  discretisation_mode: BE
+  encoder_depth: 2
+  encoder_size: 16
+  linearisation_mode: lpv
+  mode_dnn: FFNet
+  mode_rnn: new
+  model_name: FitzHughNagumo
+  output_dim: 2
+  radius: 2.0
+  residual: true
+  state_dim: 2
+  use_batch_norm: false
+  use_decoder: false
+  x_update_mode: new
+data_args:
+  data_split:
+  - 20
+  - 20
+  n_samples: 200
+  n_trajectories: 200
+  noise_seed: null
+  noise_std: 0.0
+  output_name: fhn_test_data2
+  settings: data_generation/fhn.yaml
+  time_horizon: 15.0
+data_path: /home/giuseppe/Desktop/KTH/Thesis/flumen-G/run_data/pkl_files/fhn/fhn_test_data2.pkl
+data_settings:
+  control_delta: 0.2
+  dynamics:
+    args:
+      a: -0.3
+      b: 1.4
+      tau: 0.8
+    name: FitzHughNagumo
+  sequence_generator:
+    args:
+      mean: -0.7
+      period: 8
+      std: 0.5
+    name: LogNormalSqWave

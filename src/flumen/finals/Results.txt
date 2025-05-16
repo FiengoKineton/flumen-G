@@ -52,9 +52,9 @@ FHN best runs: (fhn--32)
 - oval_false | fhn_swift-r=2--3: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-rystn8ww:v4
 - alpha_false | fhn---02: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-bnz9skhi:v4
 - upd_new | fhn-x_update__new: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data2-2wtgb4nt:v3
-- dec_steps | fhn-upd_steps: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data2-7vqofoxa:v0 (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\artifacts\fhn-upd_steps
-- dec_T | fhn-upd_T: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\artifacts\fhn-upd_T
-- residual | _: (path) _ 
+- dec_steps | fhn-upd_steps: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data2-7vqofoxa:v0 (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\fhn-upd_steps\1
+- dec_T | fhn-upd_T: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\fhn-upd_T
+- residual | fhn-residual: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\fhn-residual\1
 
 - small_DS | fhn-01-T-small_DS: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-krfpnxea:v4
 
@@ -66,8 +66,9 @@ FHN best runs: (fhn--32)
 🛠️ (fhn_al_false.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-bnz9skhi:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
 🛠️ (fhn_small_DS.pdf) python.exe .\experiments\interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-krfpnxea:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
 🛠️ (fhn_upd_new.pdf) python experiments/interactive_test_compare.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data2-2wtgb4nt:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6 --note upd_new
-✔️ (fhn_dec_steps.pdf) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\artifacts\fhn-upd_steps --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
-🛠️ (fhn_dec_T.pdf) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\artifacts\fhn-upd_T --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
+✔️ (fhn_dec_steps.pdf) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\fhn-upd_steps\1 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
+✔️ (fhn_residual.pdf) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\fhn-residual\1 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
+🛠️ (fhn_dec_T.pdf) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\fhn-upd_T --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
 
 
 Note: (decoder_mode, linearisation_mode, discretisation_mode) = (True, static, BE)
@@ -129,10 +130,12 @@ R3D12:
 --------------------------------------------------------------------------------------------------------------
 
 HD_ODE:
-- hdode_old | hdode-old: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-hdode_test_data-8lc2id1u:v0
-- hdode | hdode: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\outputs\hdode-n_21\hdode-n_21_2guxl52m
+- hdode_old | hdode-n_21-old: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21-old\hdode-n_21-old_ntrk64cw
+- hdode_upd_steps | hdode-n_21-upd_steps: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21\hdode-n_21_2guxl52m
+- hdode | hdode-n_21: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21\hdode-n_21_vxbvada8
 
-🛠️ (hdode) python.exe .\experiments\interactive_test_compare.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-hdode_test_data-8lc2id1u:v0
+🛠️ (hdode) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21\hdode-n_21_vxbvada8 C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21-old\hdode-n_21-old_ntrk64cw
+🛠️ (hdode_upd_steps) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21\hdode-n_21_2guxl52m C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21-old\hdode-n_21-old_ntrk64cw
 
 
 ___________________________________________________________________________________________________________________________________________
@@ -160,14 +163,14 @@ time                 28914.4827 ± 26327.1509  43529.4471 ± 17019.0007    25954
 ----------------------------------------------------------------------------
 
 Metrics Comparison for FHN_false:
-                                         old             alpha_false                      oval_false                          upd_new       
-Best Simulation  fhn_fin-old-2 (val=0.01486)  fhn---02 (val=0.05617)  fhn_swift-r=2--3 (val=0.04399)  fhn-x_update__new (val=0.05028)       
-_step                      131.0000 ± 7.0711        88.0000 ± 5.6569               76.8889 ± 25.0272                   132.0000 ± nan       
-best_val                     0.0167 ± 0.0027         0.0627 ± 0.0092                 0.0649 ± 0.0195                     0.0503 ± nan       
-best_epoch                 106.0000 ± 7.0711        73.0000 ± 5.6569               61.8889 ± 25.0272                   125.0000 ± nan       
-best_test                    0.0258 ± 0.0141         0.0753 ± 0.0029                 0.0773 ± 0.0190                     0.0739 ± nan       
-best_train                   0.0026 ± 0.0004         0.0382 ± 0.0008                 0.0416 ± 0.0179                     0.0330 ± nan       
-time                 40958.6990 ± 20805.0690  35880.9298 ± 2156.5427        129533.3689 ± 66097.3804                 70317.5161 ± nan       
+                                         old                   upd_steps
+Best Simulation  fhn_fin-old-2 (val=0.01486)  fhn-residual (val=0.03156)
+_step                      131.0000 ± 7.0711            74.7500 ± 8.3016
+best_val                     0.0167 ± 0.0027             0.0348 ± 0.0038
+best_epoch                 106.0000 ± 7.0711            60.7500 ± 6.6521
+best_test                    0.0258 ± 0.0141             0.0484 ± 0.0171
+best_train                   0.0026 ± 0.0004             0.0218 ± 0.0037
+time                 40958.6990 ± 20805.0690     72780.7525 ± 26435.7441
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
@@ -212,14 +215,14 @@ time                          67710.3413 ± nan          96045.5832 ± 51528.394
 ----------------------------------------------------------------------------
 
 Metrics Comparison for HD_ODE:
-                                   old               new
-Best Simulation  hdode-old (val=67.47)  hdode (val=69.8)
-_step                    36.0000 ± nan     17.0000 ± nan
-best_val                 67.4722 ± nan     69.7992 ± nan
-best_epoch               11.0000 ± nan      4.0000 ± nan
-best_test                68.3029 ± nan     69.5058 ± nan
-best_train               55.6284 ± nan     63.1452 ± nan
-time                  12342.6990 ± nan  19825.9453 ± nan
+                                       old                              new
+Best Simulation  hdode-n_21-old (val=50.8)  hdode-n_21-upd_steps (val=50.7)
+_step                        34.0000 ± nan                 28.5000 ± 2.1213
+best_val                     50.7968 ± nan                 51.2769 ± 0.8143
+best_epoch                    9.0000 ± nan                  3.5000 ± 2.1213
+best_test                    48.6050 ± nan                 51.2871 ± 0.5759
+best_train                   43.3362 ± nan                 45.5738 ± 3.7866
+time                       5270.0679 ± nan           16941.5540 ± 5524.3247
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------

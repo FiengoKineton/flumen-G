@@ -127,7 +127,7 @@ if __name__ == "__main__":
             #'oval_false': 'src/flumen/finals/csv/FHN/new/fhn-oval_false.csv',
             #'upd_new': 'src/flumen/finals/csv/FHN/new/fhn-upd_new.csv',
             'upd_steps': 'src/flumen/finals/csv/FHN/new/fhn-upd_steps.csv',
-            'residuals': 'src/flumen/finals/csv/FHN/new/fhn-residuals.csv',
+            #'residuals': 'src/flumen/finals/csv/FHN/new/fhn-residuals.csv',
         },
         'NAD_small': {
             'old_small': 'src/flumen/finals/csv/NAD/old/default/old_nad-stable.csv',

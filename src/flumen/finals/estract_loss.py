@@ -9,7 +9,7 @@ import re
 
 CSV = False
 PLOT = False
-ALL = False
+ALL = True
 
 which = "fhn"
 

@@ -276,7 +276,7 @@ class Hyperparams:
             },
 
             'hyperparams___fhn_old': {
-                "control_rnn_size": 50,  
+                "control_rnn_size": 66,  
                 "control_rnn_depth": 1,         
                 "encoder_size": 2,   
                 "encoder_depth": 2,  
