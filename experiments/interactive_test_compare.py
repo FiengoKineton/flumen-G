@@ -92,15 +92,13 @@ def main():
     num_times = 2 if args.time_horizon is None else 1          # default 2 | multiplied by the time_span
 
     metadata, state_dict = get_metadata(args.wandb, args.path)
-    if args.wandb_2: metadata_2, state_dict_2 = get_metadata(args.wandb_2, args.path_2)
+    metadata_2, state_dict_2 = get_metadata(args.wandb_2, args.path_2) # if args.wandb_2: 
     
     #metadata["args"]["mode_rnn"] = 'old'
     print("metadata:")
     pprint(metadata)
 
-    if args.wandb_2: 
-        print("\nmetadata_2:")
-        pprint(metadata_2)
+    print("\nmetadata_2:"), pprint(metadata_2) #     if args.wandb_2: 
 
     #mode_rnn = metadata.get("args", {}).get("mode_rnn", "old")
 
@@ -111,10 +109,10 @@ def main():
     model.load_state_dict(state_dict)
     model.eval()
 
-    if args.wandb_2: 
-        model_2 = CausalFlowModel(**metadata_2["args"])
-        model_2.load_state_dict(state_dict_2)
-        model_2.eval()
+    
+    model_2 = CausalFlowModel(**metadata_2["args"]) # if args.wandb_2: 
+    model_2.load_state_dict(state_dict_2)
+    model_2.eval()
 
     if test_sin: 
         # Override the input signal for testing (e.g., Sinusoidal)
@@ -168,11 +166,11 @@ def main():
 
         with torch.no_grad():
             y_pred, _, _ = model(x0_feed, u_feed, deltas_feed)
-            if args.wandb_2: y_pred_2, _, _ = model_2(x0_feed, u_feed, deltas_feed)
+            y_pred_2, _, _ = model_2(x0_feed, u_feed, deltas_feed) # if args.wandb_2: 
             # model 2 
 
         y_pred = np.flip(y_pred.numpy(), 0)
-        if args.wandb_2: y_pred_2 = np.flip(y_pred_2.numpy(), 0)
+        y_pred_2 = np.flip(y_pred_2.numpy(), 0) # if args.wandb_2: 
 
         
         time_predict = time() - time_predict
@@ -211,7 +209,7 @@ def main():
         if args.continuous_state:
             ax1[0].pcolormesh(t.squeeze(), xx, y.T)
             ax1[1].pcolormesh(t.squeeze(), xx, y_pred.T)
-            if args.wandb_2: ax1[1].pcolormesh(t.squeeze(), xx, y_pred_2.T)
+            ax1[1].pcolormesh(t.squeeze(), xx, y_pred_2.T) # if args.wandb_2: 
         else:
             # **Plot y_true vs y_pred**
             n = model.output_dim #if model.state_dim==2 else 1
@@ -234,9 +232,7 @@ def main():
                             label=f'{WANDB_1} ({err[k]:.6f})')
 
                     # Predicted (Default), optional
-                    if args.wandb_2:
-                        ax_.plot(t, y_pred_2[:, k], color=colors[1], linestyle=linestyles[1],
-                                label=f'{WANDB_2} ({err_2[k]:.6f})')
+                    ax_.plot(t, y_pred_2[:, k], color=colors[1], linestyle=linestyles[1], label=f'{WANDB_2} ({err_2[k]:.6f})') # if args.wandb_2:
 
                     # True state trajectory
                     ax_.plot(t, y[:, k], color=colors[2], linestyle=linestyles[2], 
@@ -265,9 +261,7 @@ def main():
                                 label=f'{WANDB_1}')
 
                         # Predicted (Default), optional
-                        if args.wandb_2:
-                            ax_.plot(range(len(list_2)), list_2[:, k], color=colors[1], linestyle=linestyles[1],
-                                    label=f'{WANDB_2}')
+                        ax_.plot(range(len(list_2)), list_2[:, k], color=colors[1], linestyle=linestyles[1], label=f'{WANDB_2}') # if args.wandb_2:
 
                         ax_.set_ylabel(f"$x_{{{k+1}}}$")
                         ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)

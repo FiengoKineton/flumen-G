@@ -129,8 +129,8 @@ R3D12:
 --------------------------------------------------------------------------------------------------------------
 
 HD_ODE:
-- hdode_old | r3d12-gaussian-old: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-hdode_test_data-8lc2id1u:v0
-- hdode | r3d12-gaussian-static: (wandb) _
+- hdode_old | hdode-old: (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-hdode_test_data-8lc2id1u:v0
+- hdode | hdode: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\outputs\hdode-n_21\hdode-n_21_2guxl52m
 
 🛠️ (hdode) python.exe .\experiments\interactive_test_compare.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-hdode_test_data-8lc2id1u:v0
 

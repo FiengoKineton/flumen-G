@@ -432,11 +432,11 @@ class Hyperparams:
                 "decoder_mode": False,          # set to True if mode_rnn is 'old'
                 "radius": 1,
                 "reg": 0.0,
-                "decode_every_timestep": True,
+                "decode_every_timestep": False,
             },
 
             'hyperparams___hdode_old': {
-                "control_rnn_size": 64,         # Reduced to limit overfitting
+                "control_rnn_size": 53,         # Reduced to limit overfitting
                 "control_rnn_depth": 1,         
                 "encoder_size": 1,              # Reduced from 2 to 1
                 "encoder_depth": 2,             # Reduced from 2 to 1
