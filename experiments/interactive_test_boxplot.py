@@ -17,28 +17,25 @@ from time import time
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
-"""
+r"""
 RUNS: 
 
 VDP----------------
 (lpv) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lbz1tnpu:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0 --note lpv
 (static) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-lwqp2l3z:v3 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-vdp_test_data-x3zk3ip4:v0 --note static
-(upd_new) python .\experiments\interactive_test_boxplot.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10 --note upd_new
 
 FHN----------------
-(stat) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-04y8vw0k:v4 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6 --note static
-(upd_new) python.exe .\experiments\interactive_test_boxplot.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6 --note upd_new
+python.exe .\experiments\interactive_test_boxplot.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\fhn-upd_steps\1 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-fhn_test_data-w52hqxkd:v6
 
 NAD----------------
-(big) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-3dxiz9gf:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10
-(big_upd_new) python.exe .\experiments\interactive_test_boxplot.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10 --note upd_new
-(small) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-zshs5333:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10
+(big) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-3dxiz9gf:v2 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10 --note big
+(big_upd_new) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-se8qltc2:v31 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-jwlwuqmw:v10 --note upd_new
+(small) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-zshs5333:v0 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10 --note small
 (small_upd_new) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-siq3pyyf:v8 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-mg4z6swx:v10 --note upd_new
 
 R3D12--------------
 (r3d12_static) python.exe .\experiments\interactive_test_boxplot.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-ku1s1thr:v1 --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-gaciweh0:v0
 (r3d12_upd_new) python.exe .\experiments\interactive_test_boxplot.py --wandb _ --wandb_2 aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-r3d12_test_data-gaciweh0:v0
-
 """
 
 
