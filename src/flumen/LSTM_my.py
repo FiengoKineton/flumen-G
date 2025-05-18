@@ -9,6 +9,8 @@ import numpy as np
 from scipy.special import expit
 from .trajectory import TrajectoryDataset
 from torch.utils.data import DataLoader
+import sympy as sp
+
 
 
 """
@@ -404,7 +406,27 @@ class LSTM(nn.Module):
                 "u_eq": torch.tensor(u_eq, dtype=self.dtype),
                 "state_dim": state_dim,
                 "control_dim": control_dim
-            }            
+            }     
+        
+        elif model_name == "LinearSys": 
+            state_dim = 2
+            control_dim = 1
+            A = self.data["dynamics"]["args"]["a"]
+            B = self.data["dynamics"]["args"]["b"]
+
+            u_eq = torch.zeros(control_dim)
+            x_eq = torch.zeros(state_dim)
+
+            param = {
+                "A": torch.tensor(A, dtype=self.dtype),
+                "B": torch.tensor(B, dtype=self.dtype),
+                "dyn_factor": dyn_factor,
+                "dtype": self.dtype,
+                "x_eq": x_eq,
+                "u_eq": u_eq,
+                "state_dim": state_dim,
+                "control_dim": control_dim
+            }
 
         elif model_name == "HD_ODE": 
             state_dim = self.data["dynamics"]["args"]["state_dim"]
@@ -443,6 +465,75 @@ class LSTM(nn.Module):
                 "u_eq": u_eq,
                 "state_dim": state_dim,
                 "control_dim": control_dim
+            }
+
+        elif model_name == "GreenshieldsTraffic": 
+            n = self.data["dynamics"]["args"]["n"]
+            v0 = self.data["dynamics"]["args"]["v0"]
+            inv_step = n
+
+            def flux(x, v0):
+                return v0 * x * (1 - x)
+
+            def dx(x, u, v0, inv_step):
+                q_out = flux(x, v0)
+                q0_in = flux(u, v0)
+                q_in = np.roll(q_out, 1)
+                q_in[0] = q0_in
+                return inv_step * (q_in - q_out)
+
+            def equilibrium_condition(x_eq, u_eq, v0):
+                #return flux(u_eq, v0) - flux(x_eq, v0)
+                x_vec = np.full(n, x_eq)
+                dx_vec = dx(x_vec, u_eq, v0, inv_step)
+                return np.max(np.abs(dx_vec))
+
+            from scipy.optimize import fsolve
+            u_eq = 0  # can pick a value in (0, 1) arbitrarily
+            #x_eq = fsolve(equilibrium_condition, 0.2, args=(u_eq, v0))[0]
+            x_eq = fsolve(lambda x_vec: dx(x_vec, u_eq, v0, inv_step), np.full(n, 0.2))
+
+            x = sp.symbols(f'x0:{n}')
+            u = sp.Symbol('u')
+            q_out_sym = [v0 * xi * (1 - xi) for xi in x]
+            q_in_sym = [None] * n
+            q_in_sym[0] = v0 * u * (1 - u)
+
+            for i in range(1, n):
+                q_in_sym[i] = q_out_sym[i - 1]
+
+            dx_sym = [(q_in_sym[i] - q_out_sym[i]) * n for i in range(n)]
+
+            # Jacobian: ∂dx/∂x and ∂dx/∂u
+            J_x = sp.Matrix(dx_sym).jacobian(x)
+            J_u = sp.Matrix(dx_sym).jacobian([u])
+
+            # Substitute equilibrium values
+            subs_dict = {x[i]: x_eq[i] for i in range(n)}
+            subs_dict[u] = u_eq
+            J_x_eq = J_x.subs(subs_dict)
+            J_u_eq = J_u.subs(subs_dict)
+
+
+            x_eq_vec = np.full(n, x_eq)  # homogeneous equilibrium
+            f_eq_np = dx(x_eq_vec, u_eq, v0, inv_step)
+            f_eq = torch.tensor(f_eq_np, dtype=self.dtype)
+
+            A = torch.tensor(J_x_eq, dtype=self.dtype).reshape(n, n)
+            B = torch.tensor(J_u_eq, dtype=self.dtype).reshape(n, 1)
+            f_eq = torch.tensor(f_eq.reshape(n,1), dtype=self.dtype)
+
+
+            param = {
+                "A": A,
+                "B": B, 
+                "f_eq": f_eq,
+                "dyn_factor": dyn_factor,
+                "dtype": self.dtype,
+                "x_eq": x_eq,
+                "u_eq": u_eq,
+                "state_dim": n,
+                "control_dim": 1,
             }
 
         else:
@@ -701,6 +792,30 @@ def linearisation_static__NonlinearActivationDynamics(param, const, x, u):      
     sys.exit() #"""
     return A, B, f_eq, None
 
+def linearisation_static__LinearSys(param, const, x, u):                                                # --nope--
+    x_eq = param['x_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    A = param['A']
+    B = param['B']
+
+    batch_size, _, _ = const
+
+    A = dyn_factor * A
+    B = dyn_factor * B
+
+    f_eq = dyn_factor * torch.tensor([
+        [0],
+        [0]
+    ], dtype=dtype)
+
+    A = A.unsqueeze(0).expand(batch_size, -1, -1) 
+    B = B.unsqueeze(0).expand(batch_size, -1, -1) 
+    f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
+    return A, B, f_eq, None
+
+
 def linearisation_static__R3D12(param, const, x, u):
     # === Parametri dinamici ===
     state_dim = param['state_dim']
@@ -798,6 +913,27 @@ def linearisation_static__HD_ODE(param, const, x, u):
     B = (dyn_factor * B).unsqueeze(0).expand(batch_size, -1, -1)
     f_eq = (dyn_factor * f_eq).unsqueeze(0).expand(batch_size, -1, -1)
     return A, B, f_eq, None
+
+def linearisation_static__GreenshieldsTraffic(param, const, x, u): 
+    x_eq = param['x_eq']
+    u_eq = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    A = param['A']
+    B = param['B']
+    f_eq = param['f_eq']
+
+    batch_size, _, _ = const
+
+    A = dyn_factor * A
+    B = dyn_factor * B
+    f_eq = dyn_factor * f_eq
+
+    A = A.unsqueeze(0).expand(batch_size, -1, -1) 
+    B = B.unsqueeze(0).expand(batch_size, -1, -1) 
+    f_eq = f_eq.unsqueeze(0).expand(batch_size, -1, -1)
+    return A, B, f_eq, None
+
 
 # ─────────────────────────────────────────────────────────────────────────── #
 # ---------------- Linearisation functions ---------------------------------- #
@@ -1551,6 +1687,9 @@ def linearisation_lpv__R3D12(param, const, x, u, epsilon=1e-4):
     plt.show()
     # -------------------------------------------"""
     return A, B, f_eq, radius
+
+def linearisation_lpv__GreenshieldsTraffic(param, const, x, y, epsilon=1e-4): 
+    pass
 
 
 # ═══════════════════════════════════════════════════════════════════════════ #

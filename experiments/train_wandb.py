@@ -50,8 +50,8 @@ python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --tim
 python experiments/train_wandb.py data/linsys_test_data.pkl linsys_test 
 
 --HHfs------------------------------
-python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/hhfs.yaml hhfs_test_data
-python experiments/train_wandb.py data/hhfs_test_data.pkl hhfs_test 
+python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/greenshields.yaml greenshields_test_data
+python experiments/train_wandb.py data/greenshields_test_data.pkl greenshields_test 
 
 
 --general---------------------------
@@ -81,11 +81,15 @@ sets = {
     'fhn': 'hyperparams___fhn',             # in progress
     'r3d12': 'hyperparams___r3d12',         # new
     'hdode': 'hyperparams___hdode',         # new
+    'linsys': 'hyperparams__linsys',        # old
     'vdp_old': 'hyperparams___vdp_old', 
     'fhn_old': 'hyperparams___fhn_old', 
     'nad_old': 'hyperparams___nad_old',
     'r3d12_old': 'hyperparams___r3d12_old',
     'hdode_old': 'hyperparams___hdode_old',
+    'linsys_old': 'hyperparams__linsys_old',
+    'greenshields': 'hyperparams__greenshields',
+    'greenshields_old': 'hyperparams__greenshields_old',
 }
 
 sweeps = {
@@ -100,7 +104,7 @@ sweeps = {
 }
 
 
-name_set = sets['hdode_old']     # vdp, fhn, nad
+name_set = sets['greenshields']     # vdp, fhn, nad
 hyperparams = hp_manager.get_hyperparams(name_set)
 
 name_sweep = sweeps['fhn']
