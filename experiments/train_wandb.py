@@ -49,7 +49,7 @@ python.exe experiments/train_wandb.py data/hdode_test_data.pkl hdode
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/linsys.yaml linsys_test_data
 python experiments/train_wandb.py data/linsys_test_data.pkl linsys_test 
 
---HHfs------------------------------
+--greenshields----------------------
 python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/greenshields.yaml greenshields_test_data
 python experiments/train_wandb.py data/greenshields_test_data.pkl greenshields_test 
 

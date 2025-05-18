@@ -136,6 +136,20 @@ HD_ODE:
 
 🛠️ (hdode) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21\hdode-n_21_vxbvada8 C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21-old\hdode-n_21-old_ntrk64cw
 🛠️ (hdode_upd_steps) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21\hdode-n_21_2guxl52m C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\hdode-n_21-old\hdode-n_21-old_ntrk64cw
+--------------------------------------------------------------------------------------------------------------
+
+LinSys:
+- linsys_old | linsys-old: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys-old
+- linsys | linsys: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys
+
+🛠️ (linsys) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys-old
+--------------------------------------------------------------------------------------------------------------
+
+GreenShields:
+- greenshields_old | greenshields-old: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields-old
+- greenshields | greenshields: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields
+
+🛠️ (greenshields) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields-old
 
 
 ___________________________________________________________________________________________________________________________________________

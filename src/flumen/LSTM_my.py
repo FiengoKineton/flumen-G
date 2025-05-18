@@ -13,14 +13,6 @@ import sympy as sp
 
 
 
-"""
-COMMANDs:
-
-python experiments/semble_generate.py --n_trajectories 200 --n_samples 200 --time_horizon 15 data_generation/vdp.yaml vdp_test_data
-python experiments/train_wandb.py data/vdp_test_data.pkl vdp_test 
-"""
-
-
 # ---------------- LSTM ----------------------------------------------------- #
 
 class LSTM(nn.Module):
@@ -254,6 +246,8 @@ class LSTM(nn.Module):
         ###if self.fc is not None and not isinstance(outputs, torch.nn.utils.rnn.PackedSequence): out = self.fc(out[:, -1, :])
         return out, (z, c_z), coefficients, matrices
 
+
+# ---------------- Init ----------------------------------------------------- #
 
     def get_dyn_matrix_params(self): 
         """
