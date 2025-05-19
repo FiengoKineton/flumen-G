@@ -1717,7 +1717,7 @@ def linearisation_lpv__GreenshieldsTraffic(param, const, x, u, epsilon=1e-4):
     B_eq = J_u.subs(subs_dict)
 
     A_eq = torch.tensor(np.array(A_eq).astype(np.float32), dtype=dtype)
-    B = torch.tensor(np.array(B_eq).astype(np.float32), dtype=dtype)
+    B = dyn_factor * torch.tensor(np.array(B_eq).astype(np.float32), dtype=dtype)
 
     # Funzione dinamica
     def dx(xv, uv):
@@ -1738,9 +1738,9 @@ def linearisation_lpv__GreenshieldsTraffic(param, const, x, u, epsilon=1e-4):
         subs_i = {x_syms[i]: xi[i].item() for i in range(n)}
         subs_i[u_sym] = u_eq_val
         A_i = J_x.subs(subs_i)
-        A_i = torch.tensor(np.array(A_i).astype(np.float32), dtype=dtype)
+        A_i = dyn_factor * torch.tensor(np.array(A_i).astype(np.float32), dtype=dtype)
         f_i = dx(xi.numpy(), u_eq_val)
-        f_i = torch.tensor(f_i, dtype=dtype)
+        f_i = dyn_factor * torch.tensor(f_i, dtype=dtype)
         A_list.append(A_i)
         f_eq_list.append(f_i)
 
