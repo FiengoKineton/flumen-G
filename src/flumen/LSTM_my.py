@@ -528,6 +528,8 @@ class LSTM(nn.Module):
                 "u_eq": u_eq,
                 "state_dim": n,
                 "control_dim": 1,
+                "v0": v0, 
+                "inv_step": inv_step,
             }
 
         else:
@@ -1682,8 +1684,82 @@ def linearisation_lpv__R3D12(param, const, x, u, epsilon=1e-4):
     # -------------------------------------------"""
     return A, B, f_eq, radius
 
-def linearisation_lpv__GreenshieldsTraffic(param, const, x, y, epsilon=1e-4): 
-    pass
+def linearisation_lpv__GreenshieldsTraffic(param, const, x, u, epsilon=1e-4):
+    # Parametri e costanti
+    x_eq_val = param['x_eq']
+    u_eq_val = param['u_eq']
+    dyn_factor = param['dyn_factor']
+    dtype = param['dtype']
+    v0 = param['v0']
+    n = param['state_dim']
+    inv_step = param['inv_step']
+    
+    batch_size, radius, _ = const
+    batch_size = u.shape[0]
+    
+    x_target = x[0].unsqueeze(1)     # [128, 1, 100]
+    u_target = u                     # [128, 1]
+
+    # Costruzione simbolica
+    x_syms = sp.symbols(f'x0:{n}')
+    u_sym = sp.Symbol('u')
+    q_out_sym = [v0 * xi * (1 - xi) for xi in x_syms]
+    q_in_sym = [v0 * u_sym * (1 - u_sym)] + q_out_sym[:-1]
+    dx_sym = [(q_in_sym[i] - q_out_sym[i]) * n for i in range(n)]
+
+    J_x = sp.Matrix(dx_sym).jacobian(x_syms)
+    J_u = sp.Matrix(dx_sym).jacobian([u_sym])
+
+    # Equilibrio
+    subs_dict = {x_syms[i]: x_eq_val[i] for i in range(n)}
+    subs_dict[u_sym] = u_eq_val
+    A_eq = J_x.subs(subs_dict)
+    B_eq = J_u.subs(subs_dict)
+
+    A_eq = torch.tensor(np.array(A_eq).astype(np.float32), dtype=dtype)
+    B = torch.tensor(np.array(B_eq).astype(np.float32), dtype=dtype)
+
+    # Funzione dinamica
+    def dx(xv, uv):
+        q_out = v0 * xv * (1 - xv)
+        q0_in = v0 * uv * (1 - uv)
+        q_in = np.roll(q_out, 1)
+        q_in[0] = q0_in
+        return inv_step * (q_in - q_out)
+
+    # Punti attorno a x_eq (sfera unitaria moltiplicata per raggio)
+    directions = torch.randn((radius, n), dtype=dtype)
+    directions = directions / torch.norm(directions, dim=1, keepdim=True)
+    sampled_points = torch.tensor(x_eq_val, dtype=dtype).unsqueeze(0) + radius * directions  # [radius, n]
+
+    # Calcola A_i e f_eq_i per ogni punto
+    A_list, f_eq_list = [], []
+    for xi in sampled_points:
+        subs_i = {x_syms[i]: xi[i].item() for i in range(n)}
+        subs_i[u_sym] = u_eq_val
+        A_i = J_x.subs(subs_i)
+        A_i = torch.tensor(np.array(A_i).astype(np.float32), dtype=dtype)
+        f_i = dx(xi.numpy(), u_eq_val)
+        f_i = torch.tensor(f_i, dtype=dtype)
+        A_list.append(A_i)
+        f_eq_list.append(f_i)
+
+    A_list = torch.stack(A_list).unsqueeze(0).expand(batch_size, -1, -1, -1)      # [B, K, n, n]
+    f_eq_list = torch.stack(f_eq_list).unsqueeze(0).expand(batch_size, -1, -1)    # [B, K, n]
+
+    # Calcolo pesi
+    sampled_points = sampled_points.unsqueeze(0).expand(batch_size, -1, -1)       # [B, K, n]
+    distances = torch.norm(x_target - sampled_points, dim=2)                     # [B, K]
+    weights = torch.exp(-(distances**2 + epsilon))
+    weights = weights / weights.sum(dim=1, keepdim=True)                          # Normalizza
+
+    w_A = weights.unsqueeze(-1).unsqueeze(-1)  # [B, K, 1, 1]
+    w_f = weights.unsqueeze(-1)                # [B, K, 1]
+
+    A = torch.sum(w_A * A_list, dim=1)                      # [B, n, n]
+    B = B.expand(batch_size, -1, -1)                        # [B, n, 1]
+    f_eq = torch.sum(w_f * f_eq_list, dim=1).unsqueeze(-1)  # [B, n, 1]
+    return A, B, f_eq, radius
 
 
 # ═══════════════════════════════════════════════════════════════════════════ #

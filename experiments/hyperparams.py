@@ -482,10 +482,10 @@ class Hyperparams:
                 "x_update_mode": "new",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet", 
-                "linearisation_mode": "static",
+                "linearisation_mode": "lpv",
                 "decoder_mode": False,
                 "decode_every_timestep": True,
-                "radius": 1,
+                "radius": 2,
                 "reg": 0.0,
             },
 
