@@ -147,7 +147,7 @@ LinSys:
 
 GreenShields:
 - greenshields_old | greenshields-old: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields-old (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-greenshields_test_data-31l7ve2e:v11
-- greenshields | greenshields: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields (wandb) _
+- greenshields | greenshields: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-greenshields_test_data-zoqk4cds:v10
 
 🛠️ (greenshields) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields-old
 

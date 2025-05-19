@@ -1,0 +1,51 @@
+args:
+  batch_size: 96
+  control_dim: 1
+  control_rnn_depth: 1
+  control_rnn_size: 48
+  decode_every_timestep: false
+  decoder_depth: 2
+  decoder_mode: false
+  decoder_size: 2
+  discretisation_mode: FE
+  encoder_depth: 2
+  encoder_size: 2
+  linearisation_mode: static
+  mode_dnn: FFNet
+  mode_rnn: new
+  model_name: LinearSys
+  output_dim: 2
+  radius: 3
+  residual: false
+  state_dim: 2
+  use_batch_norm: false
+  use_decoder: false
+  x_update_mode: new
+data_args:
+  data_split:
+  - 20
+  - 20
+  n_samples: 200
+  n_trajectories: 200
+  noise_seed: null
+  noise_std: 0.0
+  output_name: linsys_test_data
+  settings: data_generation/linsys.yaml
+  time_horizon: 15.0
+data_path: /home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/linsys_test_data.pkl
+data_settings:
+  control_delta: 1.0
+  dynamics:
+    args:
+      a:
+      - - -0.01
+        - 1
+      - - 0
+        - -1
+      b:
+      - - 0
+      - - 1
+    name: LinearSys
+  sequence_generator:
+    args: {}
+    name: RandomWalkSequence
