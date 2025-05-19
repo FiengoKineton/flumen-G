@@ -1,0 +1,53 @@
+args:
+  batch_size: 64
+  control_dim: 1
+  control_rnn_depth: 1
+  control_rnn_size: 132
+  decode_every_timestep: false
+  decoder_depth: 1
+  decoder_mode: true
+  decoder_size: 1
+  discretisation_mode: null
+  encoder_depth: 1
+  encoder_size: 1
+  linearisation_mode: null
+  mode_dnn: FFNet
+  mode_rnn: old
+  model_name: GreenshieldsTraffic
+  output_dim: 100
+  radius: null
+  residual: false
+  state_dim: 100
+  use_batch_norm: false
+  use_decoder: false
+  x_update_mode: null
+data_args:
+  data_split:
+  - 20
+  - 20
+  n_samples: 200
+  n_trajectories: 200
+  noise_seed: null
+  noise_std: 0.0
+  output_name: greenshields_test_data
+  settings: data_generation/greenshields.yaml
+  time_horizon: 15.0
+data_path: /home/giuseppe/Desktop/KTH/Thesis/flumen-G/data/greenshields_test_data.pkl
+data_settings:
+  control_delta: 1.0
+  dynamics:
+    args:
+      n: 100
+      v0: 1.0
+    name: GreenshieldsTraffic
+  initial_state_generator:
+    args:
+      n_cells: 100
+      n_sections: 4
+    name: GreenshieldsInitialState
+  sequence_generator:
+    args:
+      max: 0.5
+      min: 0.0
+      period: 1
+    name: UniformSqWave

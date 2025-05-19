@@ -139,15 +139,15 @@ HD_ODE:
 --------------------------------------------------------------------------------------------------------------
 
 LinSys:
-- linsys_old | linsys-old: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys-old
-- linsys | linsys: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys
+- linsys_old | linsys-old: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys-old (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-linsys_test_data-q15yrnaj:v0
+- linsys | linsys: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys (wandb) _
 
 🛠️ (linsys) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\linsys-old
 --------------------------------------------------------------------------------------------------------------
 
 GreenShields:
-- greenshields_old | greenshields-old: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields-old
-- greenshields | greenshields: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields
+- greenshields_old | greenshields-old: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields-old (wandb) aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-greenshields_test_data-31l7ve2e:v11
+- greenshields | greenshields: (path) C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields (wandb) _
 
 🛠️ (greenshields) python.exe .\experiments\interactive_test_compare.py C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields C:\Users\g7fie\OneDrive\Documenti\GitHub\flumen-G\paths\greenshields-old
 
