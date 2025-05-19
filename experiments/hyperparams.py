@@ -261,7 +261,7 @@ class Hyperparams:
                 "sched_patience": 10,
                 "sched_factor": 3,
                 "loss": "mse",
-                "discretisation_mode": "TU",
+                "discretisation_mode": "FE",
                 "optimiser_mode": "adam",
                 "x_update_mode": "new",
                 "mode_rnn": "new",
@@ -463,27 +463,28 @@ class Hyperparams:
 
         ### ----------------------------------------------------------
             'hyperparams__greenshields': {
-                "control_rnn_size": 32,         # {48, 64, 80} 
+                "control_rnn_size": 32,
                 "control_rnn_depth": 1,         
-                "encoder_size": 1,              # 8
+                "encoder_size": 1,
                 "encoder_depth": 1,  
-                "decoder_size": 1,              # 8
+                "decoder_size": 1,
                 "decoder_depth": 1,  
-                "batch_size": 64,
+                "batch_size": 96,
                 "lr": 0.0003,             
                 "n_epochs": 200,  
                 "es_patience": 25,        
-                "es_delta": 1e-07,
-                "sched_patience": 10,           # 5
-                "sched_factor": 3,              # 2
+                "es_delta": 1e-06,
+                "sched_patience": 10,
+                "sched_factor": 3,
                 "loss": "mse",                  
-                "discretisation_mode": "TU",    # {BE, FE}
+                "discretisation_mode": "BE",
                 "optimiser_mode": "adam",       
-                "x_update_mode": "entropy",
+                "x_update_mode": "new",
                 "mode_rnn": "new", 
                 "mode_dnn": "FFNet", 
                 "linearisation_mode": "static",
-                "decoder_mode": False,          # set to True if mode_rnn is 'old'
+                "decoder_mode": False,
+                "decode_every_timestep": True,
                 "radius": 1,
                 "reg": 0.0,
             },

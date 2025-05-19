@@ -80,7 +80,7 @@ def main():
     NOISE_STD = args.test_noise_std
     WANDB_1, WANDB_2 = 'new_architecture', 'default_architecture'   # 'old_architecture', 'default' 
     test_sin = True
-    N, i = 100, 0
+    N, i = 20, 0
 
     num_times = 2 if args.time_horizon is None else 1          # default 2 | multiplied by the time_span
 
@@ -172,6 +172,19 @@ def main():
 
     err_array_1 = np.array(err_list_1) 
     err_array_2 = np.array(err_list_2) 
+
+    flat_1 = err_array_1.flatten()
+    flat_2 = err_array_2.flatten()
+
+    mean_1 = np.mean(flat_1)
+    std_1 = np.std(flat_1)
+
+    mean_2 = np.mean(flat_2)
+    std_2 = np.std(flat_2)
+
+    print(f"New Architecture:     MSE ≈ {mean_1:.4f} ± {std_1:.4f}")
+    print(f"Default Architecture: MSE ≈ {mean_2:.4f} ± {std_2:.4f}")
+
 
     if n==2:
         data_to_plot = [
