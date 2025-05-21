@@ -210,7 +210,7 @@ class Hyperparams:
                 "loss": "mse",                      # {mse, huber, l1}
                 "discretisation_mode": "TU",        # {FE, BE, TU, RK4, exact}
                 "optimiser_mode": "adam",           # {adam, tbptt, nesterov, newton}
-                "x_update_mode": "new",             # before entropy | {alpha, beta, lamda, relu, switch, entropy, new}
+                "x_update_mode": "entropy",         # before entropy | {alpha, beta, lamda, relu, switch, entropy, new}
                 "mode_rnn": "new",                  # {new, old, gru}
                 "mode_dnn": "FFNet",                # {FFNet, ConvNet, SelfAttention, ResidualBlock, GRUEncoderDecoder}
                 "linearisation_mode": "lpv",        # {static, current, lpv} | either lpv or static
