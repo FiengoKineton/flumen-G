@@ -518,6 +518,18 @@ class LSTM(nn.Module):
             f_eq = torch.tensor(f_eq.reshape(n,1), dtype=self.dtype)
 
 
+            """# Find indices of non-zero elements
+            non_zero_indices = torch.nonzero(B, as_tuple=False)
+
+            # Get the corresponding values
+            non_zero_values = B[non_zero_indices[:, 0], 0]
+
+            # Print both
+            for idx, val in zip(non_zero_indices[:, 0], non_zero_values):
+                print(f"Index: {idx.item()}, Value: {val.item()}")
+            
+            print(B)"""
+
             param = {
                 "A": A,
                 "B": B, 

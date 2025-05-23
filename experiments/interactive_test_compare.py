@@ -224,7 +224,7 @@ def main():
             err_list_1.append([err[n-2], err[n-1]])
             err_list_2.append([err_2[n-2], err_2[n-1]])
 
-            if n!=12:
+            if n==2:    # n!=12
                 for k, ax_ in enumerate(ax1[:n] if n == 2 else [ax1[0]]):   ######
                     # Predicted (Advanced)
                     if num!=2: k=n-1
@@ -242,7 +242,7 @@ def main():
                     ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
             else: 
                 for k in range(num):
-                    m = n-1-k
+                    m = n-1-k if n==12 else 0
                     j = num-1-k
                     ax1[j].plot(t, y_pred[:, m], color=colors[0], linestyle=linestyles[0], label=f'{WANDB_1} ({err[m]:.6f})')
                     ax1[j].plot(t, y_pred_2[:, m], color=colors[1], linestyle=linestyles[1], label=f'{WANDB_2} ({err_2[m]:.6f})')

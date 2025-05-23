@@ -46,10 +46,10 @@ NAD_small
 - (new) python.exe .\experiments\interactive_test_extra.py --wandb aguiar-kth-royal-institute-of-technology/g7-fiengo-msc-thesis/flumen-nad_test_data-zshs5333:v0 --note new_small
 """
 
-ERROR = True
+ERROR = False
 PHASE = True
-FFT = True
-CORRELATION = True
+FFT = False
+CORRELATION = False
 
 
 def parse_args():
@@ -192,19 +192,22 @@ def evaluate_all(y_true, y_pred, t, NAME, N, NOTE=None):
 
         # L'SSIM misura la similarità strutturale: 1 = identici, 0 = completamente diversi.
         # ➤ Un SSIM > 0.6 è generalmente buono in contesti dinamici.
-            
-        ssim_val = compute_ssim_phase(y_true[:,N-2:], y_pred[:,N-2:])
+        
+        if N == 2: idx = [0, 1]
+        elif N==100: idx = [0, -1]
+        else: idx = [N-2, N-1]
+        ssim_val = compute_ssim_phase(y_true[:,idx], y_pred[:,idx])
 
         fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-        axes[0].hist2d(y_true[:, N-2], y_true[:, N-1], bins=64, density=True, cmap='viridis')
+        axes[0].hist2d(y_true[:, idx[0]], y_true[:, idx[1]], bins=64, density=True, cmap='viridis')
         axes[0].set_title("True Phase Portrait")
         axes[0].set_xlabel("$x_1$")
         axes[0].set_ylabel("$x_2$")
 
-        axes[1].hist2d(y_pred[:, N-2], y_pred[:, N-1], bins=64, density=True, cmap='plasma')
+        axes[1].hist2d(y_pred[:, idx[0]], y_pred[:, idx[1]], bins=64, density=True, cmap='plasma')
         axes[1].set_title("Predicted Phase Portrait")
-        axes[1].set_xlabel("$x_1$")
-        axes[1].set_ylabel("$x_2$")
+        axes[1].set_xlabel(f"$x_{{{idx[0]}}}$")
+        axes[1].set_ylabel(f"$x_{{{idx[1]}}}$")
 
 
         if NOTE:    plt.suptitle(f"{NAME} SSIM (phase portrait): {ssim_val:.4f} -- {NOTE}")
@@ -359,4 +362,5 @@ if __name__ == "__main__":
 
         # --------------------------------------------------------
         # Example:
+        print(f'state dimension: {N}')
         evaluate_all(y, y_pred, t, NAME, N, NOTE)
