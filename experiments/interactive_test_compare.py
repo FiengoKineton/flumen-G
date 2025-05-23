@@ -242,7 +242,7 @@ def main():
                     ax_.legend(loc='lower right', bbox_to_anchor=(1, 0), borderaxespad=0.5)
             else: 
                 for k in range(num):
-                    m = n-1-k if n==12 else 0
+                    m = 0 if n==100 else n-1-k
                     j = num-1-k
                     ax1[j].plot(t, y_pred[:, m], color=colors[0], linestyle=linestyles[0], label=f'{WANDB_1} ({err[m]:.6f})')
                     ax1[j].plot(t, y_pred_2[:, m], color=colors[1], linestyle=linestyles[1], label=f'{WANDB_2} ({err_2[m]:.6f})')
