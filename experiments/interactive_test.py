@@ -35,6 +35,7 @@ def main():
 
     num_times = 2 if args.time_horizon is None else 1          # default 2 | multiplied by the time_span
     more = args.more
+    test_sin = False
 
 
     if args.wandb:
@@ -56,6 +57,15 @@ def main():
     if "dyn_matrix" in metadata["args"] and not isinstance(metadata["args"]["dyn_matrix"], torch.Tensor):
         metadata["args"]["dyn_matrix"] = torch.tensor(metadata["args"]["dyn_matrix"])
 
+    if test_sin: 
+        # Override the input signal for testing (e.g., Sinusoidal)
+        metadata["data_settings"]["sequence_generator"] = {
+            "name": "SinusoidalSequence",
+            "args": {
+                "max_freq": 0.2
+            }
+    }
+        
     #metadata["args"]["mode_rnn"] = 'old'
     pprint(metadata)
 
